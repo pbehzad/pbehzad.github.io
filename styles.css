@@ -1,0 +1,129 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100;400;700&display=swap');
+
+body {
+  background-color: rgb(1, 1, 1);
+  color: rgb(254, 254, 254);
+  font-family: 'JetBrains Mono', monospace;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.extra-thin {
+  font-weight: 100; /* This will now work correctly */
+}
+
+.container {
+  width: 80%; /* Control page width with this */
+  max-width: 820px; /* Maximum width */
+  min-width: 320px; /* Prevent it from being too small */
+  margin: 0 auto; /* Center container */
+}
+
+header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin-top: 8rem;
+}
+
+.flick {
+  animation: flicker 12s infinite;
+}
+
+header h1 {
+  font-size: 6.5rem;
+  margin-bottom: 1rem;
+  animation: flicker 12s infinite;
+}
+
+nav ul {
+  list-style: none;
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+}
+
+nav ul li {
+  display: inline;
+}
+
+nav ul li a {
+  color: rgb(254, 254, 254);
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+nav ul li a:hover {
+  color: grey;
+}
+
+footer {
+  padding-top: 1000px;
+}
+/* Hide all sections initially */
+.section {
+  display: none;
+}
+
+/* Make the active section visible */
+.section.visible {
+  display: block;
+}
+
+/* Sections aligned with the header */
+.section {
+  width: 100%;
+  max-width: 1200px;
+  margin: 2rem auto;
+  text-align: left;
+  padding: 1rem;
+}
+
+/* Flicker animation for header and other elements */
+@keyframes flicker {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+/* Media Queries for responsiveness */
+@media (max-width: 768px) {
+  header h1 {
+    font-size: 4rem;
+  }
+  
+  nav ul {
+    flex-direction: column;
+  }
+
+  .section {
+    width: 90%;
+    padding: 1rem;
+  }
+
+  .section h2 {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  header h1 {
+    font-size: 3rem;
+  }
+
+  nav ul {
+    flex-direction: column;
+  }
+
+  .section {
+    width: 95%;
+  }
+
+  .section h2 {
+    font-size: 1.2rem;
+  }
+}
