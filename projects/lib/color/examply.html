@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>80s CRT Color Palette</title>
+    <link rel="stylesheet" href="colors.css">
+    <style>
+        /* Inline style for demonstration purposes */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: var(--crt-black);
+            color: var(--crt-white);
+            padding: 20px;
+        }
+
+        .box {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .color-box {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            font-weight: bold;
+            border-radius: 8px;
+            background-color: var(--crt-gray);
+        }
+
+        .color-box div {
+            height: 50px;
+            border-radius: 4px;
+            margin-right: 10px;
+        }
+
+        .color-name {
+            font-size: 1em;
+            color: var(--crt-white);
+        }
+    </style>
+</head>
+<body>
+    <h1>80s CRT Color Palette</h1>
+
+    <div class="box">
+
+    </div>
+    <script>
+        // Function to fetch and parse colors from CSS file
+        async function loadColorsFromCSS() {
+            const response = await fetch('colors.css'); // Load the CSS file
+            const cssText = await response.text();
+    
+            // Use regular expressions to find color variables in CSS
+            const colorRegex = /(--crt-[\w-]+):\s*(#[0-9a-fA-F]{6})/g;
+            let match;
+            const colors = [];
+    
+            // Extract color variable names and values
+            while ((match = colorRegex.exec(cssText)) !== null) {
+                colors.push({ name: match[1], value: match[2] });
+            }
+    
+            return colors;
+        }
+    
+        // Function to create color boxes based on CSS variables
+        async function createColorBoxes() {
+            const colors = await loadColorsFromCSS();
+            const container = document.querySelector('.box');
+    
+            colors.forEach(color => {
+                // Create the outer color-box div
+                const colorBox = document.createElement('div');
+                colorBox.classList.add('color-box');
+                colorBox.style.backgroundColor = `var(${color.name})`;
+    
+                // Create the inner color preview div
+                const colorPreview = document.createElement('div');
+                colorPreview.style.backgroundColor = `var(${color.name})`;
+                colorPreview.style.height = '50px';
+                colorPreview.style.borderRadius = '4px';
+                colorPreview.style.marginRight = '10px';
+    
+                // Create the color name span
+                const colorName = document.createElement('span');
+                colorName.classList.add('color-name');
+                colorName.textContent = color.name.replace('--crt-', '').replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+                
+                // Append preview and name to color-box
+                colorBox.appendChild(colorPreview);
+                colorBox.appendChild(colorName);
+                colorBox.innerHTML += `<h6>${color.name}</h6>`;
+    
+                // Append color-box to container
+                container.appendChild(colorBox);
+            });
+        }
+    
+        // Initialize on DOM content load
+        document.addEventListener('DOMContentLoaded', createColorBoxes);
+    </script>
+    
+</body>
+</html>

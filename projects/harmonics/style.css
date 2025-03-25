@@ -1,0 +1,122 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100;400;700&display=swap');
+@import url('colors.css');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: rgb(1, 1, 1);
+    color: var(--crt-white);
+    font-family: 'JetBrains Mono', monospace;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+}
+
+h1 {
+    color:  var(--crt-green);
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.container {
+    text-align: center;
+    width: 90%; /* Set container to 90% of the screen width */
+    margin: auto;
+}
+
+input, button {
+    margin: 10px;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid var(--crt-white);
+}
+
+button {
+    cursor: pointer;
+    background-color: var(--crt-red);
+    color: var(--crt-white);
+}
+
+#result {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    margin-top: 20px;
+    padding: 10px;
+    gap: 10px;
+}
+
+.card {
+    border: 1px solid var(--crt-white);
+    border-radius: 8px;
+    padding: 5px;
+    background-color: var(--crt-black);;
+    min-width: 50px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+
+.container {
+    text-align: center;
+    width: 90%; /* Set container to 90% of the screen width */
+    margin: auto;
+    scrollbar-color: cadetblue;
+}
+
+input, button {
+    margin: 10px;
+    padding: 5px;
+    border-radius: 5px;
+    border: 1px solid var(--crt-white);
+}
+input {
+    width: 100px;
+    color: var(--crt-white);
+    background-color: var(--crt-black);
+}
+button {
+    cursor: pointer;
+    background-color:var(--crt-red);
+    color: var(--crt-white);
+}
+
+#result {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    margin-top: 20px;
+    padding: 10px;
+    gap: 10px;
+}
+
+.card {
+    border: 1px solid var(--crt-white);
+    border-radius: 8px;
+    padding: 5px;
+    background-color: var(--crt-black);
+    min-width: 130px;
+    min-height: 300px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+
+.card:hover {
+    transform: translateY(-5px);
+    background-color: #0c0c0c;
+}
+
+.card.selected {
+    color: var(--crt-black);
+    background-color: var(--crt-green);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    transform: scale(1.05);
+    transition: transform 0.2s ease-in-out;
+}

@@ -1,0 +1,61 @@
+
+:root {
+    
+    /* Base Colors */
+    --black: #010101;
+    --crt-black: #0f0f0f;
+    --crt-gray: #2b2b2b;
+    --crt-white: #d7d7d7;
+    --crt-dark-gray: #1a1a1a;
+    --crt-medium-gray: #404040;
+    --crt-light-gray: #b0b0b0;
+    --crt-off-white: #f0f0f0;
+    --crt-soft-black: #191919;
+    --crt-charcoal: #333333;
+    --crt-steel-gray: #505050;
+    --crt-silver: #c0c0c0;
+    
+    /* Neon Colors */
+    --crt-green: #00ff7f;
+    --crt-blue: #00ccff;
+    --crt-pink: #ff007f;
+    --crt-purple: #d700ff;
+    --crt-orange: #ff5f00;
+    --crt-yellow: #ffcc00;
+    --crt-neon-turquoise: #00ffd0;
+    --crt-neon-lavender: #cc00ff;
+    --crt-neon-aqua: #00ffff;
+    --crt-neon-salmon: #ff5e7d;
+    --crt-neon-mint: #7fff00;
+    --crt-neon-amber: #ffaa00;
+    --crt-neon-magenta: #ff00cc;
+    --crt-neon-chartreuse: #b6ff00;
+
+    /* Soft Glowing Colors */
+    --crt-soft-green: #66ffcc;
+    --crt-soft-blue: #6699ff;
+    --crt-soft-pink: #ff66b2;
+    --crt-soft-purple: #bb88ff;
+    --crt-soft-orange: #ffb366;
+    --crt-soft-yellow: #ffee99;
+    --crt-soft-cyan: #99ffff;
+    --crt-soft-lime: #b3ff66;
+    --crt-soft-red: #ff9999;
+    --crt-soft-teal: #66d9c2;
+    --crt-soft-violet: #d1a3ff;
+    --crt-soft-mint: #99ffbb;
+
+    /* Accent Colors */
+    --crt-cyan: #00ffee;
+    --crt-lime: #aaff33;
+    --crt-red: #ff3344;
+    --crt-magenta: #ff66ff;
+    --crt-deep-orange: #ff9933;
+    --crt-bright-yellow: #ffd633;
+    --crt-electric-blue: #3399ff;
+    --crt-bright-teal: #33ffee;
+    --crt-bright-green: #66ff33;
+    --crt-hot-pink: #ff3399;
+    --crt-deep-purple: #9933ff;
+    --crt-bright-amber: #ffcc33;
+}

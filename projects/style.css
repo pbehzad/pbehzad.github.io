@@ -1,0 +1,145 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100;400;700&display=swap');
+@import url('colors.css');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: rgb(1, 1, 1);
+    color: var(--crt-white);
+    font-family: 'JetBrains Mono', monospace;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+}
+
+header {
+    color:  var(--crt-green);
+    margin-top: 20px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+#controls {
+    margin: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+input, select, button {
+    padding: 5px;
+    border-radius: 5px;
+    border: 1px solid var(--crt-white);
+}
+
+input, select {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--crt-white);
+    background-color: var(--crt-black);
+}
+
+input {
+    width: 100px;
+}
+button {
+    background-color: var(--crt-red);
+    color: var(--crt-white);
+    cursor: pointer;
+}
+.gainSlider {
+    min-width: 200px;
+}
+button:hover {
+    background-color: var(--crt-purple);
+}
+
+#latticeContainer {
+    margin-top: 20px;
+    display: grid;
+    gap: 10px;
+    justify-content: center;
+    align-items: center;
+}
+
+#latticeContainer {
+    display: grid;
+    grid-template-columns: repeat(21, 1fr);
+    gap: 5px;
+    margin-top: 20px;
+}
+
+.cell {
+    background-color: var(--crt-black);
+    padding: 2px;
+    border-radius: 8px;
+    text-align: center;
+    color: var(--crt-white);
+    font-size: 0.7rem;
+    line-height: 1.4;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    transition: transform 0.2s, background-color 0.3s;
+}
+
+.cell.out-of-range {
+    background-color: var(--black);
+    pointer-events: none; 
+    color: transparent;  
+}
+
+.cell.refrence {
+    color: var(--crt-soft-orange);
+}
+
+.cell:hover {
+    transform: translateY(-5px);
+    background-color: #0c0c0c;
+}
+
+.cell.selected {
+    color: var(--crt-black);
+    background-color: var(--crt-green);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    transform: scale(1.05);
+    transition: transform 0.2s ease-in-out;
+}
+
+
+.cell:active {
+    transform: translateY(-1px);
+}
+
+#controls {
+    margin: 20px;
+    display: flex;
+    gap: 10px;
+}
+
+#sequenceList {
+    list-style-type: none;
+    padding: 0;
+}
+
+#sequenceList li {
+    margin: 10px 0;
+}
+
+#sequenceList button {
+    margin-left: 10px;
+}
+
+.cell.highlight-gray {
+    color: var(--crt-black);
+    background-color: var(--crt-pink) !important;
+}
+
+.cell.highlight-orange {
+    color: var(--crt-black);
+    background-color: var(--crt-yellow) !important;
+}

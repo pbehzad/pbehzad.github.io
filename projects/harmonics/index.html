@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Overtones Lab</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Overtones Lab</h1>
+        <label for="fundamental">Fundamental Pitch:</label>
+        <input type="text" id="fundamental" placeholder="e.g., A4">
+        <label for="harmonics">Number of Harmonics:</label>
+        <input type="number" id="harmonics" min="1" max="50" value="10">
+        <button onclick="calculateOvertones()">Run</button>
+        <div id="result"></div>
+    </div>
+    <script src="https://unpkg.com/tone@15.0.4/build/Tone.js"></script>
+    <script src="data.js"></script>
+    <script src="main.js"></script>
+    <script src="play.js"></script>
+</body>
+</html>
