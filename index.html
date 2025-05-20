@@ -8,64 +8,94 @@
 </head>
 <body>
     <header>
-        <h1 style="margin-top: 8rem; font-family: 'Courier New', Courier, monospace;">PARHAM BEHZAD</h1>
-        <h1 style="margin-top: 0%; font-size: 8rem;">○●</h1>
+        <h1 class="site-title">PARHAM BEHZAD</h1>
+        <h1 class="site-subtitle">○●</h1>
         <nav>
             <ul>
-                <li><a href="#home" onclick="showSection(event, 'home')">Home</a></li>
-                <li><a href="#compositions" onclick="showSection(event, 'compositions')">Compositions</a></li>
-                <li><a href="#texts" onclick="showSection(event, 'texts')">Texts</a></li>
-                <li><a href="#zscore" onclick="showSection(event, 'zscore')">ZSCORE</a></li>
-                <li><a href="#tools" onclick="showSection(event, 'tools')">Tools</a></li>
-                <li><a href="#about" onclick="showSection(event, 'about')">About</a></li>
-                <li><a href="#contact" onclick="showSection(event, 'contact')">Contact</a></li>
+                <li><a href="#home" class="active-nav-link">Home</a></li>
+                <li><a href="#portfolio">Portfolio</a></li>
+                <li><a href="#compositions">Compositions</a></li>
+                <li><a href="#texts">Texts</a></li>
+                <li><a href="#zscore">ZSCORE</a></li>
+                <li><a href="#tools">Tools</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="#contact">Contact</a></li>
             </ul>
         </nav>
-        
     </header>
 
-    <!-- Main container for content -->
     <div class="container">
-        <!-- Home Section -->
-        <div id="home" class="section">
-        </div>
-
-        <!-- Compositions Section -->
-        <section id="composition-section" class="section">
-            <div id="composition-section"></div>
+        <section id="home" class="section visible">
+            <p>I am a composer and developer exploring the intersections of music, philosophy, and technology. My work encompasses <a href="#portfolio">a diverse portfolio</a> including electroacoustic compositions, <a href="#tools">interactive tools</a> for musicians, and <a href="#texts">writings</a> on contemporary aesthetics.</p>
+            <p>This site serves as a central hub for my projects and research. Feel free to explore.</p>
         </section>
 
-        <!-- Texts Section -->
+        <section id="portfolio" class="section">
+            <h2>Portfolio</h2>
+            <p>show case of highlighted works</p>
+            <div class="category-filters">
+                <button class="filter-btn active" data-category="all">All</button>
+                <button class="filter-btn" data-category="Composition">Compositions</button>
+                <button class="filter-btn" data-category="Audio Engineering">Audio Engineering</button>
+                <button class="filter-btn" data-category="Engraving (ZSCORE)">Engraving (ZSCORE)</button>
+                <button class="filter-btn" data-category="Audio Programming">Audio Programming</button>
+            </div>
+            <div id="portfolio-grid-content" class="portfolio-grid-wide">
+                <!-- {/* Projects will be loaded here by JavaScript */} -->
+            </div>
+        </section>
+
+        <section id="compositions" class="section">
+            <h2>Compositions</h2>
+            <div id="composition-list-content">
+                <!-- {/* Compositions will be loaded here by JavaScript in a list format */} -->
+            </div>
+        </section>
+
         <section id="texts" class="section">
-            <h2>Texts</h2>
-            <!-- <p>Here you can display your writings...</p> -->
+            <h2>Texts & Essays</h2>
+            <div id="texts-content">
+                <!-- {/* Texts will be loaded here by JavaScript */} -->
+            </div>
         </section>
 
-        <!-- Z-SCORE Section -->
         <section id="zscore" class="section">
-            <h2>Z-SCORE</h2>
-            <!-- <p>Information about your Z-SCORE innovations...</p>
-            <a href="https://www.zscore.art">www.zscore.art</a> -->
+            <h2>ZSCORE Projects</h2>
+            <p>Through ZSCORE, I support composers in transforming their scores to another level, whether by refining notation, automating notation/compositional tasks, or enhancing final presentation quality. Creating what they need for their composition and concert day (score, parts, performance material/documentations, Live-electronics programs and patches).</p>
+            <p><a href="https://www.zscore.art" target="_blank" rel="noopener noreferrer">Visit zscore.art for more info.</a></p>
+            <div id="zscore-grid-content" class="portfolio-grid-wide">
+                <!-- {/* ZSCORE projects will be loaded here by JavaScript with wide card style */} -->
+            </div>
         </section>
 
-        <!-- Tools Section -->
         <section id="tools" class="section">
             <h2>Tools</h2>
-            <!-- <p>Details about tools and utilities...</p> -->
+            <p>Explore interactive tools and utilities I've developed:</p>
+            <div id="tools-grid-content" class="portfolio-grid">
+                <!-- {/* Tools will be loaded here by JavaScript with card style */} -->
+            </div>
         </section>
 
-        <!-- About Section -->
         <section id="about" class="section">
-            <!-- <div id="about-content"></div> -->
+            <div id="about-content">
+                <!-- {/* about.html content will be loaded here by scripts.js */} -->
+            </div>
         </section>
 
-        <!-- Contact Section -->
-        <footer id="contact">
+        <section id="contact" class="section">
             <h2>Contact</h2>
-            <p>Find me on <a href="https://soundcloud.com">SoundCloud</a> or <a href="https://youtube.com">YouTube</a>.</p>
-        </footer>
+            <p>Find me on <a href="https://soundcloud.com/pbehzad" target="_blank" rel="noopener noreferrer">SoundCloud</a> or <a href="https://www.youtube.com/channel/UCpy5_h238g7t4I7q2N3_b5g" target="_blank" rel="noopener noreferrer">YouTube</a>.</p>
+            <p>Email: <a href="mailto:parham.behzad@email.com">parham.behzad@email.com</a></p>
+        </section>
     </div>
 
-    <script src="scripts.js"></script>
+    <footer id="site-footer">
+        <div class="footer-content">
+            
+            <p>&copy; 2025 Parham Behzad. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="assets/scripts.js"></script>
 </body>
 </html>

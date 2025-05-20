@@ -1,129 +1,380 @@
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100;400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100;300;400;700&display=swap');
+@import url('colors.css'); /* Assuming your colors.css is in the same directory or assets */
 
+/* General Body Styles */
 body {
-  background-color: rgb(1, 1, 1);
-  color: rgb(254, 254, 254);
-  font-family: 'JetBrains Mono', monospace;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-}
-
-.extra-thin {
-  font-weight: 100; /* This will now work correctly */
+    background-color: var(--crt-black, #010101);
+    color: var(--crt-white, #fefefe);
+    font-family: 'JetBrains Mono', monospace;
+    margin: 0;
+    padding: 0;
+    line-height: 1.6;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
 }
 
 .container {
-  width: 80%; /* Control page width with this */
-  max-width: 820px; /* Maximum width */
-  min-width: 320px; /* Prevent it from being too small */
-  margin: 0 auto; /* Center container */
+    width: 85%;
+    max-width: 1000px;
+    margin: 2rem auto;
+    padding: 1rem;
 }
 
+/* Header and Navigation */
 header {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  margin-top: 8rem;
+    text-align: center;
+    margin-top: 4rem;
+    margin-bottom: 3rem;
+    width: 100%; /* Ensure header takes full width */
+    padding: 0 1rem; /* Add some padding for smaller screens */
+    box-sizing: border-box;
 }
 
-.flick {
-  animation: flicker 12s infinite;
+header h1.site-title {
+    font-size: 4rem;
+    /* font-family: 'Courier New', Courier, monospace; */
+    margin-bottom: 0.5rem;
+    color: var(--crt-white, #fefefe);
+    animation: flicker 1000s infinite alternate;
 }
 
-header h1 {
-  font-size: 6.5rem;
-  margin-bottom: 1rem;
-  animation: flicker 12s infinite;
+header h1.site-subtitle {
+    font-size: 6rem;
+    margin-top: -1rem;
+    margin-bottom: 2rem;
+    color: var(--crt-white, #fefefe);
 }
 
 nav ul {
-  list-style: none;
-  display: flex;
-  justify-content: center;
-  gap: 2rem;
-}
-
-nav ul li {
-  display: inline;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
 }
 
 nav ul li a {
-  color: rgb(254, 254, 254);
-  text-decoration: none;
-  transition: color 0.3s;
+    color: var(--crt-light-gray, #b0b0b0);
+    text-decoration: none;
+    font-weight: 300;
+    padding: 0.5rem 0.75rem;
+    border-radius: 4px;
+    transition: color 0.3s ease, background-color 0.3s ease;
 }
 
-nav ul li a:hover {
-  color: grey;
+nav ul li a:hover,
+nav ul li a.active {
+    color: var(--crt-black, #010101);
+    background-color: var(--crt-green, #00ff7f);
 }
 
-footer {
-  padding-top: 1000px;
-}
-/* Hide all sections initially */
+/* Sections */
 .section {
-  display: none;
+    display: none;
+    padding: 2rem 0;
+    border-bottom: 1px solid var(--crt-gray, #2b2b2b);
 }
 
-/* Make the active section visible */
+.section:last-of-type {
+    border-bottom: none;
+}
+
 .section.visible {
-  display: block;
+    display: block;
+    animation: fadeIn 0.5s ease-in-out;
 }
 
-/* Sections aligned with the header */
-.section {
-  width: 100%;
-  max-width: 1200px;
-  margin: 2rem auto;
-  text-align: left;
-  padding: 1rem;
+.section h2 {
+    font-size: 2.5rem;
+    margin-bottom: 1.5rem;
+    color: var(--crt-white, #fefefe);
+    text-align: center;
+    
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
-/* Flicker animation for header and other elements */
-@keyframes flicker {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
+/* Typography */
+p {
+    font-size: 1rem;
+    color: var(--crt-light-gray, #b0b0b0);
+    margin-bottom: 1rem;
 }
 
-/* Media Queries for responsiveness */
-@media (max-width: 768px) {
-  header h1 {
-    font-size: 4rem;
-  }
-  
-  nav ul {
-    flex-direction: column;
-  }
+a {
+    color: var(--crt-cyan, #00ffee);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
 
-  .section {
-    width: 90%;
-    padding: 1rem;
-  }
+a:hover {
+    color: var(--crt-green, #00ff7f);
+}
 
-  .section h2 {
+.extra-thin {
+    font-weight: 100;
+}
+
+/* Portfolio Section - Wide Cards */
+.portfolio-grid-wide {
+    display: grid;
+    grid-template-columns: 1fr; /* Each card takes full width */
+    gap: 1.5rem;
+}
+
+.portfolio-grid-wide .portfolio-item {
+    background-color: var(--crt-dark-gray, #1a1a1a);
+    border: 1px solid var(--crt-gray, #2b2b2b);
+    border-radius: 8px;
+    padding: 1.5rem;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.portfolio-grid-wide .portfolio-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0, 255, 127, 0.1);
+}
+
+.portfolio-item img,
+.portfolio-grid-wide .portfolio-item .img-placeholder { /* Style for placeholder */
+    width: 100%;
+    height: 200px; /* Or your desired height */
+    background-color: var(--crt-medium-gray, #404040);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+    border-radius: 4px;
+    color: var(--crt-light-gray);
+}
+
+.portfolio-item h3 {
     font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    color: var(--crt-white, #fefefe);
+}
+
+.portfolio-item .tags {
+    margin-bottom: 1rem;
+}
+
+.portfolio-item .tag {
+    display: inline-block;
+    background-color: var(--crt-medium-gray, #404040);
+    color: var(--crt-light-gray, #b0b0b0);
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    margin-right: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.portfolio-category-heading {
+    font-size: 1.8rem;
+    color: var(--crt-green, #00ff7f);
+    margin-top: 2.5rem;
+    margin-bottom: 1rem;
+    text-align: left;
+    padding-left: 0.5rem;
+    border-bottom: 1px solid var(--crt-medium-gray);
+}
+
+.portfolio-grid-wide .portfolio-category-heading:first-of-type {
+    margin-top: 0;
+}
+
+.portfolio-item .img-placeholder img {
+  width: 100%;
+  height: 100%; /* Make image fill the placeholder div height */
+  object-fit: cover; /* Crop image to fit, maintaining aspect ratio */
+  border-radius: 4px; /* Match placeholder div's border-radius */
+}
+.img-placeholder-error span { /* Style for the error message */
+  color: var(--crt-red);
+  font-size: 0.8rem;
+}
+/* Category Filters for Portfolio */
+.category-filters {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.filter-btn {
+    background-color: var(--crt-medium-gray, #404040);
+    color: var(--crt-white, #fefefe);
+    border: 1px solid var(--crt-gray, #2b2b2b);
+    padding: 0.5rem 1rem;
+    margin: 0.25rem; /* Added for better wrapping */
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s;
+    font-family: 'JetBrains Mono', monospace;
+}
+
+.filter-btn:hover,
+.filter-btn.active {
+    background-color: var(--crt-green, #00ff7f);
+    color: var(--crt-black, #010101);
+}
+
+
+/* Compositions List View */
+#composition-list-content ul {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.composition-list-item {
+    padding: 0rem 0;
+    border-bottom: 0.1px solid var(--crt-gray, #2b2b2b);
+}
+
+.composition-list-item:last-child {
+    border-bottom: none;
+}
+
+.composition-list-item h3 {
+    font-size: 1.2rem;
+    color: var(--crt-white, #fefefe);
+    margin-bottom: 0.25rem;
+    font-weight: 400;
+}
+.title-link-no-style {
+  color: inherit; /* Inherits color from the parent <h3> */
+  text-decoration: none; /* Removes the default underline */
+}
+
+.title-link-no-style:hover {
+  color: var(--crt-green, #00ff7f); /* Optional: Adds a hover effect, or you can remove this line */
+  text-decoration: none; /* Ensures no underline on hover */
+}
+.composition-list-item .composition-meta {
+    font-size: 0.9rem;
+    color: var(--crt-light-gray, #b0b0b0);
+    margin-bottom: 0.1rem;
+}
+
+.composition-list-item .details-link {
+    font-size: 0.6rem;
+    color: var(--crt-cyan, #00ffee);
+    text-decoration: underline;
+}
+
+.composition-list-item .details-link:hover {
+    color: var(--crt-green, #00ff7f);
+}
+
+/* Tools section should use the standard portfolio-grid */
+#tools-grid-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+}
+#tools-grid-content .portfolio-item {
+    /* Re-uses portfolio-item styles */
+}
+
+
+/* About Section Enhancements */
+#about h3 {
+    font-size: 1.8rem;
+    color: var(--crt-green, #00ff7f);
+    margin-top: 2rem;
+    margin-bottom: 0.75rem;
+    font-weight: 400;
+}
+
+#about h4 {
+    font-size: 1.4rem;
+    color: var(--crt-cyan, #00ffee);
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+    padding-left: 1rem;
+    font-weight: 300;
+}
+
+#about p {
+    font-size: 1rem;
+    padding-left: 0;
+}
+
+#about p[style*="padding-left"] {
+    padding-left: 1rem;
+}
+
+
+/* Footer */
+footer#contact {
+    padding-top: 3rem;
+    text-align: center;
+    border-top: 1px solid var(--crt-gray, #2b2b2b);
+    margin-top: 3rem;
+    width: 100%;
+}
+
+footer#contact h2 {
+    font-size: 2rem;
+    color: var(--crt-white, #fefefe);
+    margin-bottom: 1rem;
+}
+
+footer#contact p {
+    color: var(--crt-light-gray, #b0b0b0);
+}
+
+/* Animations */
+@keyframes flicker {
+  0%, 18%, 22%, 25%, 53%, 57%, 100% {
+    opacity: 1;
   }
+  20%, 24%, 55% {
+    opacity: 0.4;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    header h1.site-title {
+        font-size: 3rem;
+    }
+    header h1.site-subtitle {
+        font-size: 4.5rem;
+    }
+    nav ul {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    .section h2 {
+        font-size: 2rem;
+    }
+    .portfolio-grid, #tools-grid-content { /* Apply to standard grid too */
+        grid-template-columns: 1fr;
+    }
 }
 
 @media (max-width: 480px) {
-  header h1 {
-    font-size: 3rem;
-  }
-
-  nav ul {
-    flex-direction: column;
-  }
-
-  .section {
-    width: 95%;
-  }
-
-  .section h2 {
-    font-size: 1.2rem;
-  }
+    .container {
+        width: 95%;
+    }
+    header h1.site-title {
+        font-size: 2.5rem;
+    }
+    header h1.site-subtitle {
+        font-size: 3.5rem;
+    }
+    .section h2 {
+        font-size: 1.8rem;
+    }
 }
