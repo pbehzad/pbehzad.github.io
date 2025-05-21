@@ -39,18 +39,18 @@ header {
 }
 
 header h1.site-title {
-    font-size: 2rem; /* User set */
-    /* font-family: 'Courier New', Courier, monospace; */ /* User commented out */
+    font-size: 2rem;
+    /* font-family: 'Courier New', Courier, monospace; */
     margin-bottom: 0.25rem;
     color: var(--crt-white, #fefefe);
-    animation: flicker 180s infinite alternate; /* User updated flicker duration */
+    animation: flicker 180s infinite alternate;
 }
 
 header h1.site-subtitle {
     font-size: 5rem;
     margin-top: -0.75rem;
     margin-bottom: 1.5rem;
-    /* color: var(--crt-green, #00ff7f); */ /* User changed to white */
+    /* color: var(--crt-green, #00ff7f); */
     color: var(--crt-white, #fefefe);
 }
 
@@ -152,12 +152,12 @@ a:hover {
     background-color: var(--crt-dark-gray, #1a1a1a);
     border: 1px solid var(--crt-gray, #2b2b2b);
     border-radius: 0;
-    padding: 0; /* Removed padding from item itself */
+    padding: 0; 
     transition: transform 0.3s ease, box-shadow 0.3s ease;
-    max-width: 1200px;
-    margin-left: auto;
-    margin-right: auto;
-    overflow: hidden; /* To ensure image corners align with card corners if image is slightly larger */
+    /* max-width: 800px; Removed */
+    /* margin-left: auto; Removed */
+    /* margin-right: auto; Removed */
+    overflow: hidden; 
 }
 
 .portfolio-grid-wide .portfolio-item:hover {
@@ -172,7 +172,7 @@ a:hover {
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 0; /* Removed margin */
+    margin-bottom: 0;
     border-radius: 0;
     color: var(--crt-light-gray);
     font-size: 0.85rem;
@@ -182,18 +182,17 @@ a:hover {
     height: 180px;
     object-fit: cover;
     border-radius: 0;
-    margin-bottom: 0; /* Removed margin */
+    margin-bottom: 0;
     background-color: var(--crt-medium-gray);
-    display: block; /* Ensure no extra space below image */
+    display: block;
 }
 .img-placeholder-error span {
     color: var(--crt-red);
     font-size: 0.75rem;
 }
 
-/* New class for the text content within portfolio items */
 .portfolio-item-content {
-    padding: 1.25rem; /* This padding was originally on .portfolio-item */
+    padding: 1.25rem;
 }
 
 
@@ -266,8 +265,7 @@ a:hover {
 
 .composition-list-item,
 .text-entry-item {
-    /* padding: 0.6rem 0; User removed padding */
-    border-bottom: 1px solid var(--crt-gray, #2b2b2b); /* User changed to 1px */
+    border-bottom: 1px solid var(--crt-gray, #2b2b2b);
 }
 
 .composition-list-item:last-child,
@@ -279,7 +277,7 @@ a:hover {
 .text-entry-item h3 {
     font-size: 0.9rem;
     color: var(--crt-white, #fefefe);
-    margin-bottom: 0; /* User changed, assuming it's intended with meta right below */
+    margin-bottom: 0;
 }
 
 .title-link-no-style {
@@ -321,14 +319,13 @@ a:hover {
 }
 #tools-grid-content .portfolio-item {
     border-radius: 0;
-    padding: 0; /* Apply borderless image style to tools cards too */
+    padding: 0;
 }
 #tools-grid-content .portfolio-item .img-placeholder,
 #tools-grid-content .portfolio-item img {
     border-radius: 0;
-    margin-bottom: 0; /* Apply borderless image style to tools cards too */
+    margin-bottom: 0;
 }
-/* Ensure portfolio-item-content is used for tools if structure is similar */
 
 
 /* ZSCORE section uses wide portfolio grid */
@@ -338,16 +335,16 @@ a:hover {
     gap: 2rem;
 }
 #zscore-grid-content .portfolio-item {
-    max-width: 800px;
-    margin-left: auto;
-    margin-right: auto;
+    /* max-width: 800px; Removed */
+    /* margin-left: auto; Removed */
+    /* margin-right: auto; Removed */
     border-radius: 0;
-    padding: 0; /* Apply borderless image style to ZSCORE cards too */
+    padding: 0;
 }
 #zscore-grid-content .portfolio-item .img-placeholder,
 #zscore-grid-content .portfolio-item img {
     border-radius: 0;
-    margin-bottom: 0; /* Apply borderless image style to ZSCORE cards too */
+    margin-bottom: 0;
 }
 
 
@@ -464,7 +461,7 @@ section#contact p {
     }
     nav ul {
         flex-direction: column;
-        gap: 0.7rem; /* User updated gap */
+        gap: 0.7rem;
     }
     nav ul li a {
         font-size: 0.85rem;
@@ -478,7 +475,8 @@ section#contact p {
     .portfolio-item h3 { font-size: 1.2rem; }
     #about h3, #about-content h2 { font-size: 1.5rem; }
     #about h4 { font-size: 1.1rem; }
-    footer#contact-section h2 { font-size: 1.6rem; } /* Assuming user wants to keep footer#contact-section */
+    /* footer#contact-section h2 { font-size: 1.6rem; } Assuming this was a typo and meant section#contact */
+    section#contact h2 { font-size: 1.6rem; }
     #site-footer p { font-size: 0.75rem; }
 }
 
@@ -501,6 +499,7 @@ section#contact p {
     .portfolio-item h3 { font-size: 1.1rem; }
     #about h3, #about-content h2 { font-size: 1.4rem; }
     #about h4 { font-size: 1rem; }
-    footer#contact-section h2 { font-size: 1.5rem; }
+    /* footer#contact-section h2 { font-size: 1.5rem; } Assuming this was a typo and meant section#contact */
+    section#contact h2 { font-size: 1.5rem; }
     #site-footer p { font-size: 0.7rem; }
 }
