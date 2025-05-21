@@ -210,6 +210,19 @@
       {
         "id": "comp013",
         "category": "Composition",
+        "title": "Begin to Decay Into a Blossom",
+        "year": 2016,
+        "instruments": "fixed media",
+        "description": null,
+        "imageUrl": null, 
+        "imagePlaceholder": "", 
+        "tags": ["electronics", "fixed-media"],
+        "detailsLink": null, 
+        "showInPortfolio": false 
+      },
+      {
+        "id": "comp013",
+        "category": "Composition",
         "title": "Revitalizer Weald",
         "year": 2016,
         "instruments": "fixed media",
@@ -220,6 +233,7 @@
         "detailsLink": null, 
         "showInPortfolio": false 
       },
+      
     {
       "id": "audioprog001",
       "category": "Audio Programming",
