@@ -43,7 +43,7 @@ header h1.site-title {
     font-family: 'Courier New', Courier, monospace;
     margin-bottom: 0.25rem;
     color: var(--crt-white, #fefefe);
-    animation: flicker 10s infinite alternate;
+    animation: flicker 180s infinite alternate;
 }
 
 header h1.site-subtitle {
