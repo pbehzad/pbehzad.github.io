@@ -12,12 +12,12 @@ body {
     font-family: 'JetBrains Mono', monospace;
     margin: 0;
     padding: 0;
-    line-height: 1.5; /* Slightly reduced line-height for smaller fonts */
+    line-height: 1.5;
     display: flex;
     flex-direction: column;
     align-items: center;
     min-height: 100%;
-    font-size: 15px; /* Base font size for easier rem calculations, adjust if needed */
+    font-size: 15px;
 }
 
 .container {
@@ -39,17 +39,18 @@ header {
 }
 
 header h1.site-title {
-    font-size: 3rem; /* User set */
-    /* font-family: 'Courier New', Courier, monospace; */
+    font-size: 3rem;
+    font-family: 'Courier New', Courier, monospace;
     margin-bottom: 0.25rem;
     color: var(--crt-white, #fefefe);
-    animation: flicker 180s infinite alternate;
+    animation: flicker 10s infinite alternate;
 }
 
 header h1.site-subtitle {
-    font-size: 5rem; /* Reduced from 6rem */
+    font-size: 5rem;
     margin-top: -0.75rem;
     margin-bottom: 1.5rem;
+    /* color: var(--crt-green, #00ff7f); */
     color: var(--crt-white, #fefefe);
 }
 
@@ -67,9 +68,9 @@ nav ul li a {
     color: var(--crt-light-gray, #b0b0b0);
     text-decoration: none;
     font-weight: 300;
-    font-size: 0.9rem; /* Adjusted */
+    font-size: 0.9rem;
     padding: 0.4rem 0.6rem;
-    border-radius: 4px;
+    border-radius: 0; /* Changed */
     transition: color 0.3s ease, background-color 0.3s ease;
     border: 1px solid transparent;
 }
@@ -90,7 +91,7 @@ nav ul li a.active-nav-link {
 /* Sections */
 .section {
     display: none;
-    padding: 1.5rem 0; /* Slightly reduced padding */
+    padding: 1.5rem 0;
     border-bottom: 1px solid var(--crt-gray, #2b2b2b);
 }
 
@@ -104,8 +105,8 @@ nav ul li a.active-nav-link {
 }
 
 .section h2 {
-    font-size: 1.5rem; /* User set */
-    margin-bottom: 1.25rem; /* Adjusted */
+    font-size: 1.5rem;
+    margin-bottom: 1.25rem;
     color: var(--crt-white, #fefefe);
     text-align: center;
     font-weight: 700;
@@ -115,15 +116,15 @@ nav ul li a.active-nav-link {
 
 /* Typography */
 p {
-    font-size: 0.9rem; /* Reduced from 1rem */
+    font-size: 0.9rem;
     color: var(--crt-light-gray, #b0b0b0);
-    margin-bottom: 0.9rem; /* Adjusted */
+    margin-bottom: 0.9rem;
 }
 p.loading-message {
     text-align: center;
     font-style: italic;
     color: var(--crt-medium-gray);
-    font-size: 0.85rem; /* Adjusted */
+    font-size: 0.85rem;
 }
 
 a {
@@ -144,14 +145,14 @@ a:hover {
 .portfolio-grid-wide {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 2rem; /* Adjusted */
+    gap: 2rem;
 }
 
 .portfolio-grid-wide .portfolio-item {
     background-color: var(--crt-dark-gray, #1a1a1a);
     border: 1px solid var(--crt-gray, #2b2b2b);
-    border-radius: 8px;
-    padding: 1.25rem; /* Adjusted */
+    border-radius: 0; /* Changed */
+    padding: 1.25rem;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     max-width: 800px;
     margin-left: auto;
@@ -165,56 +166,56 @@ a:hover {
 
 .portfolio-item .img-placeholder {
     width: 100%;
-    height: 180px; /* Adjusted */
+    height: 180px;
     background-color: var(--crt-medium-gray, #404040);
     display: flex;
     align-items: center;
     justify-content: center;
     margin-bottom: 1rem;
-    border-radius: 4px;
+    border-radius: 0; /* Changed */
     color: var(--crt-light-gray);
-    font-size: 0.85rem; /* Adjusted */
+    font-size: 0.85rem;
 }
 .portfolio-item img {
     width: 100%;
-    height: 180px; /* Adjusted */
+    height: 180px;
     object-fit: cover;
-    border-radius: 4px;
+    border-radius: 0; /* Changed */
     margin-bottom: 1rem;
     background-color: var(--crt-medium-gray);
 }
 .img-placeholder-error span {
     color: var(--crt-red);
-    font-size: 0.75rem; /* Adjusted */
+    font-size: 0.75rem;
 }
 
 
 .portfolio-item h3 {
-    font-size: 1.3rem; /* Reduced from 1.5rem */
-    margin-bottom: 0.4rem; /* Adjusted */
+    font-size: 1.3rem;
+    margin-bottom: 0.4rem;
     color: var(--crt-white, #fefefe);
 }
 
 .portfolio-item .tags {
-    margin-bottom: 0.9rem; /* Adjusted */
+    margin-bottom: 0.9rem;
 }
 
 .portfolio-item .tag {
     display: inline-block;
     background-color: var(--crt-medium-gray, #404040);
     color: var(--crt-light-gray, #b0b0b0);
-    padding: 0.2rem 0.4rem; /* Adjusted */
-    border-radius: 4px;
-    font-size: 0.75rem; /* Reduced from 0.8rem */
-    margin-right: 0.4rem; /* Adjusted */
-    margin-bottom: 0.4rem; /* Adjusted */
+    padding: 0.2rem 0.4rem;
+    border-radius: 0; /* Changed */
+    font-size: 0.75rem;
+    margin-right: 0.4rem;
+    margin-bottom: 0.4rem;
 }
 
 .portfolio-category-heading {
-    font-size: 1.6rem; /* Reduced from 1.8rem */
+    font-size: 1.6rem;
     color: var(--crt-green, #00ff7f);
-    margin-top: 2rem; /* Adjusted */
-    margin-bottom: 0.9rem; /* Adjusted */
+    margin-top: 2rem;
+    margin-bottom: 0.9rem;
     text-align: left;
     padding-left: 0.5rem;
     border-bottom: 1px solid var(--crt-medium-gray);
@@ -227,20 +228,20 @@ a:hover {
 /* Category Filters for Portfolio */
 .category-filters {
     text-align: center;
-    margin-bottom: 1.5rem; /* Adjusted */
+    margin-bottom: 1.5rem;
 }
 
 .filter-btn {
     background-color: var(--crt-medium-gray, #404040);
     color: var(--crt-white, #fefefe);
     border: 1px solid var(--crt-gray, #2b2b2b);
-    padding: 0.4rem 0.8rem; /* Adjusted */
+    padding: 0.4rem 0.8rem;
     margin: 0.25rem;
-    border-radius: 4px;
+    border-radius: 0; /* Changed */
     cursor: pointer;
     transition: background-color 0.3s, color 0.3s;
     font-family: 'JetBrains Mono', monospace;
-    font-size: 0.85rem; /* Adjusted */
+    font-size: 0.85rem;
 }
 
 .filter-btn:hover,
@@ -258,7 +259,7 @@ a:hover {
 
 .composition-list-item,
 .text-entry-item {
-    padding: 0.6rem 0; /* Adjusted */
+    
     border-bottom: 1px solid var(--crt-gray, #2b2b2b);
 }
 
@@ -267,12 +268,11 @@ a:hover {
     border-bottom: none;
 }
 
-.composition-list-item h3, /* User set */
+.composition-list-item h3,
 .text-entry-item h3 {
     font-size: 0.9rem;
     color: var(--crt-white, #fefefe);
-    margin-bottom: 0.2rem; /* Adjusted */
-    font-weight: 400;
+
 }
 
 .title-link-no-style {
@@ -284,17 +284,17 @@ a:hover {
     text-decoration: none;
 }
 
-.composition-list-item .composition-meta, /* User set */
+.composition-list-item .composition-meta,
 .text-entry-item .text-meta {
     font-size: 0.7rem;
     color: var(--crt-light-gray, #b0b0b0);
-    margin-bottom: 0.4rem; /* Adjusted */
+    margin-bottom: 0.4rem;
 }
 .text-entry-item .text-meta .publication {
     font-style: italic;
 }
 
-.composition-list-item .details-link, /* User set */
+.composition-list-item .details-link,
 .text-entry-item .details-link {
     font-size: 0.6rem;
     color: var(--crt-cyan, #00ffee);
@@ -309,53 +309,64 @@ a:hover {
 /* Tools section uses the standard portfolio-grid */
 #tools-grid-content {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Adjusted minmax */
-    gap: 1.5rem; /* Adjusted */
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
 }
 #tools-grid-content .portfolio-item {
-    /* Re-uses portfolio-item styles */
+    border-radius: 0; /* Ensure tools items also have sharp edges */
 }
+#tools-grid-content .portfolio-item .img-placeholder,
+#tools-grid-content .portfolio-item img {
+    border-radius: 0; /* Ensure images/placeholders in tools also have sharp edges */
+}
+
 
 /* ZSCORE section uses wide portfolio grid */
 #zscore-grid-content {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 2rem; /* Adjusted */
+    gap: 2rem;
 }
 #zscore-grid-content .portfolio-item {
     max-width: 800px;
     margin-left: auto;
     margin-right: auto;
+    border-radius: 0; /* Ensure ZSCORE items also have sharp edges */
 }
+#zscore-grid-content .portfolio-item .img-placeholder,
+#zscore-grid-content .portfolio-item img {
+    border-radius: 0; /* Ensure images/placeholders in ZSCORE also have sharp edges */
+}
+
 
 /* About Section Enhancements */
 #about-content h2,
-#about h3 { /* Target h3 directly in #about if not loaded */
-    font-size: 1.6rem; /* Reduced from 1.8rem */
+#about h3 {
+    font-size: 1.6rem;
     color: var(--crt-green, #00ff7f);
-    margin-top: 1.8rem; /* Adjusted */
-    margin-bottom: 0.6rem; /* Adjusted */
+    margin-top: 1.8rem;
+    margin-bottom: 0.6rem;
     font-weight: 400;
     text-align: left;
 }
-#about-content h2 { /* For the main "About Me" title if it's an H2 in about.html */
+#about-content h2 {
     text-align: center;
-    font-size: 1.5rem; /* Match other section H2s */
+     font-size: 1.5rem;
     color: var(--crt-white, #fefefe);
 }
 
 #about-content h4 {
-    font-size: 1.2rem; /* Reduced from 1.4rem */
+    font-size: 1.2rem;
     color: var(--crt-cyan, #00ffee);
-    margin-top: 1.25rem; /* Adjusted */
-    margin-bottom: 0.4rem; /* Adjusted */
+    margin-top: 1.25rem;
+    margin-bottom: 0.4rem;
     padding-left: 1rem;
     font-weight: 300;
     text-align: left;
 }
 
 #about-content p {
-    font-size: 0.9rem; /* Match general p */
+    font-size: 0.9rem;
     padding-left: 0;
     text-align: left;
 }
@@ -366,28 +377,28 @@ a:hover {
 
 /* Contact Section (as a section within the container) */
 section#contact {
-    padding-top: 1.5rem; /* Adjusted */
-    padding-bottom: 1.5rem; /* Adjusted */
+    padding-top: 1.5rem;
+    padding-bottom: 1.5rem;
     text-align: center;
     border-bottom: none;
 }
 
 section#contact h2 {
-    font-size: 1.7rem; /* Reduced from 2rem */
+    font-size: 1.7rem;
     color: var(--crt-white, #fefefe);
-    margin-bottom: 0.9rem; /* Adjusted */
+    margin-bottom: 0.9rem;
 }
 
 section#contact p {
     color: var(--crt-light-gray, #b0b0b0);
     text-align: center;
-    font-size: 0.9rem; /* Match general p */
+    font-size: 0.9rem;
 }
 
 /* Site Footer */
 #site-footer {
     width: 100%;
-    padding: 1.25rem 1rem; /* Adjusted */
+    padding: 1.25rem 1rem;
     margin-top: auto;
     background-color: var(--crt-black, #010101);
     border-top: 1px solid var(--crt-gray, #2b2b2b);
@@ -402,15 +413,15 @@ section#contact p {
 
 #site-footer .footer-symbol {
     display: block;
-    font-size: 1.3rem; /* Adjusted */
+    font-size: 1.3rem;
     color: var(--crt-green, #00ff7f);
-    margin-bottom: 0.4rem; /* Adjusted */
+    margin-bottom: 0.4rem;
 }
 
 #site-footer p {
     color: var(--crt-medium-gray, #404040);
-    font-size: 0.8rem; /* Reduced from 0.85rem */
-    margin: 0.2rem 0; /* Adjusted */
+    font-size: 0.8rem;
+    margin: 0.2rem 0;
 }
 
 /* Animations */
@@ -431,23 +442,23 @@ section#contact p {
 /* Responsive Design */
 @media (max-width: 768px) {
     body {
-        font-size: 14px; /* Adjust base for smaller screens */
+        font-size: 14px;
     }
     header h1.site-title {
-        font-size: 2.5rem; /* Adjusted */
+        font-size: 2.5rem;
     }
     header h1.site-subtitle {
-        font-size: 4rem; /* Adjusted */
+        font-size: 4rem;
     }
     nav ul {
         flex-direction: column;
-        gap: 0.4rem; /* Adjusted */
+        gap: 0.4rem;
     }
     nav ul li a {
-        font-size: 0.85rem; /* Adjusted */
+        font-size: 0.85rem;
     }
     .section h2 {
-        font-size: 1.4rem; /* Adjusted */
+        font-size: 1.4rem;
     }
     .portfolio-grid, #tools-grid-content {
         grid-template-columns: 1fr;
@@ -461,19 +472,19 @@ section#contact p {
 
 @media (max-width: 480px) {
     body {
-        font-size: 13px; /* Further adjust base for very small screens */
+        font-size: 13px;
     }
     .container {
         width: 95%;
     }
     header h1.site-title {
-        font-size: 2rem; /* Adjusted */
+        font-size: 2rem;
     }
     header h1.site-subtitle {
-        font-size: 3.5rem; /* Adjusted */
+        font-size: 3.5rem;
     }
     .section h2 {
-        font-size: 1.3rem; /* Adjusted */
+        font-size: 1.3rem;
     }
     .portfolio-item h3 { font-size: 1.1rem; }
     #about h3, #about-content h2 { font-size: 1.4rem; }
