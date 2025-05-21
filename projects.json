@@ -1,5 +1,18 @@
 [
     {
+        "id": "comp001",
+        "category": "Composition",
+        "title": "One Coming... (work-in-progress)",
+        "year": 2025,
+        "instruments": "voice, live-electronic",
+        "description": null,
+        "imageUrl": null, 
+        "imagePlaceholder": null, 
+        "tags": ["Piano Duo", "Ensemble", "keys"],
+        "detailsLink": "project-sq1.html", 
+        "showInPortfolio": true 
+      },
+      {
       "id": "comp001",
       "category": "Composition",
       "title": "overcomplication",
@@ -7,7 +20,7 @@
       "instruments": "piano, midi-keyboard",
       "description": null,
       "imageUrl": null, 
-      "imagePlaceholder": "String Quartet No. 1 Image", 
+      "imagePlaceholder": "overcomplication", 
       "tags": ["Piano Duo", "Ensemble", "keys"],
       "detailsLink": "project-sq1.html", 
       "showInPortfolio": true 
