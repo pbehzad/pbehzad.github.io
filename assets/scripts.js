@@ -127,17 +127,20 @@ function displayPortfolioProjects(projectsToDisplay) {
         categoryHeading.textContent = category;
         portfolioGrid.appendChild(categoryHeading);
 
-        categorizedProjects[category].forEach(project => { // project is the loop variable here
+        categorizedProjects[category].forEach(project => {
             const item = document.createElement('div');
             item.classList.add('portfolio-item');
+            // Image is outside the new "portfolio-item-content" div
             item.innerHTML = `
-                ${createImageElement(project)}
-                <h3>${project.title}</h3>
-                <p>${project.description || 'No description available.'}</p>
-                <div class="tags">
-                    ${project.tags ? project.tags.map(tag => `<span class="tag">${tag}</span>`).join('') : ''}
+                ${createImageElement(project)} 
+                <div class="portfolio-item-content">
+                    <h3>${project.title}</h3>
+                    <p>${project.description || 'No description available.'}</p>
+                    <div class="tags">
+                        ${project.tags ? project.tags.map(tag => `<span class="tag">${tag}</span>`).join('') : ''}
+                    </div>
+                    ${project.detailsLink ? `<a href="${project.detailsLink}" class="portfolio-link" ${project.detailsLink.startsWith('http') || project.detailsLink.startsWith('JSprojects') ? 'target="_blank" rel="noopener noreferrer"' : `onclick="showProjectDetails('${project.id}')"`}>View Details</a>` : ''}
                 </div>
-                ${project.detailsLink ? `<a href="${project.detailsLink}" class="portfolio-link" ${project.detailsLink.startsWith('http') || project.detailsLink.startsWith('JSprojects') ? 'target="_blank" rel="noopener noreferrer"' : `onclick="showProjectDetails('${project.id}')"`}>View Details</a>` : ''}
             `;
             portfolioGrid.appendChild(item);
         });
@@ -186,15 +189,13 @@ function displayCompositionsList(projects) {
 
     const ul = document.createElement('ul');
     compositions.sort((a, b) => b.year - a.year);
-    compositions.forEach(comp => { // comp is the loop variable here
+    compositions.forEach(comp => {
         const li = document.createElement('li');
         li.classList.add('composition-list-item');
 
         let titleHtml;
         if (comp.detailsLink) {
             const isExternalOrTool = comp.detailsLink.startsWith('http') || comp.detailsLink.startsWith('JSprojects');
-            // For internal page links like "project-sq1.html", it will just be a normal link.
-            // For external/tool links, it opens in a new tab.
             const linkTarget = isExternalOrTool ? 'target="_blank" rel="noopener noreferrer"' : '';
             titleHtml = `<h3><a href="${comp.detailsLink}" class="title-link-no-style" ${linkTarget}>${comp.title}</a></h3>`;
         } else {
@@ -203,11 +204,8 @@ function displayCompositionsList(projects) {
 
         li.innerHTML = `
             ${titleHtml}
-            <p class="composition-meta">${comp.year} | ${comp.instruments || 'N/A'}</p>
-            <p>${comp.description || ''}</p>
-            ${/* If title is not a link AND detailsLink exists for SPA-like details (not used here for compositions)
-               You could add a "More Details" link here if needed, but title is primary link now.
-            */''}
+            <p class="composition-meta">Year: ${comp.year} | Instruments: ${comp.instruments || 'N/A'}</p>
+            <p>${comp.description || 'No description available.'}</p>
         `;
         ul.appendChild(li);
     });
@@ -227,17 +225,19 @@ function displayZscoreProjects(projects) {
         return;
     }
 
-    zscoreProjects.forEach(project => { // project is the loop variable here
+    zscoreProjects.forEach(project => {
         const item = document.createElement('div');
         item.classList.add('portfolio-item');
         item.innerHTML = `
             ${createImageElement(project)}
-            <h3>${project.title}</h3>
-            <p>${project.description || 'No description available.'}</p>
-            <div class="tags">
-                ${project.tags ? project.tags.map(tag => `<span class="tag">${tag}</span>`).join('') : ''}
+            <div class="portfolio-item-content">
+                <h3>${project.title}</h3>
+                <p>${project.description || 'No description available.'}</p>
+                <div class="tags">
+                    ${project.tags ? project.tags.map(tag => `<span class="tag">${tag}</span>`).join('') : ''}
+                </div>
+                ${project.detailsLink ? `<a href="${project.detailsLink}" class="portfolio-link" ${project.detailsLink.startsWith('http') || project.detailsLink.startsWith('JSprojects') ? 'target="_blank" rel="noopener noreferrer"' : `onclick="showProjectDetails('${project.id}')"`}>View Details</a>` : ''}
             </div>
-            ${project.detailsLink ? `<a href="${project.detailsLink}" class="portfolio-link" ${project.detailsLink.startsWith('http') || project.detailsLink.startsWith('JSprojects') ? 'target="_blank" rel="noopener noreferrer"' : `onclick="showProjectDetails('${project.id}')"`}>View Details</a>` : ''}
         `;
         zscoreGridContent.appendChild(item);
     });
@@ -258,10 +258,9 @@ function displayTextEntries(projects) {
 
     const ul = document.createElement('ul');
     textEntries.sort((a, b) => b.year - a.year);
-    textEntries.forEach(entry => { // entry is the loop variable here
+    textEntries.forEach(entry => {
         const li = document.createElement('li');
         li.classList.add('text-entry-item');
-        // Updated to make title a link if detailsLink exists
         let titleHtml;
         if (entry.detailsLink) {
             const isExternalOrTool = entry.detailsLink.startsWith('http') || entry.detailsLink.startsWith('JSprojects');
@@ -278,7 +277,6 @@ function displayTextEntries(projects) {
             <div class="tags">
                 ${entry.tags ? entry.tags.map(tag => `<span class="tag">${tag}</span>`).join('') : ''}
             </div>
-            ${/* Removed separate "Read More" link as title is now the link if available */''}
         `;
         ul.appendChild(li);
     });
@@ -298,17 +296,19 @@ function displayTools(projects) {
         return;
     }
 
-    tools.forEach(tool => { // tool is the loop variable here
+    tools.forEach(tool => {
         const item = document.createElement('div');
         item.classList.add('portfolio-item');
         item.innerHTML = `
             ${createImageElement(tool)}
-            <h3>${tool.title}</h3>
-            <p>${tool.description || 'No description available.'}</p>
-            <div class="tags">
-                ${tool.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+            <div class="portfolio-item-content">
+                <h3>${tool.title}</h3>
+                <p>${tool.description || 'No description available.'}</p>
+                <div class="tags">
+                    ${tool.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+                </div>
+                ${tool.detailsLink ? `<a href="${tool.detailsLink}" class="portfolio-link" target="_blank" rel="noopener noreferrer">Launch Tool</a>` : ''}
             </div>
-            ${tool.detailsLink ? `<a href="${tool.detailsLink}" class="portfolio-link" target="_blank" rel="noopener noreferrer">Launch Tool</a>` : ''}
         `;
         toolsGridContent.appendChild(item);
     });
@@ -318,15 +318,9 @@ function showProjectDetails(projectId) {
     console.log("Show details for project ID:", projectId);
     const project = allProjects.find(p => p.id === projectId);
     if (project && project.detailsLink && !project.detailsLink.startsWith('http') && !project.detailsLink.startsWith('JSprojects')) {
-        // This case is now handled by direct href for compositions/texts if detailsLink is a relative path.
-        // If you still want JS to handle this for some internal SPA-like view, you'd implement that here.
-        // For now, direct links are preferred for simplicity with HTML detail pages.
-        // If the link was meant for showSection, it should be a hash like '#project-detail-comp001'
-        // and showSection would handle it.
-        alert(`Navigating to details for: ${project.title}. (This would be a direct page link or handled by SPA router)`);
+        alert(`Navigating to details for: ${project.title}. Implement actual navigation or modal here.`);
     } else if (project && project.detailsLink) {
-         // This alert is mostly for debugging or if an onclick was unintentionally left.
-         alert(`Details for '${project.title}' are typically accessed via its direct link.`);
+         alert(`Details for '${project.title}' would be shown here or on its dedicated page.`);
     } else {
         alert("No details link available for this project.");
     }

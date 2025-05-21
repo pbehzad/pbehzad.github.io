@@ -3,7 +3,7 @@
 
 /* General Body Styles */
 html {
-    height: 100%; /* Ensure html takes full height */
+    height: 100%;
 }
 
 body {
@@ -39,18 +39,18 @@ header {
 }
 
 header h1.site-title {
-    font-size: 2rem;
-    /* font-family: 'Courier New', Courier, monospace; */
+    font-size: 2rem; /* User set */
+    /* font-family: 'Courier New', Courier, monospace; */ /* User commented out */
     margin-bottom: 0.25rem;
     color: var(--crt-white, #fefefe);
-    animation: flicker 180s infinite alternate;
+    animation: flicker 180s infinite alternate; /* User updated flicker duration */
 }
 
 header h1.site-subtitle {
     font-size: 5rem;
     margin-top: -0.75rem;
     margin-bottom: 1.5rem;
-    /* color: var(--crt-green, #00ff7f); */
+    /* color: var(--crt-green, #00ff7f); */ /* User changed to white */
     color: var(--crt-white, #fefefe);
 }
 
@@ -70,7 +70,7 @@ nav ul li a {
     font-weight: 300;
     font-size: 0.9rem;
     padding: 0.4rem 0.6rem;
-    border-radius: 0; /* Changed */
+    border-radius: 0;
     transition: color 0.3s ease, background-color 0.3s ease;
     border: 1px solid transparent;
 }
@@ -151,12 +151,13 @@ a:hover {
 .portfolio-grid-wide .portfolio-item {
     background-color: var(--crt-dark-gray, #1a1a1a);
     border: 1px solid var(--crt-gray, #2b2b2b);
-    border-radius: 0; /* Changed */
-    padding: 1.25rem;
+    border-radius: 0;
+    padding: 0; /* Removed padding from item itself */
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     max-width: 800px;
     margin-left: auto;
     margin-right: auto;
+    overflow: hidden; /* To ensure image corners align with card corners if image is slightly larger */
 }
 
 .portfolio-grid-wide .portfolio-item:hover {
@@ -171,8 +172,8 @@ a:hover {
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 1rem;
-    border-radius: 0; /* Changed */
+    margin-bottom: 0; /* Removed margin */
+    border-radius: 0;
     color: var(--crt-light-gray);
     font-size: 0.85rem;
 }
@@ -180,13 +181,19 @@ a:hover {
     width: 100%;
     height: 180px;
     object-fit: cover;
-    border-radius: 0; /* Changed */
-    margin-bottom: 1rem;
+    border-radius: 0;
+    margin-bottom: 0; /* Removed margin */
     background-color: var(--crt-medium-gray);
+    display: block; /* Ensure no extra space below image */
 }
 .img-placeholder-error span {
     color: var(--crt-red);
     font-size: 0.75rem;
+}
+
+/* New class for the text content within portfolio items */
+.portfolio-item-content {
+    padding: 1.25rem; /* This padding was originally on .portfolio-item */
 }
 
 
@@ -205,7 +212,7 @@ a:hover {
     background-color: var(--crt-medium-gray, #404040);
     color: var(--crt-light-gray, #b0b0b0);
     padding: 0.2rem 0.4rem;
-    border-radius: 0; /* Changed */
+    border-radius: 0;
     font-size: 0.75rem;
     margin-right: 0.4rem;
     margin-bottom: 0.4rem;
@@ -237,7 +244,7 @@ a:hover {
     border: 1px solid var(--crt-gray, #2b2b2b);
     padding: 0.4rem 0.8rem;
     margin: 0.25rem;
-    border-radius: 0; /* Changed */
+    border-radius: 0;
     cursor: pointer;
     transition: background-color 0.3s, color 0.3s;
     font-family: 'JetBrains Mono', monospace;
@@ -259,8 +266,8 @@ a:hover {
 
 .composition-list-item,
 .text-entry-item {
-    
-    border-bottom: 1px solid var(--crt-gray, #2b2b2b);
+    /* padding: 0.6rem 0; User removed padding */
+    border-bottom: 1px solid var(--crt-gray, #2b2b2b); /* User changed to 1px */
 }
 
 .composition-list-item:last-child,
@@ -272,7 +279,7 @@ a:hover {
 .text-entry-item h3 {
     font-size: 0.9rem;
     color: var(--crt-white, #fefefe);
-
+    margin-bottom: 0; /* User changed, assuming it's intended with meta right below */
 }
 
 .title-link-no-style {
@@ -313,12 +320,15 @@ a:hover {
     gap: 1.5rem;
 }
 #tools-grid-content .portfolio-item {
-    border-radius: 0; /* Ensure tools items also have sharp edges */
+    border-radius: 0;
+    padding: 0; /* Apply borderless image style to tools cards too */
 }
 #tools-grid-content .portfolio-item .img-placeholder,
 #tools-grid-content .portfolio-item img {
-    border-radius: 0; /* Ensure images/placeholders in tools also have sharp edges */
+    border-radius: 0;
+    margin-bottom: 0; /* Apply borderless image style to tools cards too */
 }
+/* Ensure portfolio-item-content is used for tools if structure is similar */
 
 
 /* ZSCORE section uses wide portfolio grid */
@@ -331,11 +341,13 @@ a:hover {
     max-width: 800px;
     margin-left: auto;
     margin-right: auto;
-    border-radius: 0; /* Ensure ZSCORE items also have sharp edges */
+    border-radius: 0;
+    padding: 0; /* Apply borderless image style to ZSCORE cards too */
 }
 #zscore-grid-content .portfolio-item .img-placeholder,
 #zscore-grid-content .portfolio-item img {
-    border-radius: 0; /* Ensure images/placeholders in ZSCORE also have sharp edges */
+    border-radius: 0;
+    margin-bottom: 0; /* Apply borderless image style to ZSCORE cards too */
 }
 
 
@@ -452,7 +464,7 @@ section#contact p {
     }
     nav ul {
         flex-direction: column;
-        gap: 0.7rem;
+        gap: 0.7rem; /* User updated gap */
     }
     nav ul li a {
         font-size: 0.85rem;
@@ -466,7 +478,7 @@ section#contact p {
     .portfolio-item h3 { font-size: 1.2rem; }
     #about h3, #about-content h2 { font-size: 1.5rem; }
     #about h4 { font-size: 1.1rem; }
-    footer#contact-section h2 { font-size: 1.6rem; }
+    footer#contact-section h2 { font-size: 1.6rem; } /* Assuming user wants to keep footer#contact-section */
     #site-footer p { font-size: 0.75rem; }
 }
 
