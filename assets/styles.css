@@ -2,17 +2,22 @@
 @import url('colors.css'); /* Assuming your colors.css is in the same directory or assets */
 
 /* General Body Styles */
+html {
+    height: 100%; /* Ensure html takes full height */
+}
+
 body {
     background-color: var(--crt-black, #010101);
     color: var(--crt-white, #fefefe);
     font-family: 'JetBrains Mono', monospace;
     margin: 0;
     padding: 0;
-    line-height: 1.6;
+    line-height: 1.5; /* Slightly reduced line-height for smaller fonts */
     display: flex;
     flex-direction: column;
     align-items: center;
-    min-height: 100vh;
+    min-height: 100%;
+    font-size: 15px; /* Base font size for easier rem calculations, adjust if needed */
 }
 
 .container {
@@ -20,30 +25,31 @@ body {
     max-width: 1000px;
     margin: 2rem auto;
     padding: 1rem;
+    flex-grow: 1;
 }
 
 /* Header and Navigation */
 header {
     text-align: center;
-    margin-top: 4rem;
-    margin-bottom: 3rem;
-    width: 100%; /* Ensure header takes full width */
-    padding: 0 1rem; /* Add some padding for smaller screens */
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+    width: 100%;
+    padding: 0 1rem;
     box-sizing: border-box;
 }
 
 header h1.site-title {
-    font-size: 4rem;
+    font-size: 3rem; /* User set */
     /* font-family: 'Courier New', Courier, monospace; */
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.25rem;
     color: var(--crt-white, #fefefe);
-    animation: flicker 1000s infinite alternate;
+    animation: flicker 10s infinite alternate;
 }
 
 header h1.site-subtitle {
-    font-size: 6rem;
-    margin-top: -1rem;
-    margin-bottom: 2rem;
+    font-size: 5rem; /* Reduced from 6rem */
+    margin-top: -0.75rem;
+    margin-bottom: 1.5rem;
     color: var(--crt-white, #fefefe);
 }
 
@@ -53,7 +59,7 @@ nav ul {
     margin: 0;
     display: flex;
     justify-content: center;
-    gap: 1.5rem;
+    gap: 1rem;
     flex-wrap: wrap;
 }
 
@@ -61,21 +67,30 @@ nav ul li a {
     color: var(--crt-light-gray, #b0b0b0);
     text-decoration: none;
     font-weight: 300;
-    padding: 0.5rem 0.75rem;
+    font-size: 0.9rem; /* Adjusted */
+    padding: 0.4rem 0.6rem;
     border-radius: 4px;
     transition: color 0.3s ease, background-color 0.3s ease;
+    border: 1px solid transparent;
 }
 
-nav ul li a:hover,
-nav ul li a.active {
+nav ul li a:hover {
     color: var(--crt-black, #010101);
     background-color: var(--crt-green, #00ff7f);
+    border-color: var(--crt-green, #00ff7f);
+}
+
+nav ul li a.active-nav-link {
+    color: var(--crt-black, #010101);
+    background-color: var(--crt-green, #00ff7f);
+    border-color: var(--crt-green, #00ff7f);
+    font-weight: 700;
 }
 
 /* Sections */
 .section {
     display: none;
-    padding: 2rem 0;
+    padding: 1.5rem 0; /* Slightly reduced padding */
     border-bottom: 1px solid var(--crt-gray, #2b2b2b);
 }
 
@@ -89,20 +104,26 @@ nav ul li a.active {
 }
 
 .section h2 {
-    font-size: 2.5rem;
-    margin-bottom: 1.5rem;
+    font-size: 1.5rem; /* User set */
+    margin-bottom: 1.25rem; /* Adjusted */
     color: var(--crt-white, #fefefe);
     text-align: center;
-    
+    font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 1px;
 }
 
 /* Typography */
 p {
-    font-size: 1rem;
+    font-size: 0.9rem; /* Reduced from 1rem */
     color: var(--crt-light-gray, #b0b0b0);
-    margin-bottom: 1rem;
+    margin-bottom: 0.9rem; /* Adjusted */
+}
+p.loading-message {
+    text-align: center;
+    font-style: italic;
+    color: var(--crt-medium-gray);
+    font-size: 0.85rem; /* Adjusted */
 }
 
 a {
@@ -122,15 +143,15 @@ a:hover {
 /* Portfolio Section - Wide Cards */
 .portfolio-grid-wide {
     display: grid;
-    grid-template-columns: 1fr; /* Each card takes full width */
-    gap: 1.5rem;
+    grid-template-columns: 1fr;
+    gap: 2rem; /* Adjusted */
 }
 
 .portfolio-grid-wide .portfolio-item {
     background-color: var(--crt-dark-gray, #1a1a1a);
     border: 1px solid var(--crt-gray, #2b2b2b);
     border-radius: 8px;
-    padding: 1.5rem;
+    padding: 1.25rem; /* Adjusted */
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     max-width: 800px;
     margin-left: auto;
@@ -142,10 +163,9 @@ a:hover {
     box-shadow: 0 8px 15px rgba(0, 255, 127, 0.1);
 }
 
-.portfolio-item img,
-.portfolio-grid-wide .portfolio-item .img-placeholder { /* Style for placeholder */
+.portfolio-item .img-placeholder {
     width: 100%;
-    height: 200px; /* Or your desired height */
+    height: 180px; /* Adjusted */
     background-color: var(--crt-medium-gray, #404040);
     display: flex;
     align-items: center;
@@ -153,34 +173,48 @@ a:hover {
     margin-bottom: 1rem;
     border-radius: 4px;
     color: var(--crt-light-gray);
+    font-size: 0.85rem; /* Adjusted */
+}
+.portfolio-item img {
+    width: 100%;
+    height: 180px; /* Adjusted */
+    object-fit: cover;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+    background-color: var(--crt-medium-gray);
+}
+.img-placeholder-error span {
+    color: var(--crt-red);
+    font-size: 0.75rem; /* Adjusted */
 }
 
+
 .portfolio-item h3 {
-    font-size: 1.5rem;
-    margin-bottom: 0.5rem;
+    font-size: 1.3rem; /* Reduced from 1.5rem */
+    margin-bottom: 0.4rem; /* Adjusted */
     color: var(--crt-white, #fefefe);
 }
 
 .portfolio-item .tags {
-    margin-bottom: 1rem;
+    margin-bottom: 0.9rem; /* Adjusted */
 }
 
 .portfolio-item .tag {
     display: inline-block;
     background-color: var(--crt-medium-gray, #404040);
     color: var(--crt-light-gray, #b0b0b0);
-    padding: 0.25rem 0.5rem;
+    padding: 0.2rem 0.4rem; /* Adjusted */
     border-radius: 4px;
-    font-size: 0.8rem;
-    margin-right: 0.5rem;
-    margin-bottom: 0.5rem;
+    font-size: 0.75rem; /* Reduced from 0.8rem */
+    margin-right: 0.4rem; /* Adjusted */
+    margin-bottom: 0.4rem; /* Adjusted */
 }
 
 .portfolio-category-heading {
-    font-size: 1.8rem;
+    font-size: 1.6rem; /* Reduced from 1.8rem */
     color: var(--crt-green, #00ff7f);
-    margin-top: 2.5rem;
-    margin-bottom: 1rem;
+    margin-top: 2rem; /* Adjusted */
+    margin-bottom: 0.9rem; /* Adjusted */
     text-align: left;
     padding-left: 0.5rem;
     border-bottom: 1px solid var(--crt-medium-gray);
@@ -190,32 +224,23 @@ a:hover {
     margin-top: 0;
 }
 
-.portfolio-item .img-placeholder img {
-  width: 100%;
-  height: 100%; /* Make image fill the placeholder div height */
-  object-fit: cover; /* Crop image to fit, maintaining aspect ratio */
-  border-radius: 4px; /* Match placeholder div's border-radius */
-}
-.img-placeholder-error span { /* Style for the error message */
-  color: var(--crt-red);
-  font-size: 0.8rem;
-}
 /* Category Filters for Portfolio */
 .category-filters {
     text-align: center;
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem; /* Adjusted */
 }
 
 .filter-btn {
     background-color: var(--crt-medium-gray, #404040);
     color: var(--crt-white, #fefefe);
     border: 1px solid var(--crt-gray, #2b2b2b);
-    padding: 0.5rem 1rem;
-    margin: 0.25rem; /* Added for better wrapping */
+    padding: 0.4rem 0.8rem; /* Adjusted */
+    margin: 0.25rem;
     border-radius: 4px;
     cursor: pointer;
     transition: background-color 0.3s, color 0.3s;
     font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem; /* Adjusted */
 }
 
 .filter-btn:hover,
@@ -224,109 +249,168 @@ a:hover {
     color: var(--crt-black, #010101);
 }
 
-
-/* Compositions List View */
-#composition-list-content ul {
+/* Compositions List View & Texts List View (Shared Styles) */
+#composition-list-content ul,
+#texts-content ul {
     list-style-type: none;
     padding-left: 0;
 }
 
-.composition-list-item {
-    padding: 0rem 0;
-    border-bottom: 0.1px solid var(--crt-gray, #2b2b2b);
+.composition-list-item,
+.text-entry-item {
+    padding: 0.6rem 0; /* Adjusted */
+    border-bottom: 1px solid var(--crt-gray, #2b2b2b);
 }
 
-.composition-list-item:last-child {
+.composition-list-item:last-child,
+.text-entry-item:last-child {
     border-bottom: none;
 }
 
-.composition-list-item h3 {
-    font-size: 1.2rem;
+.composition-list-item h3, /* User set */
+.text-entry-item h3 {
+    font-size: 0.9rem;
     color: var(--crt-white, #fefefe);
-    margin-bottom: 0.25rem;
+    margin-bottom: 0.2rem; /* Adjusted */
     font-weight: 400;
 }
+
 .title-link-no-style {
-  color: inherit; /* Inherits color from the parent <h3> */
-  text-decoration: none; /* Removes the default underline */
+    color: inherit;
+    text-decoration: none;
 }
-
 .title-link-no-style:hover {
-  color: var(--crt-green, #00ff7f); /* Optional: Adds a hover effect, or you can remove this line */
-  text-decoration: none; /* Ensures no underline on hover */
-}
-.composition-list-item .composition-meta {
-    font-size: 0.9rem;
-    color: var(--crt-light-gray, #b0b0b0);
-    margin-bottom: 0.1rem;
+    color: var(--crt-green, #00ff7f);
+    text-decoration: none;
 }
 
-.composition-list-item .details-link {
+.composition-list-item .composition-meta, /* User set */
+.text-entry-item .text-meta {
+    font-size: 0.7rem;
+    color: var(--crt-light-gray, #b0b0b0);
+    margin-bottom: 0.4rem; /* Adjusted */
+}
+.text-entry-item .text-meta .publication {
+    font-style: italic;
+}
+
+.composition-list-item .details-link, /* User set */
+.text-entry-item .details-link {
     font-size: 0.6rem;
     color: var(--crt-cyan, #00ffee);
     text-decoration: underline;
 }
 
-.composition-list-item .details-link:hover {
+.composition-list-item .details-link:hover,
+.text-entry-item .details-link:hover {
     color: var(--crt-green, #00ff7f);
 }
 
-/* Tools section should use the standard portfolio-grid */
+/* Tools section uses the standard portfolio-grid */
 #tools-grid-content {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 2rem;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Adjusted minmax */
+    gap: 1.5rem; /* Adjusted */
 }
 #tools-grid-content .portfolio-item {
     /* Re-uses portfolio-item styles */
 }
 
+/* ZSCORE section uses wide portfolio grid */
+#zscore-grid-content {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem; /* Adjusted */
+}
+#zscore-grid-content .portfolio-item {
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
 
 /* About Section Enhancements */
-#about h3 {
-    font-size: 1.8rem;
+#about-content h2,
+#about h3 { /* Target h3 directly in #about if not loaded */
+    font-size: 1.6rem; /* Reduced from 1.8rem */
     color: var(--crt-green, #00ff7f);
-    margin-top: 2rem;
-    margin-bottom: 0.75rem;
+    margin-top: 1.8rem; /* Adjusted */
+    margin-bottom: 0.6rem; /* Adjusted */
     font-weight: 400;
+    text-align: left;
+}
+#about-content h2 { /* For the main "About Me" title if it's an H2 in about.html */
+    text-align: center;
+    font-size: 1.5rem; /* Match other section H2s */
+    color: var(--crt-white, #fefefe);
 }
 
-#about h4 {
-    font-size: 1.4rem;
+#about-content h4 {
+    font-size: 1.2rem; /* Reduced from 1.4rem */
     color: var(--crt-cyan, #00ffee);
-    margin-top: 1.5rem;
-    margin-bottom: 0.5rem;
+    margin-top: 1.25rem; /* Adjusted */
+    margin-bottom: 0.4rem; /* Adjusted */
     padding-left: 1rem;
     font-weight: 300;
+    text-align: left;
 }
 
-#about p {
-    font-size: 1rem;
+#about-content p {
+    font-size: 0.9rem; /* Match general p */
     padding-left: 0;
+    text-align: left;
 }
 
-#about p[style*="padding-left"] {
+#about-content p[style*="padding-left"] {
     padding-left: 1rem;
 }
 
-
-/* Footer */
-footer#contact {
-    padding-top: 3rem;
+/* Contact Section (as a section within the container) */
+section#contact {
+    padding-top: 1.5rem; /* Adjusted */
+    padding-bottom: 1.5rem; /* Adjusted */
     text-align: center;
-    border-top: 1px solid var(--crt-gray, #2b2b2b);
-    margin-top: 3rem;
-    width: 100%;
+    border-bottom: none;
 }
 
-footer#contact h2 {
-    font-size: 2rem;
+section#contact h2 {
+    font-size: 1.7rem; /* Reduced from 2rem */
     color: var(--crt-white, #fefefe);
-    margin-bottom: 1rem;
+    margin-bottom: 0.9rem; /* Adjusted */
 }
 
-footer#contact p {
+section#contact p {
     color: var(--crt-light-gray, #b0b0b0);
+    text-align: center;
+    font-size: 0.9rem; /* Match general p */
+}
+
+/* Site Footer */
+#site-footer {
+    width: 100%;
+    padding: 1.25rem 1rem; /* Adjusted */
+    margin-top: auto;
+    background-color: var(--crt-black, #010101);
+    border-top: 1px solid var(--crt-gray, #2b2b2b);
+    text-align: center;
+    box-sizing: border-box;
+}
+
+#site-footer .footer-content {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+#site-footer .footer-symbol {
+    display: block;
+    font-size: 1.3rem; /* Adjusted */
+    color: var(--crt-green, #00ff7f);
+    margin-bottom: 0.4rem; /* Adjusted */
+}
+
+#site-footer p {
+    color: var(--crt-medium-gray, #404040);
+    font-size: 0.8rem; /* Reduced from 0.85rem */
+    margin: 0.2rem 0; /* Adjusted */
 }
 
 /* Animations */
@@ -346,35 +430,54 @@ footer#contact p {
 
 /* Responsive Design */
 @media (max-width: 768px) {
+    body {
+        font-size: 14px; /* Adjust base for smaller screens */
+    }
     header h1.site-title {
-        font-size: 3rem;
+        font-size: 2.5rem; /* Adjusted */
     }
     header h1.site-subtitle {
-        font-size: 4.5rem;
+        font-size: 4rem; /* Adjusted */
     }
     nav ul {
         flex-direction: column;
-        gap: 0.5rem;
+        gap: 0.4rem; /* Adjusted */
+    }
+    nav ul li a {
+        font-size: 0.85rem; /* Adjusted */
     }
     .section h2 {
-        font-size: 2rem;
+        font-size: 1.4rem; /* Adjusted */
     }
-    .portfolio-grid, #tools-grid-content { /* Apply to standard grid too */
+    .portfolio-grid, #tools-grid-content {
         grid-template-columns: 1fr;
     }
+    .portfolio-item h3 { font-size: 1.2rem; }
+    #about h3, #about-content h2 { font-size: 1.5rem; }
+    #about h4 { font-size: 1.1rem; }
+    footer#contact-section h2 { font-size: 1.6rem; }
+    #site-footer p { font-size: 0.75rem; }
 }
 
 @media (max-width: 480px) {
+    body {
+        font-size: 13px; /* Further adjust base for very small screens */
+    }
     .container {
         width: 95%;
     }
     header h1.site-title {
-        font-size: 2.5rem;
+        font-size: 2rem; /* Adjusted */
     }
     header h1.site-subtitle {
-        font-size: 3.5rem;
+        font-size: 3.5rem; /* Adjusted */
     }
     .section h2 {
-        font-size: 1.8rem;
+        font-size: 1.3rem; /* Adjusted */
     }
+    .portfolio-item h3 { font-size: 1.1rem; }
+    #about h3, #about-content h2 { font-size: 1.4rem; }
+    #about h4 { font-size: 1rem; }
+    footer#contact-section h2 { font-size: 1.5rem; }
+    #site-footer p { font-size: 0.7rem; }
 }
