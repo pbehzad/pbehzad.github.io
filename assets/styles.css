@@ -154,7 +154,7 @@ a:hover {
     border-radius: 0;
     padding: 0; /* Removed padding from item itself */
     transition: transform 0.3s ease, box-shadow 0.3s ease;
-    max-width: 800px;
+    max-width: 1200px;
     margin-left: auto;
     margin-right: auto;
     overflow: hidden; /* To ensure image corners align with card corners if image is slightly larger */

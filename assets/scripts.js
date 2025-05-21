@@ -204,8 +204,8 @@ function displayCompositionsList(projects) {
 
         li.innerHTML = `
             ${titleHtml}
-            <p class="composition-meta">Year: ${comp.year} | Instruments: ${comp.instruments || 'N/A'}</p>
-            <p>${comp.description || 'No description available.'}</p>
+            <p class="composition-meta">${comp.year} | ${comp.instruments || 'N/A'}</p>
+            <p>${comp.description || ''}</p>
         `;
         ul.appendChild(li);
     });
