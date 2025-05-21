@@ -7,8 +7,8 @@ html {
 }
 
 body {
-    background-color: var(--crt-black, #010101);
-    color: var(--crt-white, #fefefe);
+    background-color: var(--crt-black);
+    color: var(--crt-white);
     font-family: 'JetBrains Mono', monospace;
     margin: 0;
     padding: 0;
@@ -42,7 +42,7 @@ header h1.site-title {
     font-size: 2rem;
     /* font-family: 'Courier New', Courier, monospace; */
     margin-bottom: 0.25rem;
-    color: var(--crt-white, #fefefe);
+    color: var(--crt-white);
     animation: flicker 180s infinite alternate;
 }
 
@@ -50,8 +50,7 @@ header h1.site-subtitle {
     font-size: 5rem;
     margin-top: -0.75rem;
     margin-bottom: 1.5rem;
-    /* color: var(--crt-green, #00ff7f); */
-    color: var(--crt-white, #fefefe);
+    color: var(--crt-white);
 }
 
 nav ul {
@@ -65,7 +64,7 @@ nav ul {
 }
 
 nav ul li a {
-    color: var(--crt-light-gray, #b0b0b0);
+    color: var(--crt-light-gray);
     text-decoration: none;
     font-weight: 300;
     font-size: 0.9rem;
@@ -76,15 +75,15 @@ nav ul li a {
 }
 
 nav ul li a:hover {
-    color: var(--crt-black, #010101);
-    background-color: var(--crt-green, #00ff7f);
-    border-color: var(--crt-green, #00ff7f);
+    color: var(--crt-black);
+    background-color: var(--crt-green);
+    border-color: var(--crt-green);
 }
 
 nav ul li a.active-nav-link {
-    color: var(--crt-black, #010101);
-    background-color: var(--crt-green, #00ff7f);
-    border-color: var(--crt-green, #00ff7f);
+    color: var(--crt-black);
+    background-color: var(--crt-green);
+    border-color: var(--crt-green);
     font-weight: 700;
 }
 
@@ -92,7 +91,7 @@ nav ul li a.active-nav-link {
 .section {
     display: none;
     padding: 1.5rem 0;
-    border-bottom: 1px solid var(--crt-gray, #2b2b2b);
+    border-bottom: 1px solid var(--crt-gray);
 }
 
 .section:last-of-type {
@@ -107,7 +106,7 @@ nav ul li a.active-nav-link {
 .section h2 {
     font-size: 1.5rem;
     margin-bottom: 1.25rem;
-    color: var(--crt-white, #fefefe);
+    color: var(--crt-white);
     text-align: center;
     font-weight: 700;
     text-transform: uppercase;
@@ -117,7 +116,7 @@ nav ul li a.active-nav-link {
 /* Typography */
 p {
     font-size: 0.9rem;
-    color: var(--crt-light-gray, #b0b0b0);
+    color: var(--crt-light-gray);
     margin-bottom: 0.9rem;
 }
 p.loading-message {
@@ -128,13 +127,13 @@ p.loading-message {
 }
 
 a {
-    color: var(--crt-cyan, #00ffee);
+    color: var(--crt-cyan);
     text-decoration: none;
     transition: color 0.3s ease;
 }
 
 a:hover {
-    color: var(--crt-green, #00ff7f);
+    color: var(--crt-green);
 }
 
 .extra-thin {
@@ -149,33 +148,31 @@ a:hover {
 }
 
 .portfolio-grid-wide .portfolio-item {
-    background-color: var(--crt-dark-gray, #1a1a1a);
-    border: 1px solid var(--crt-gray, #2b2b2b);
+    background-color: var(--crt-black);
+    border: 1px solid var(--crt-gray);
     border-radius: 0;
     padding: 0; 
     transition: transform 0.3s ease, box-shadow 0.3s ease;
-    /* max-width: 800px; Removed */
-    /* margin-left: auto; Removed */
-    /* margin-right: auto; Removed */
     overflow: hidden; 
 }
 
 .portfolio-grid-wide .portfolio-item:hover {
     transform: translateY(-5px);
-    box-shadow: 0 8px 15px rgba(0, 255, 127, 0.1);
+    box-shadow: 0 8px 15px var(--crt-green-transparent); /* Assuming you have a transparent green */
 }
 
 .portfolio-item .img-placeholder {
     width: 100%;
     height: 180px;
-    background-color: var(--crt-medium-gray, #404040);
+    background-color: var(--crt-black);
     display: flex;
     align-items: center;
     justify-content: center;
     margin-bottom: 0;
     border-radius: 0;
-    color: var(--crt-light-gray);
+    color: var(--crt-medium-gray);
     font-size: 0.85rem;
+    border: 1px solid var(--crt-gray);
 }
 .portfolio-item img {
     width: 100%;
@@ -183,11 +180,11 @@ a:hover {
     object-fit: cover;
     border-radius: 0;
     margin-bottom: 0;
-    background-color: var(--crt-medium-gray);
+    background-color: var(--crt-black);
     display: block;
 }
 .img-placeholder-error span {
-    color: var(--crt-red);
+    color: var(--crt-red); /* Assuming you have a --crt-red */
     font-size: 0.75rem;
 }
 
@@ -199,7 +196,7 @@ a:hover {
 .portfolio-item h3 {
     font-size: 1.3rem;
     margin-bottom: 0.4rem;
-    color: var(--crt-white, #fefefe);
+    color: var(--crt-white);
 }
 
 .portfolio-item .tags {
@@ -208,8 +205,8 @@ a:hover {
 
 .portfolio-item .tag {
     display: inline-block;
-    background-color: var(--crt-medium-gray, #404040);
-    color: var(--crt-light-gray, #b0b0b0);
+    background-color: var(--crt-medium-gray);
+    color: var(--crt-light-gray);
     padding: 0.2rem 0.4rem;
     border-radius: 0;
     font-size: 0.75rem;
@@ -219,7 +216,7 @@ a:hover {
 
 .portfolio-category-heading {
     font-size: 1.6rem;
-    color: var(--crt-green, #00ff7f);
+    color: var(--crt-green);
     margin-top: 2rem;
     margin-bottom: 0.9rem;
     text-align: left;
@@ -238,9 +235,9 @@ a:hover {
 }
 
 .filter-btn {
-    background-color: var(--crt-medium-gray, #404040);
-    color: var(--crt-white, #fefefe);
-    border: 1px solid var(--crt-gray, #2b2b2b);
+    background-color: var(--crt-medium-gray);
+    color: var(--crt-white);
+    border: 1px solid var(--crt-gray);
     padding: 0.4rem 0.8rem;
     margin: 0.25rem;
     border-radius: 0;
@@ -252,8 +249,8 @@ a:hover {
 
 .filter-btn:hover,
 .filter-btn.active {
-    background-color: var(--crt-green, #00ff7f);
-    color: var(--crt-black, #010101);
+    background-color: var(--crt-green);
+    color: var(--crt-black);
 }
 
 /* Compositions List View & Texts List View (Shared Styles) */
@@ -265,7 +262,7 @@ a:hover {
 
 .composition-list-item,
 .text-entry-item {
-    border-bottom: 1px solid var(--crt-gray, #2b2b2b);
+    border-bottom: 1px solid var(--crt-gray);
 }
 
 .composition-list-item:last-child,
@@ -276,7 +273,7 @@ a:hover {
 .composition-list-item h3,
 .text-entry-item h3 {
     font-size: 0.9rem;
-    color: var(--crt-white, #fefefe);
+    color: var(--crt-white);
     margin-bottom: 0;
 }
 
@@ -285,14 +282,14 @@ a:hover {
     text-decoration: none;
 }
 .title-link-no-style:hover {
-    color: var(--crt-green, #00ff7f);
+    color: var(--crt-green);
     text-decoration: none;
 }
 
 .composition-list-item .composition-meta,
 .text-entry-item .text-meta {
     font-size: 0.7rem;
-    color: var(--crt-light-gray, #b0b0b0);
+    color: var(--crt-light-gray);
     margin-bottom: 0.4rem;
 }
 .text-entry-item .text-meta .publication {
@@ -302,13 +299,13 @@ a:hover {
 .composition-list-item .details-link,
 .text-entry-item .details-link {
     font-size: 0.6rem;
-    color: var(--crt-cyan, #00ffee);
+    color: var(--crt-cyan);
     text-decoration: underline;
 }
 
 .composition-list-item .details-link:hover,
 .text-entry-item .details-link:hover {
-    color: var(--crt-green, #00ff7f);
+    color: var(--crt-green);
 }
 
 /* Tools section uses the standard portfolio-grid */
@@ -318,11 +315,13 @@ a:hover {
     gap: 1.5rem;
 }
 #tools-grid-content .portfolio-item {
+    border: 1px solid var(--crt-gray);
     border-radius: 0;
     padding: 0;
 }
 #tools-grid-content .portfolio-item .img-placeholder,
 #tools-grid-content .portfolio-item img {
+    border: 1px solid var(--crt-gray);
     border-radius: 0;
     margin-bottom: 0;
 }
@@ -335,9 +334,6 @@ a:hover {
     gap: 2rem;
 }
 #zscore-grid-content .portfolio-item {
-    /* max-width: 800px; Removed */
-    /* margin-left: auto; Removed */
-    /* margin-right: auto; Removed */
     border-radius: 0;
     padding: 0;
 }
@@ -352,21 +348,21 @@ a:hover {
 #about-content h2,
 #about h3 {
     font-size: 1.6rem;
-    color: var(--crt-green, #00ff7f);
+    color: var(--crt-green);
     margin-top: 1.8rem;
     margin-bottom: 0.6rem;
     font-weight: 400;
     text-align: left;
 }
-#about-content h2 {
+#about-content h2 { /* This targets H2 specifically if loaded from about.html */
     text-align: center;
-     font-size: 1.5rem;
-    color: var(--crt-white, #fefefe);
+     font-size: 1.5rem; /* Match other section H2s */
+    color: var(--crt-white);
 }
 
 #about-content h4 {
     font-size: 1.2rem;
-    color: var(--crt-cyan, #00ffee);
+    color: var(--crt-cyan);
     margin-top: 1.25rem;
     margin-bottom: 0.4rem;
     padding-left: 1rem;
@@ -394,12 +390,12 @@ section#contact {
 
 section#contact h2 {
     font-size: 1.7rem;
-    color: var(--crt-white, #fefefe);
+    color: var(--crt-white);
     margin-bottom: 0.9rem;
 }
 
 section#contact p {
-    color: var(--crt-light-gray, #b0b0b0);
+    color: var(--crt-light-gray);
     text-align: center;
     font-size: 0.9rem;
 }
@@ -409,8 +405,8 @@ section#contact p {
     width: 100%;
     padding: 1.25rem 1rem;
     margin-top: auto;
-    background-color: var(--crt-black, #010101);
-    border-top: 1px solid var(--crt-gray, #2b2b2b);
+    background-color: var(--crt-black);
+    border-top: 1px solid var(--crt-gray);
     text-align: center;
     box-sizing: border-box;
 }
@@ -423,12 +419,12 @@ section#contact p {
 #site-footer .footer-symbol {
     display: block;
     font-size: 1.3rem;
-    color: var(--crt-green, #00ff7f);
+    color: var(--crt-green);
     margin-bottom: 0.4rem;
 }
 
 #site-footer p {
-    color: var(--crt-medium-gray, #404040);
+    color: var(--crt-medium-gray);
     font-size: 0.8rem;
     margin: 0.2rem 0;
 }
@@ -475,7 +471,6 @@ section#contact p {
     .portfolio-item h3 { font-size: 1.2rem; }
     #about h3, #about-content h2 { font-size: 1.5rem; }
     #about h4 { font-size: 1.1rem; }
-    /* footer#contact-section h2 { font-size: 1.6rem; } Assuming this was a typo and meant section#contact */
     section#contact h2 { font-size: 1.6rem; }
     #site-footer p { font-size: 0.75rem; }
 }
@@ -499,7 +494,6 @@ section#contact p {
     .portfolio-item h3 { font-size: 1.1rem; }
     #about h3, #about-content h2 { font-size: 1.4rem; }
     #about h4 { font-size: 1rem; }
-    /* footer#contact-section h2 { font-size: 1.5rem; } Assuming this was a typo and meant section#contact */
     section#contact h2 { font-size: 1.5rem; }
     #site-footer p { font-size: 0.7rem; }
 }
