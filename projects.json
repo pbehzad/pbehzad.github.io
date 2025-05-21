@@ -10,7 +10,7 @@
         "imagePlaceholder": null, 
         "tags": ["Piano Duo", "Ensemble", "keys"],
         "detailsLink": "project-sq1.html", 
-        "showInPortfolio": true 
+        "showInPortfolio": false 
       },
       {
       "id": "comp001",
@@ -36,7 +36,7 @@
         "imagePlaceholder": "", 
         "tags": ["Ensemble"],
         "detailsLink": null, 
-        "showInPortfolio": true 
+        "showInPortfolio": false 
       },
       {
         "id": "comp003",
@@ -49,7 +49,7 @@
         "imagePlaceholder": "", 
         "tags": ["double bass", "live-electronics", "8-channels"],
         "detailsLink": null, 
-        "showInPortfolio": true 
+        "showInPortfolio": false 
       },
       {
         "id": "comp004",
@@ -75,7 +75,7 @@
         "imagePlaceholder": "", 
         "tags": ["ensemble", "viola", "cello", "piano"],
         "detailsLink": null, 
-        "showInPortfolio": true 
+        "showInPortfolio": false 
       },
       {
         "id": "comp005",
@@ -88,7 +88,7 @@
         "imagePlaceholder": "", 
         "tags": ["cello", "live-electronics", "8-channels"],
         "detailsLink": "project-sq2.html", 
-        "showInPortfolio": true 
+        "showInPortfolio": false 
       },
       {
         "id": "comp006",
@@ -114,7 +114,7 @@
         "imagePlaceholder": "", 
         "tags": ["ensemble", "viola", "cello", "piano"],
         "detailsLink": "project-sq2.html", 
-        "showInPortfolio": true 
+        "showInPortfolio": false 
       },
       {
         "id": "comp008",
@@ -140,7 +140,7 @@
         "imagePlaceholder": "", 
         "tags": ["ensemble"],
         "detailsLink": null, 
-        "showInPortfolio": true 
+        "showInPortfolio": false 
       },  
       {
         "id": "comp011",
@@ -153,7 +153,7 @@
         "imagePlaceholder": "", 
         "tags": ["solo", "english horn"],
         "detailsLink": null, 
-        "showInPortfolio": true 
+        "showInPortfolio": false 
       },
       {
         "id": "comp012",
@@ -166,7 +166,7 @@
         "imagePlaceholder": "", 
         "tags": ["solo", "viola"],
         "detailsLink": null, 
-        "showInPortfolio": true 
+        "showInPortfolio": false 
       },
       {
         "id": "comp013",
@@ -179,7 +179,7 @@
         "imagePlaceholder": "", 
         "tags": ["electronics", "fixed-media"],
         "detailsLink": null, 
-        "showInPortfolio": true 
+        "showInPortfolio": false 
       },
       {
         "id": "comp012",
@@ -192,7 +192,7 @@
         "imagePlaceholder": "", 
         "tags": ["duet", "cello", "piano"],
         "detailsLink": null, 
-        "showInPortfolio": true 
+        "showInPortfolio": false 
       },
       {
         "id": "comp013",
@@ -205,7 +205,7 @@
         "imagePlaceholder": "", 
         "tags": ["electronics", "fixed-media"],
         "detailsLink": null, 
-        "showInPortfolio": true 
+        "showInPortfolio": false 
       },
     {
       "id": "audioprog001",
@@ -231,7 +231,7 @@
         "imagePlaceholder": "Euler Lattice Tool",
         "tags": ["JavaScript", "Web Audio", "Music Theory", "Tool"],
         "detailsLink": "JSprojects/index.html",
-        "showInPortfolio": true
+        "showInPortfolio": false
       },
     {
       "id": "text001",
@@ -250,12 +250,12 @@
     {
       "id": "zscore001",
       "category": "Engraving (ZSCORE)",
-      "title": "Score Preparation: Symphony No. 3",
+      "title": "IMPACT by Amir Shpilman",
       "year": 2024,
-      "instruments": "Full Orchestra",
+      "instruments": "Full Orchestra, Choir, 2x Stunt women",
       "description": "Detailed score and parts preparation...",
       "imageUrl": null, 
-      "imagePlaceholder": "Engraving Project 1",
+      "imagePlaceholder": "IMPACT by Amir Shpilman",
       "tags": ["Sibelius", "Notation", "Orchestral"],
       "detailsLink": null,
       "showInPortfolio": true
