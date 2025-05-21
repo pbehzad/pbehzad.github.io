@@ -39,8 +39,8 @@ header {
 }
 
 header h1.site-title {
-    font-size: 3rem;
-    font-family: 'Courier New', Courier, monospace;
+    font-size: 2rem;
+    /* font-family: 'Courier New', Courier, monospace; */
     margin-bottom: 0.25rem;
     color: var(--crt-white, #fefefe);
     animation: flicker 180s infinite alternate;
