@@ -33,7 +33,7 @@ body {
 
 /* Header and Navigation */
 header {
-    font-family: var(--header-font);
+    font-family: var(--body-font);
     text-align: center;
     margin-top: 2rem;
     margin-bottom: 2rem;
@@ -52,7 +52,7 @@ header h1.site-title {
 
 header h1.site-subtitle {
     font-family: var(--body-font);
-    font-size: 5rem;
+    font-size: 2rem;
     margin-top: -0.75rem;
     margin-bottom: 1.5rem;
     color: var(--crt-white);
