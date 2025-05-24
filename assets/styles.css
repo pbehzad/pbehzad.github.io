@@ -76,14 +76,14 @@ nav ul li a {
 
 nav ul li a:hover {
     color: var(--crt-black);
-    background-color: var(--crt-green);
-    border-color: var(--crt-green);
+    background-color: var(--crt-off-white);
+    border-color: var(--crt-off-white);
 }
 
 nav ul li a.active-nav-link {
     color: var(--crt-black);
-    background-color: var(--crt-green);
-    border-color: var(--crt-green);
+    background-color: var(--crt-off-white);
+    border-color: var(--crt-off-white);
     font-weight: 700;
 }
 
@@ -133,7 +133,7 @@ a {
 }
 
 a:hover {
-    color: var(--crt-green);
+    color: var(--crt-soft-orange);
 }
 
 .extra-thin {
@@ -158,7 +158,7 @@ a:hover {
 
 .portfolio-grid-wide .portfolio-item:hover {
     transform: translateY(-5px);
-    box-shadow: 0 8px 15px var(--crt-green-transparent); /* Assuming you have a transparent green */
+    box-shadow: 0 8px 15px var(--crt-off-white-transparent); /* Assuming you have a transparent green */
 }
 
 .portfolio-item .img-placeholder {
@@ -216,7 +216,7 @@ a:hover {
 
 .portfolio-category-heading {
     font-size: 1.6rem;
-    color: var(--crt-green);
+    color: var(--crt-off-white);
     margin-top: 2rem;
     margin-bottom: 0.9rem;
     text-align: left;
@@ -249,7 +249,7 @@ a:hover {
 
 .filter-btn:hover,
 .filter-btn.active {
-    background-color: var(--crt-green);
+    background-color: var(--crt-off-white);
     color: var(--crt-black);
 }
 
@@ -282,7 +282,7 @@ a:hover {
     text-decoration: none;
 }
 .title-link-no-style:hover {
-    color: var(--crt-green);
+    color: var(--crt-soft-lime);
     text-decoration: none;
 }
 
@@ -305,7 +305,7 @@ a:hover {
 
 .composition-list-item .details-link:hover,
 .text-entry-item .details-link:hover {
-    color: var(--crt-green);
+    color: var(--crt-off-white);
 }
 
 /* Tools section uses the standard portfolio-grid */
@@ -348,7 +348,7 @@ a:hover {
 #about-content h2,
 #about h3 {
     font-size: 1.6rem;
-    color: var(--crt-green);
+    color: var(--crt-off-white);
     margin-top: 1.8rem;
     margin-bottom: 0.6rem;
     font-weight: 400;
@@ -419,7 +419,7 @@ section#contact p {
 #site-footer .footer-symbol {
     display: block;
     font-size: 1.3rem;
-    color: var(--crt-green);
+    color: var(--crt-off-white);
     margin-bottom: 0.4rem;
 }
 
