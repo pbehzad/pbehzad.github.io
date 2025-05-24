@@ -1,6 +1,9 @@
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100;300;400;700&display=swap');
 @import url('colors.css'); /* Assuming your colors.css is in the same directory or assets */
-
+:root {
+    --header-font: 'Courier New', Courier, monospace;
+    --body-font: 'JetBrains Mono', monospace;
+  }
 /* General Body Styles */
 html {
     height: 100%;
@@ -9,7 +12,7 @@ html {
 body {
     background-color: var(--crt-black);
     color: var(--crt-white);
-    font-family: 'JetBrains Mono', monospace;
+    font-family: var(--body-font);
     margin: 0;
     padding: 0;
     line-height: 1.5;
@@ -30,6 +33,7 @@ body {
 
 /* Header and Navigation */
 header {
+    font-family: var(--header-font);
     text-align: center;
     margin-top: 2rem;
     margin-bottom: 2rem;
@@ -40,13 +44,14 @@ header {
 
 header h1.site-title {
     font-size: 2rem;
-    /* font-family: 'Courier New', Courier, monospace; */
+    font-family: var(--header-font);
     margin-bottom: 0.25rem;
     color: var(--crt-white);
     animation: flicker 180s infinite alternate;
 }
 
 header h1.site-subtitle {
+    font-family: var(--body-font);
     font-size: 5rem;
     margin-top: -0.75rem;
     margin-bottom: 1.5rem;
@@ -104,6 +109,7 @@ nav ul li a.active-nav-link {
 }
 
 .section h2 {
+    font-family: var(--header-font);
     font-size: 1.5rem;
     margin-bottom: 1.25rem;
     color: var(--crt-white);
@@ -243,7 +249,7 @@ a:hover {
     border-radius: 0;
     cursor: pointer;
     transition: background-color 0.3s, color 0.3s;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: var(--body-font);
     font-size: 0.85rem;
 }
 
