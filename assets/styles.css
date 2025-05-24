@@ -282,7 +282,7 @@ a:hover {
     text-decoration: none;
 }
 .title-link-no-style:hover {
-    color: var(--crt-soft-lime);
+    color: var(--crt-green);
     text-decoration: none;
 }
 
