@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Logarithmic Time Divider</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100;300;400;700&display=swap" rel="stylesheet">
+    <style>
+        /* === Embedded colors.css === */
+        :root {
+            --black: #010101; --crt-black: #0f0f0f; --crt-gray: #2b2b2b;
+            --crt-white: #d7d7d7; --crt-dark-gray: #1a1a1a; --crt-medium-gray: #404040;
+            --crt-light-gray: #b0b0b0; --crt-off-white: #f0f0f0; --crt-soft-black: #191919;
+            --crt-charcoal: #333333; --crt-steel-gray: #505050; --crt-silver: #c0c0c0;
+            --crt-green: #00ff7f; --crt-blue: #00ccff; --crt-pink: #ff007f;
+            --crt-purple: #d700ff; --crt-orange: #ff5f00; --crt-yellow: #ffcc00;
+            --crt-neon-turquoise: #00ffd0; --crt-neon-lavender: #cc00ff; --crt-neon-aqua: #00ffff;
+            --crt-neon-salmon: #ff5e7d; --crt-neon-mint: #7fff00; --crt-neon-amber: #ffaa00;
+            --crt-neon-magenta: #ff00cc; --crt-neon-chartreuse: #b6ff00;
+            --crt-soft-green: #66ffcc; --crt-soft-blue: #6699ff; --crt-soft-pink: #ff66b2;
+            --crt-soft-purple: #bb88ff; --crt-soft-orange: #ffb366; --crt-soft-yellow: #ffee99;
+            --crt-soft-cyan: #99ffff; --crt-soft-lime: #b3ff66; --crt-soft-red: #ff9999;
+            --crt-soft-teal: #66d9c2; --crt-soft-violet: #d1a3ff; --crt-soft-mint: #99ffbb;
+            --crt-cyan: #00ffee; --crt-lime: #aaff33; --crt-red: #ff3344;
+            --crt-magenta: #ff66ff; --crt-deep-orange: #ff9933; --crt-bright-yellow: #ffd633;
+            --crt-electric-blue: #3399ff; --crt-bright-teal: #33ffee; --crt-bright-green: #66ff33;
+            --crt-hot-pink: #ff3399; --crt-deep-purple: #9933ff; --crt-bright-amber: #ffcc33;
+        }
+
+        /* === General Styles based on styles.css === */
+        body {
+            background-color: var(--crt-black);
+            color: var(--crt-white);
+            font-family: 'JetBrains Mono', monospace;
+            margin: 0;
+            padding: 2rem;
+            line-height: 1.5;
+            font-size: 15px;
+            box-sizing: border-box;
+        }
+        .main-container {
+            width: 100%;
+            margin: 0 auto;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        h1 {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 2rem;
+            margin: 0;
+            color: var(--crt-white);
+        }
+        header p {
+            color: var(--crt-light-gray);
+            font-size: 0.9rem;
+        }
+        .grid-layout {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+        @media (min-width: 1024px) {
+            .grid-layout { grid-template-columns: 350px 1fr; }
+        }
+        .panel {
+            border: 1px solid var(--crt-gray);
+            background-color: var(--crt-soft-black);
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+        }
+        .panel h2 {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 1.5rem;
+            margin-top: 0;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--crt-gray);
+            text-transform: uppercase;
+        }
+
+        /* === Form Control Styles === */
+        .control-group { margin-bottom: 1.5rem; }
+        .control-group label {
+            display: block;
+            font-weight: 300;
+            margin-bottom: 0.5rem;
+            color: var(--crt-light-gray);
+        }
+        .input-wrapper { display: flex; gap: 1rem; }
+        input[type="number"] {
+            width: 5rem;
+            background-color: var(--crt-dark-gray);
+            border: 1px solid var(--crt-gray);
+            color: var(--crt-white);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            padding: 0.5rem;
+        }
+        input[type="range"] {
+            -webkit-appearance: none; appearance: none;
+            width: 100%;
+            height: 2px;
+            background: var(--crt-gray);
+            outline: none;
+            margin: auto 0;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none; appearance: none;
+            width: 10px; height: 20px;
+            background: var(--crt-green);
+            cursor: pointer;
+            border: 1px solid var(--crt-black);
+        }
+        input[type="range"]::-moz-range-thumb {
+            width: 10px; height: 20px;
+            background: var(--crt-green);
+            cursor: pointer;
+            border: 1px solid var(--crt-black);
+        }
+        .radio-group label {
+            display: flex; align-items: center;
+            color: var(--crt-light-gray);
+            cursor: pointer;
+        }
+        .radio-group input[type="radio"] {
+            opacity: 0; width: 0; height: 0;
+        }
+        .radio-custom {
+            width: 1em; height: 1em;
+            border: 1px solid var(--crt-gray);
+            margin-right: 0.5rem;
+            display: inline-flex;
+            align-items: center; justify-content: center;
+        }
+        .radio-custom::after {
+            content: '';
+            width: 0.5em; height: 0.5em;
+            background: var(--crt-green);
+            display: block;
+            transform: scale(0);
+            transition: transform 0.2s;
+        }
+        .radio-group input[type="radio"]:checked + .radio-custom::after {
+            transform: scale(1);
+        }
+
+        /* === Chart & Table Styles === */
+        .chart-container {
+            height: 250px;
+            cursor: move;
+            border: 1px solid var(--crt-gray);
+            background-color: var(--crt-dark-gray);
+        }
+        .data-table-container {
+            margin-top: 1.5rem;
+        }
+        .data-table-wrapper {
+            max-height: 250px;
+            overflow-y: auto;
+            border: 1px solid var(--crt-gray);
+        }
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .data-table th, .data-table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid var(--crt-gray);
+        }
+        .data-table th {
+            position: sticky; top: 0;
+            background-color: var(--crt-medium-gray);
+            font-family: 'Courier New', Courier, monospace;
+            font-weight: 700;
+        }
+        .data-table tr:last-child td { border-bottom: none; }
+        .data-table tr:nth-child(even) { background-color: var(--crt-soft-black); }
+
+        /* D3 Chart specific styles */
+        .chart-container .x-axis path,
+        .chart-container .x-axis .tick line { stroke: var(--crt-gray); }
+        .chart-container .x-axis .tick text { fill: var(--crt-light-gray); }
+        .data-point text {
+            fill: var(--crt-off-white);
+            font-size: 11px;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+        <header>
+            <h1>Logarithmic Time Divider</h1>
+        </header>
+
+        <div class="grid-layout">
+            <div class="panel">
+                <h2>Parameters</h2>
+                <div class="control-group">
+                    <label for="totalLength">Total Length (seconds)</label>
+                    <div class="input-wrapper">
+                        <input type="range" id="totalLengthSlider" min="10" max="1000" value="330">
+                        <input type="number" id="totalLength" value="330">
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label for="numSegments">Number of Segments</label>
+                    <div class="input-wrapper">
+                        <input type="range" id="numSegmentsSlider" min="2" max="50" value="22">
+                        <input type="number" id="numSegments" value="22">
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label for="logBase">Logarithmic Base</label>
+                    <div class="input-wrapper">
+                        <input type="range" id="logBaseSlider" min="1.01" max="3" step="0.01" value="1.3">
+                        <input type="number" id="logBase" step="0.01" value="1.3">
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label for="timeOffset">Time Offset (seconds)</label>
+                    <div class="input-wrapper">
+                        <input type="range" id="timeOffsetSlider" min="0" max="600" value="0">
+                        <input type="number" id="timeOffset" value="0">
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label>Direction</label>
+                    <div id="direction" class="radio-group">
+                        <label>
+                            <input type="radio" name="direction" value="1" checked>
+                            <span class="radio-custom"></span>
+                            <span>Decelerating</span>
+                        </label>
+                        <label style="margin-left: 1rem;">
+                            <input type="radio" name="direction" value="-1">
+                            <span class="radio-custom"></span>
+                            <span>Accelerating</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel chart-panel">
+                <h2 id="chart-title"></h2>
+                <div id="chart-container" class="chart-container"></div>
+                <div class="data-table-container">
+                    <div class="data-table-wrapper">
+                        <table class="data-table">
+                            <thead>
+                                <tr><th>Segment</th><th>Duration</th><th>Timecode</th></tr>
+                            </thead>
+                            <tbody id="data-table-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // --- DOM Element Selection ---
+            const inputs = {
+                totalLength: document.getElementById('totalLength'),
+                totalLengthSlider: document.getElementById('totalLengthSlider'),
+                numSegments: document.getElementById('numSegments'),
+                numSegmentsSlider: document.getElementById('numSegmentsSlider'),
+                logBase: document.getElementById('logBase'),
+                logBaseSlider: document.getElementById('logBaseSlider'),
+                timeOffset: document.getElementById('timeOffset'),
+                timeOffsetSlider: document.getElementById('timeOffsetSlider'),
+                direction: document.getElementById('direction'),
+            };
+
+            const outputs = {
+                chartContainer: document.getElementById('chart-container'),
+                chartTitle: document.getElementById('chart-title'),
+                dataTableBody: document.getElementById('data-table-body'),
+            };
+
+            // --- Core Logic ---
+            function formatTime(seconds) {
+                if (typeof seconds !== 'number' || isNaN(seconds)) return '00:00:00';
+                const minutes = Math.floor(seconds / 60);
+                const sec = Math.floor(seconds % 60);
+                const ms = Math.floor((seconds % 1) * 100);
+                return `${String(minutes).padStart(2, '0')}:${String(sec).padStart(2, '0')}:${String(ms).padStart(2, '0')}`;
+            }
+
+            function calculateDivisions(totalLength, numSegments, logBase, direction) {
+                if (numSegments < 2 || logBase <= 1 || totalLength <= 0) return [];
+                const a = totalLength * (logBase - 1) / (Math.pow(logBase, numSegments) - 1);
+                let segmentLengths = Array.from({ length: numSegments }, (_, i) => a * Math.pow(logBase, i));
+
+                if (direction === 1) segmentLengths.reverse();
+                
+                const cumulativeTimes = [];
+                segmentLengths.reduce((acc, length, index) => {
+                    const newTime = acc + length;
+                    cumulativeTimes.push({ index: index + 1, time: newTime, duration: length });
+                    return newTime;
+                }, 0);
+                return cumulativeTimes;
+            }
+
+            // --- D3 Chart Setup ---
+            const margin = { top: 60, right: 30, bottom: 50, left: 30 };
+            let width, height; // Will be set by handleResize
+            
+            const svg = d3.select(outputs.chartContainer).append("svg").attr("class", "w-full h-full");
+            const chartGroup = svg.append("g");
+            const xAxisGroup = chartGroup.append("g").attr("class", "x-axis");
+            const mainLine = chartGroup.append("line").attr("stroke", "var(--crt-gray)").attr("stroke-width", 2).attr("stroke-dasharray", "4 4");
+            let x = d3.scaleLinear();
+
+            // --- Main Update & Draw Function ---
+            function update() {
+                const totalLength = parseFloat(inputs.totalLength.value);
+                const numSegments = parseInt(inputs.numSegments.value);
+                const logBase = parseFloat(inputs.logBase.value);
+                const timeOffset = parseFloat(inputs.timeOffset.value);
+                const direction = parseInt(document.querySelector('input[name="direction"]:checked').value);
+
+                let data = calculateDivisions(totalLength, numSegments, logBase, direction);
+                
+                // Apply the time offset to the calculated data
+                data = data.map(d => ({
+                    ...d,
+                    time: d.time + timeOffset,
+                    label: formatTime(d.time + timeOffset)
+                }));
+                
+                outputs.chartTitle.textContent = direction === 1 ? 'Decelerating' : 'Accelerating';
+                
+                outputs.dataTableBody.innerHTML = '';
+                data.forEach(d => {
+                    const row = outputs.dataTableBody.insertRow();
+                    row.innerHTML = `<td>${d.index}</td><td>${formatTime(d.duration)}</td><td>${d.label}</td>`;
+                });
+
+                const chartHeight = height - margin.top - margin.bottom;
+                chartGroup.attr("transform", `translate(${margin.left}, ${margin.top})`);
+                
+                x.domain([timeOffset, (d3.max(data, d => d.time) || totalLength + timeOffset)]).range([0, width - margin.left - margin.right]);
+
+                xAxisGroup.attr("transform", `translate(0, ${chartHeight})`).call(d3.axisBottom(x).ticks(5).tickFormat(d => `${d}s`));
+                
+                mainLine.attr("x1", 0).attr("x2", x.range()[1]).attr("y1", chartHeight / 2).attr("y2", chartHeight / 2);
+
+                const points = chartGroup.selectAll(".data-point").data(data, d => d.index);
+
+                points.exit().remove();
+
+                const newPoints = points.enter().append("g").attr("class", "data-point");
+                newPoints.append("circle").attr("r", 7).attr("stroke", "var(--crt-black)").attr("stroke-width", 2);
+                newPoints.append("text").attr("text-anchor", "middle");
+
+                const allPoints = newPoints.merge(points);
+                allPoints.attr("transform", d => `translate(${x(d.time)}, ${chartHeight / 2})`);
+                allPoints.select("circle").attr("fill", direction === 1 ? "var(--crt-blue)" : "var(--crt-red)");
+                
+                allPoints.select("text")
+                    .text(d => d.label)
+                    .attr("dy", (d, i) => i % 2 === 0 ? "-1.2em" : "2.0em");
+
+                const zoom = d3.zoom()
+                    .scaleExtent([0.5, 20])
+                    .extent([[0, 0], [width, height]])
+                    .translateExtent([[0, 0], [width - margin.left - margin.right, height]])
+                    .on("zoom", zoomed);
+                
+                svg.call(zoom.transform, d3.zoomIdentity);
+                svg.call(zoom);
+
+                function zoomed(event) {
+                    const newX = event.transform.rescaleX(x);
+                    xAxisGroup.call(d3.axisBottom(newX).ticks(5).tickFormat(d => `${d}s`));
+                    allPoints.attr("transform", d => `translate(${newX(d.time)}, ${chartHeight / 2})`);
+                }
+            }
+            
+            function handleResize() {
+                const containerRect = outputs.chartContainer.getBoundingClientRect();
+                width = containerRect.width;
+                height = containerRect.height;
+                svg.attr("width", width).attr("height", height);
+                update();
+            }
+            
+            function setupEventListeners() {
+                inputs.totalLengthSlider.addEventListener('input', e => { inputs.totalLength.value = e.target.value; update(); });
+                inputs.totalLength.addEventListener('change', e => { inputs.totalLengthSlider.value = e.target.value; update(); });
+
+                inputs.numSegmentsSlider.addEventListener('input', e => { inputs.numSegments.value = e.target.value; update(); });
+                inputs.numSegments.addEventListener('change', e => { inputs.numSegmentsSlider.value = e.target.value; update(); });
+
+                inputs.logBaseSlider.addEventListener('input', e => { inputs.logBase.value = e.target.value; update(); });
+                inputs.logBase.addEventListener('change', e => { inputs.logBaseSlider.value = e.target.value; update(); });
+                
+                inputs.timeOffsetSlider.addEventListener('input', e => { inputs.timeOffset.value = e.target.value; update(); });
+                inputs.timeOffset.addEventListener('change', e => { inputs.timeOffsetSlider.value = e.target.value; update(); });
+
+                inputs.direction.addEventListener('change', update);
+                
+                window.addEventListener('resize', handleResize);
+            }
+
+            setupEventListeners();
+            handleResize();
+        });
+    </script>
+</body>
+</html>

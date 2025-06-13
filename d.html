@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>German Grammar Cheat Sheet (A2-B1)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Custom scrollbar for a cleaner look */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        .dark ::-webkit-scrollbar-track {
+            background: #2d3748;
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background: #718096;
+        }
+        .dark ::-webkit-scrollbar-thumb:hover {
+            background: #a0aec0;
+        }
+        /* Active state for navigation links */
+        .nav-link.active {
+            color: #3b82f6; /* blue-500 */
+            font-weight: 600;
+            transform: translateX(4px);
+        }
+        .dark .nav-link.active {
+            color: #60a5fa; /* blue-400 */
+        }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-gray-900 text-slate-800 dark:text-slate-200 transition-colors duration-300">
+
+    <!-- Dark Mode Toggle & Header -->
+    <header class="sticky top-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm z-20 border-b border-slate-200 dark:border-gray-700">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <h1 class="text-xl md:text-2xl font-bold text-slate-900 dark:text-white">German Grammar Cheat Sheet</h1>
+            <button id="darkModeToggle" class="p-2 rounded-full text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-gray-700 transition-colors">
+                <!-- Sun icon -->
+                <svg id="sunIcon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                <!-- Moon icon -->
+                <svg id="moonIcon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+            </button>
+        </div>
+    </header>
+
+    <div class="container mx-auto px-4 flex flex-col md:flex-row gap-8 py-8">
+        <!-- Table of Contents (Sticky Sidebar) -->
+        <aside class="w-full md:w-1/4 lg:w-1/5">
+            <nav id="table-of-contents" class="sticky top-24">
+                <h2 class="font-bold text-lg mb-3 text-slate-900 dark:text-white">Contents</h2>
+                <ul class="space-y-2">
+                    <li>
+                        <a href="#a2-level" class="nav-link text-slate-600 dark:text-slate-400 hover:text-blue-500 transition-all duration-200 block">A2 Level</a>
+                        <ul class="pl-4 mt-2 space-y-2 border-l border-slate-200 dark:border-gray-700">
+                            <li><a href="#a2-tenses" class="nav-link text-sm text-slate-500 dark:text-slate-400 hover:text-blue-500 transition-all">Verb Tenses</a></li>
+                            <li><a href="#a2-cases" class="nav-link text-sm text-slate-500 dark:text-slate-400 hover:text-blue-500 transition-all">The Cases</a></li>
+                            <li><a href="#a2-satzbau" class="nav-link text-sm text-slate-500 dark:text-slate-400 hover:text-blue-500 transition-all">Sentence Structure</a></li>
+                            <li><a href="#a2-prepositions" class="nav-link text-sm text-slate-500 dark:text-slate-400 hover:text-blue-500 transition-all">Prepositions</a></li>
+                            <li><a href="#a2-adjectives" class="nav-link text-sm text-slate-500 dark:text-slate-400 hover:text-blue-500 transition-all">Adjective Endings</a></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="#b1-level" class="nav-link text-slate-600 dark:text-slate-400 hover:text-blue-500 transition-all duration-200 block">B1 Level</a>
+                         <ul class="pl-4 mt-2 space-y-2 border-l border-slate-200 dark:border-gray-700">
+                            <li><a href="#b1-cases" class="nav-link text-sm text-slate-500 dark:text-slate-400 hover:text-blue-500 transition-all">The Four Cases</a></li>
+                            <li><a href="#b1-verbs" class="nav-link text-sm text-slate-500 dark:text-slate-400 hover:text-blue-500 transition-all">Verbs: Tenses & Moods</a></li>
+                            <li><a href="#b1-satzbau" class="nav-link text-sm text-slate-500 dark:text-slate-400 hover:text-blue-500 transition-all">Advanced Clauses</a></li>
+                            <li><a href="#b1-more-satzbau" class="nav-link text-sm text-slate-500 dark:text-slate-400 hover:text-blue-500 transition-all">More Sentence Structures</a></li>
+                            <li><a href="#b1-adjectives" class="nav-link text-sm text-slate-500 dark:text-slate-400 hover:text-blue-500 transition-all">Adjective Declension</a></li>
+                            <li><a href="#b1-preposition-verbs" class="nav-link text-sm text-slate-500 dark:text-slate-400 hover:text-blue-500 transition-all">Verbs with Prepositions</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="w-full md:w-3/4 lg:w-4/5">
+            <div class="space-y-12">
+                <!-- A2 Level Section -->
+                <section id="a2-level" class="scroll-mt-24">
+                    <h2 class="text-3xl font-bold mb-6 pb-2 border-b-2 border-blue-500 text-slate-900 dark:text-white">A2 Level Grammar</h2>
+                    
+                    <div id="a2-tenses" class="scroll-mt-24 space-y-4">
+                        <h3 class="text-2xl font-semibold text-slate-800 dark:text-slate-100">Verb Tenses</h3>
+                        <div class="overflow-x-auto bg-white dark:bg-gray-800 rounded-lg shadow">
+                            <table class="min-w-full text-sm text-left">
+                                <thead class="bg-slate-100 dark:bg-gray-700">
+                                    <tr>
+                                        <th class="p-3">Tense</th>
+                                        <th class="p-3">How to Form</th>
+                                        <th class="p-3">Example(s)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="border-t border-slate-200 dark:border-gray-700">
+                                        <td class="p-3 font-medium">Present (Präsens)</td>
+                                        <td class="p-3">Regular Endings: <code>-e, -st, -t, -en, -t, -en</code></td>
+                                        <td class="p-3">Ich <b>mache</b> das. <br> Du <b>sprichst</b> Deutsch.</td>
+                                    </tr>
+                                    <tr class="border-t border-slate-200 dark:border-gray-700 bg-slate-50 dark:bg-gray-800/50">
+                                        <td class="p-3 font-medium">Perfect (Perfekt)</td>
+                                        <td class="p-3"><code>haben / sein</code> + <b>Past Participle</b><br><small><b>sein verbs:</b> go, come, fly, run, wake up, etc.</small></td>
+                                        <td class="p-3">Er <b>hat</b> es <b>gesagt</b>.<br>Wir <b>sind</b> nach Graz <b>gefahren</b>.</td>
+                                    </tr>
+                                    <tr class="border-t border-slate-200 dark:border-gray-700">
+                                        <td class="p-3 font-medium">Simple Past (Präteritum)</td>
+                                        <td class="p-3">Mainly for <code>haben</code>, <code>sein</code>, and modal verbs.</td>
+                                        <td class="p-3">Ich <b>hatte</b> keine Zeit.<br>Wir <b>waren</b> im Urlaub.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div id="a2-cases" class="scroll-mt-24 space-y-4">
+                        <h3 class="text-2xl font-semibold mt-8 text-slate-800 dark:text-slate-100">The Cases: Nominative, Accusative, Dative</h3>
+                        <div class="overflow-x-auto bg-white dark:bg-gray-800 rounded-lg shadow">
+                            <table class="min-w-full text-sm text-left">
+                                <thead class="bg-slate-100 dark:bg-gray-700">
+                                    <tr>
+                                        <th class="p-3">Case</th><th class="p-3">Use</th><th class="p-3">Definite (m/f/n/pl)</th><th class="p-3">Indefinite (m/f/n)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="border-t border-slate-200 dark:border-gray-700">
+                                        <td class="p-3 font-medium">Nominative</td><td><b>Subject</b></td><td><code>der/die/das/die</code></td><td><code>ein/eine/ein</code></td>
+                                    </tr>
+                                    <tr class="border-t border-slate-200 dark:border-gray-700 bg-slate-50 dark:bg-gray-800/50">
+                                        <td class="p-3 font-medium">Accusative</td><td><b>Direct Object</b></td><td><code>den/die/das/die</code></td><td><code>einen/eine/ein</code></td>
+                                    </tr>
+                                    <tr class="border-t border-slate-200 dark:border-gray-700">
+                                        <td class="p-3 font-medium">Dative</td><td><b>Indirect Object</b></td><td><code>dem/der/dem/den (+n)</code></td><td><code>einem/einer/einem</code></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div id="a2-satzbau" class="scroll-mt-24 space-y-4">
+                      <h3 class="text-2xl font-semibold mt-8 text-slate-800 dark:text-slate-100">Sentence Structure</h3>
+                       <div class="overflow-x-auto bg-white dark:bg-gray-800 rounded-lg shadow">
+                           <table class="min-w-full text-sm text-left">
+                               <thead class="bg-slate-100 dark:bg-gray-700">
+                                   <tr><th class="p-3">Type</th><th class="p-3">Rule</th><th class="p-3">Example</th></tr>
+                               </thead>
+                               <tbody>
+                                   <tr class="border-t border-slate-200 dark:border-gray-700">
+                                       <td class="p-3 font-medium">Main Clause</td><td>Conjugated Verb in <b>Position 2</b>.</td><td>Ich <b>lerne</b> heute Deutsch.</td>
+                                   </tr>
+                                   <tr class="border-t border-slate-200 dark:border-gray-700 bg-slate-50 dark:bg-gray-800/50">
+                                       <td class="p-3 font-medium">Subordinate Clause</td><td>Conjugated Verb moves to the <b>very end</b>.</td><td>Ich bleibe zu Hause, <b>weil</b> ich müde <b>bin</b>.</td>
+                                   </tr>
+                               </tbody>
+                           </table>
+                       </div>
+                    </div>
+                    
+                    <div id="a2-prepositions" class="scroll-mt-24 space-y-4">
+                      <h3 class="text-2xl font-semibold mt-8 text-slate-800 dark:text-slate-100">Prepositions & Cases</h3>
+                      <div class="overflow-x-auto bg-white dark:bg-gray-800 rounded-lg shadow">
+                          <table class="min-w-full text-sm text-left">
+                              <thead class="bg-slate-100 dark:bg-gray-700">
+                                  <tr><th class="p-3">Accusative</th><th class="p-3">Dative</th><th class="p-3">Two-Way (Wechselpräpositionen)</th></tr>
+                              </thead>
+                              <tbody>
+                                  <tr class="border-t border-slate-200 dark:border-gray-700 align-top">
+                                      <td class="p-3"><code>durch, für, gegen, ohne, um</code></td>
+                                      <td class="p-3"><code>aus, bei, mit, nach, seit, von, zu</code></td>
+                                      <td class="p-3"><code>in, an, auf, über, unter, vor, neben, zwischen</code><br><small class="block mt-1"><b>ACC:</b> Motion | <b>DAT:</b> Location</small></td>
+                                  </tr>
+                              </tbody>
+                          </table>
+                      </div>
+                    </div>
+
+                    <div id="a2-adjectives" class="scroll-mt-24 space-y-4">
+                      <h3 class="text-2xl font-semibold mt-8 text-slate-800 dark:text-slate-100">Adjective Endings</h3>
+                      <p>Adjective endings change based on the article and case. Below are endings after a <b>definite article</b>.</p>
+                       <div class="overflow-x-auto bg-white dark:bg-gray-800 rounded-lg shadow">
+                           <table class="min-w-full text-sm text-left">
+                               <thead class="bg-slate-100 dark:bg-gray-700">
+                                   <tr><th class="p-3">Case</th><th class="p-3">Masculine (`der`)</th><th class="p-3">Feminine (`die`)</th><th class="p-3">Neuter (`das`)</th><th class="p-3">Plural (`die`)</th></tr>
+                               </thead>
+                               <tbody>
+                                   <tr class="border-t border-slate-200 dark:border-gray-700">
+                                       <td class="p-3 font-medium">NOM</td><td class="p-3">-e</td><td class="p-3">-e</td><td class="p-3">-e</td><td class="p-3">-en</td>
+                                   </tr>
+                                   <tr class="border-t border-slate-200 dark:border-gray-700 bg-slate-50 dark:bg-gray-800/50">
+                                       <td class="p-3 font-medium">ACC</td><td class="p-3">-en</td><td class="p-3">-e</td><td class="p-3">-e</td><td class="p-3">-en</td>
+                                   </tr>
+                                   <tr class="border-t border-slate-200 dark:border-gray-700">
+                                       <td class="p-3 font-medium">DAT</td><td class="p-3">-en</td><td class="p-3">-en</td><td class="p-3">-en</td><td class="p-3">-en</td>
+                                   </tr>
+                               </tbody>
+                           </table>
+                       </div>
+                    </div>
+                </section>
+
+                <!-- B1 Level Section -->
+                <section id="b1-level" class="scroll-mt-24">
+                    <h2 class="text-3xl font-bold mb-6 pb-2 border-b-2 border-green-500 text-slate-900 dark:text-white">B1 Level Grammar</h2>
+                    
+                    <div id="b1-cases" class="scroll-mt-24 space-y-4">
+                      <h3 class="text-2xl font-semibold text-slate-800 dark:text-slate-100">The Four Cases: Full Mastery</h3>
+                      <p>B1 requires mastery of all four cases, including Genitive prepositions like <code>während, trotz, wegen, statt</code>.</p>
+                       <div class="overflow-x-auto bg-white dark:bg-gray-800 rounded-lg shadow">
+                           <table class="min-w-full text-sm text-left">
+                               <thead class="bg-slate-100 dark:bg-gray-700">
+                                   <tr>
+                                       <th class="p-3">Case</th>
+                                       <th class="p-3">Use</th>
+                                       <th class="p-3">Definite (m/f/n/pl)</th>
+                                   </tr>
+                               </thead>
+                               <tbody>
+                                   <tr class="border-t border-slate-200 dark:border-gray-700">
+                                       <td class="p-3 font-medium">Nominative</td><td>Subject</td><td><code>der/die/das/die</code></td>
+                                   </tr>
+                                   <tr class="border-t border-slate-200 dark:border-gray-700 bg-slate-50 dark:bg-gray-800/50">
+                                       <td class="p-3 font-medium">Accusative</td><td>Direct Object</td><td><code>den/die/das/die</code></td>
+                                   </tr>
+                                   <tr class="border-t border-slate-200 dark:border-gray-700">
+                                       <td class="p-3 font-medium">Dative</td><td>Indirect Object</td><td><code>dem/der/dem/den (+n)</code></td>
+                                   </tr>
+                                   <tr class="border-t border-slate-200 dark:border-gray-700 bg-slate-50 dark:bg-gray-800/50">
+                                       <td class="p-3 font-medium">Genitive</td><td>Possession (whose?)</td><td><code>des (+s)/der/des (+s)/der</code></td>
+                                   </tr>
+                               </tbody>
+                           </table>
+                       </div>
+                    </div>
+
+                    <div id="b1-verbs" class="scroll-mt-24 space-y-4">
+                      <h3 class="text-2xl font-semibold mt-8 text-slate-800 dark:text-slate-100">Verbs: Tenses & Moods</h3>
+                       <div class="overflow-x-auto bg-white dark:bg-gray-800 rounded-lg shadow">
+                           <table class="min-w-full text-sm text-left">
+                               <thead class="bg-slate-100 dark:bg-gray-700">
+                                   <tr><th class="p-3">Tense/Mood</th><th class="p-3">How to Form</th><th class="p-3">Example</th></tr>
+                               </thead>
+                               <tbody>
+                                   <tr class="border-t border-slate-200 dark:border-gray-700">
+                                       <td class="p-3 font-medium">Plusquamperfekt</td><td><code>hatte / war</code> + Past Participle</td><td>Ich <b>hatte gegessen</b>, als du ankamst.</td>
+                                   </tr>
+                                   <tr class="border-t border-slate-200 dark:border-gray-700 bg-slate-50 dark:bg-gray-800/50">
+                                       <td class="p-3 font-medium">Futur I</td><td><code>werden</code> + Infinitive</td><td>Morgen <b>wird es regnen</b>.</td>
+                                   </tr>
+                                   <tr class="border-t border-slate-200 dark:border-gray-700">
+                                       <td class="p-3 font-medium">Passive Voice</td><td><code>werden</code> + Past Participle</td><td>Das Paket <b>wird geliefert</b>.</td>
+                                   </tr>
+                                   <tr class="border-t border-slate-200 dark:border-gray-700 bg-slate-50 dark:bg-gray-800/50">
+                                       <td class="p-3 font-medium">Konjunktiv II</td><td><code>würde</code> + Infinitive OR<br>Präteritum + Umlaut</td><td>Wenn ich Zeit <b>hätte</b>, <b>würde</b> ich reisen.</td>
+                                   </tr>
+                               </tbody>
+                           </table>
+                       </div>
+                    </div>
+                    
+                    <div id="b1-satzbau" class="scroll-mt-24 space-y-4">
+                      <h3 class="text-2xl font-semibold mt-8 text-slate-800 dark:text-slate-100">Advanced Clauses</h3>
+                      <p>Connecting ideas with more complex structures like Relative Clauses.</p>
+                       <div class="p-4 bg-white dark:bg-gray-800 rounded-lg shadow">
+                        <h4 class="font-semibold mb-2">Relative Clauses (Relativsätze)</h4>
+                        <p class="mb-2">Provide more information about a noun. The pronoun's case depends on its function in the relative clause.</p>
+                        <p class="italic">Dort ist der Mann, <strong class="text-blue-500">dem</strong> ich geholfen habe.</p>
+                        <p class="italic">Hier ist das Buch, <strong class="text-blue-500">das</strong> ich gelesen habe.</p>
+                       </div>
+                    </div>
+
+                    <!-- NEW SECTION START -->
+                    <div id="b1-more-satzbau" class="scroll-mt-24 space-y-4">
+                        <h3 class="text-2xl font-semibold mt-8 text-slate-800 dark:text-slate-100">More Sentence Structures</h3>
+                        
+                        <div class="p-4 bg-white dark:bg-gray-800 rounded-lg shadow">
+                            <h4 class="font-semibold mb-2 text-slate-800 dark:text-slate-100">"ob" vs. "wenn" (The "if" clauses)</h4>
+                            <p class="mb-2">They both can mean "if", but are not interchangeable.</p>
+                            <ul class="list-disc list-inside space-y-2">
+                                <li><b>ob (if / whether):</b> Introduces an indirect yes/no question. The verb moves to the end.
+                                    <br><em class="pl-4">Ich weiß nicht, <b>ob</b> er Zeit <b>hat</b>.</em> (I don't know if he has time.)
+                                </li>
+                                <li><b>wenn (if / when):</b> For conditional "if-then" statements. The verb moves to the end.
+                                    <br><em class="pl-4"><b>Wenn</b> ich Zeit <b>habe</b>, helfe ich dir.</em> (If I have time, I'll help you.)
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div class="overflow-x-auto bg-white dark:bg-gray-800 rounded-lg shadow">
+                           <table class="min-w-full text-sm text-left">
+                                <thead class="bg-slate-100 dark:bg-gray-700">
+                                    <tr><th colspan="3" class="p-3 text-base font-semibold">Other Subordinating Conjunctions (Verb to End)</th></tr>
+                                    <tr><th class="p-3">Conjunction</th><th class="p-3">Meaning</th><th class="p-3">Example</th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="border-t border-slate-200 dark:border-gray-700">
+                                        <td class="p-3 font-medium"><code>obwohl</code></td><td>although</td><td>Er arbeitet, <b>obwohl</b> er krank <b>ist</b>.</td>
+                                    </tr>
+                                    <tr class="border-t border-slate-200 dark:border-gray-700 bg-slate-50 dark:bg-gray-800/50">
+                                        <td class="p-3 font-medium"><code>während</code></td><td>while / during</td><td>Sie liest, <b>während</b> er <b>kocht</b>.</td>
+                                    </tr>
+                                    <tr class="border-t border-slate-200 dark:border-gray-700">
+                                        <td class="p-3 font-medium"><code>als</code></td><td>when (single past event)</td><td><b>Als</b> ich ein Kind <b>war</b>, wohnte ich in Graz.</td>
+                                    </tr>
+                                    <tr class="border-t border-slate-200 dark:border-gray-700 bg-slate-50 dark:bg-gray-800/50">
+                                        <td class="p-3 font-medium"><code>nachdem</code></td><td>after</td><td><b>Nachdem</b> wir gegessen <b>hatten</b>, gingen wir spazieren.</td>
+                                    </tr>
+                                </tbody>
+                           </table>
+                        </div>
+
+                         <div class="overflow-x-auto bg-white dark:bg-gray-800 rounded-lg shadow">
+                           <table class="min-w-full text-sm text-left">
+                                <thead class="bg-slate-100 dark:bg-gray-700">
+                                    <tr><th colspan="3" class="p-3 text-base font-semibold">Consequential Adverbs (Verb in Position 2 - Inversion)</th></tr>
+                                    <tr><th class="p-3">Adverb</th><th class="p-3">Meaning</th><th class="p-3">Example</th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="border-t border-slate-200 dark:border-gray-700">
+                                        <td class="p-3 font-medium"><code>deshalb / deswegen</code></td><td>therefore / that's why</td><td>Ich war krank. <b>Deshalb bin</b> ich zu Hause geblieben.</td>
+                                    </tr>
+                                    <tr class="border-t border-slate-200 dark:border-gray-700 bg-slate-50 dark:bg-gray-800/50">
+                                        <td class="p-3 font-medium"><code>trotzdem</code></td><td>nevertheless / despite that</td><td>Es regnet. <b>Trotzdem gehe</b> ich spazieren.</td>
+                                    </tr>
+                                </tbody>
+                           </table>
+                        </div>
+                    </div>
+                    <!-- NEW SECTION END -->
+
+                    <div id="b1-adjectives" class="scroll-mt-24 space-y-4">
+                        <h3 class="text-2xl font-semibold mt-8 text-slate-800 dark:text-slate-100">Adjective Declension (Without Article)</h3>
+                        <p>Endings change when there is no article before the adjective.</p>
+                        <div class="overflow-x-auto bg-white dark:bg-gray-800 rounded-lg shadow">
+                           <table class="min-w-full text-sm text-left">
+                                <thead class="bg-slate-100 dark:bg-gray-700">
+                                    <tr><th class="p-3">Case</th><th class="p-3">Masculine</th><th class="p-3">Feminine</th><th class="p-3">Neuter</th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="border-t border-slate-200 dark:border-gray-700">
+                                        <td class="p-3 font-medium">NOM</td><td>gut<b>er</b> Wein</td><td>gut<b>e</b> Milch</td><td>gut<b>es</b> Bier</td>
+                                    </tr>
+                                    <tr class="border-t border-slate-200 dark:border-gray-700 bg-slate-50 dark:bg-gray-800/50">
+                                        <td class="p-3 font-medium">ACC</td><td>gut<b>en</b> Wein</td><td>gut<b>e</b> Milch</td><td>gut<b>es</b> Bier</td>
+                                    </tr>
+                                    <tr class="border-t border-slate-200 dark:border-gray-700">
+                                        <td class="p-3 font-medium">DAT</td><td>gut<b>em</b> Wein</td><td>gut<b>er</b> Milch</td><td>gut<b>em</b> Bier</td>
+                                    </tr>
+                               </tbody>
+                           </table>
+                        </div>
+                    </div>
+
+                    <div id="b1-preposition-verbs" class="scroll-mt-24 space-y-4">
+                        <h3 class="text-2xl font-semibold mt-8 text-slate-800 dark:text-slate-100">Verbs with Prepositions & Reflexive Verbs</h3>
+                        <p>Many verbs are tied to a specific preposition and case which must be memorized.</p>
+                        <div class="overflow-x-auto bg-white dark:bg-gray-800 rounded-lg shadow">
+                           <table class="min-w-full text-sm text-left">
+                                <thead class="bg-slate-100 dark:bg-gray-700">
+                                    <tr><th class="p-3">Verb + Preposition</th><th class="p-3">Case</th><th class="p-3">Example</th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="border-t border-slate-200 dark:border-gray-700">
+                                        <td class="p-3"><code>sich interessieren für</code></td><td>ACC</td><td>Ich interessiere mich <b>für</b> moderne Kunst.</td>
+                                    </tr>
+                                    <tr class="border-t border-slate-200 dark:border-gray-700 bg-slate-50 dark:bg-gray-800/50">
+                                        <td class="p-3"><code>warten auf</code></td><td>ACC</td><td>Wir warten <b>auf</b> den Bus.</td>
+                                    </tr>
+                                    <tr class="border-t border-slate-200 dark:border-gray-700">
+                                        <td class="p-3"><code>träumen von</code></td><td>DAT</td><td>Sie träumt <b>von</b> einer langen Reise.</td>
+                                    </tr>
+                                    <tr class="border-t border-slate-200 dark:border-gray-700 bg-slate-50 dark:bg-gray-800/50">
+                                        <td class="p-3">Reflexive + Dative</td><td>DAT</td><td>Ich wasche <b>mir</b> die Hände.</td>
+                                    </tr>
+                               </tbody>
+                           </table>
+                        </div>
+                    </div>
+
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- Back to Top Button -->
+    <button id="backToTopBtn" class="hidden fixed bottom-5 right-5 bg-blue-500 hover:bg-blue-600 text-white p-3 rounded-full shadow-lg transition-opacity duration-300">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
+    </button>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- Dark Mode ---
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        const sunIcon = document.getElementById('sunIcon');
+        const moonIcon = document.getElementById('moonIcon');
+        const html = document.documentElement;
+
+        // Check for saved dark mode preference
+        if (localStorage.getItem('darkMode') === 'true' || 
+           (!('darkMode' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            html.classList.add('dark');
+            sunIcon.classList.add('hidden');
+            moonIcon.classList.remove('hidden');
+        }
+
+        darkModeToggle.addEventListener('click', () => {
+            html.classList.toggle('dark');
+            const isDarkMode = html.classList.contains('dark');
+            localStorage.setItem('darkMode', isDarkMode);
+            sunIcon.classList.toggle('hidden', isDarkMode);
+            moonIcon.classList.toggle('hidden', !isDarkMode);
+        });
+
+        // --- Smooth Scrolling for Nav Links ---
+        document.querySelectorAll('#table-of-contents a').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+
+        // --- Scrollspy ---
+        const sections = document.querySelectorAll('section[id], div[id^="a2-"], div[id^="b1-"]');
+        const navLinks = document.querySelectorAll('#table-of-contents .nav-link');
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const id = entry.target.getAttribute('id');
+                    navLinks.forEach(link => {
+                        link.classList.remove('active');
+                        if (link.getAttribute('href') === `#${id}`) {
+                            link.classList.add('active');
+                        }
+                    });
+                }
+            });
+        }, { rootMargin: '-30% 0px -60% 0px' }); // Adjust margins to highlight when section is in middle of screen
+
+        sections.forEach(section => {
+            observer.observe(section);
+        });
+        
+        // --- Back to Top Button ---
+        const backToTopBtn = document.getElementById('backToTopBtn');
+
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 300) {
+                backToTopBtn.classList.remove('hidden');
+            } else {
+                backToTopBtn.classList.add('hidden');
+            }
+        });
+
+        backToTopBtn.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    });
+</script>
+
+</body>
+</html>
