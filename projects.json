@@ -237,7 +237,7 @@
     {
       "id": "audioprog001",
       "category": "Audio Programming",
-      "title": "Harmonium Lab",
+      "title": "Harmonarium",
       "year": 2024,
       "instruments": null, 
       "description": "Interactive web application for exploring just intonation network.",
