@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Stopwatch</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Modern Stopwatch</h1>
+        <div class="stopwatch-display">
+            <span id="hours">00</span>:<span id="minutes">00</span>:<span id="seconds">00</span>.<span id="milliseconds">000</span>
+        </div>
+        <div class="controls">
+            <button id="startBtn">Start</button>
+            <button id="pauseBtn">Pause</button>
+            <button id="resetBtn">Reset</button>
+            <button id="lapBtn">Lap</button>
+        </div>
+        <div class="lap-duration-setting">
+            <label for="lapDuration">Lap Duration (minutes):</label>
+            <input type="number" id="lapDuration" value="25" min="1">
+        </div>
+        <div class="lap-list-container">
+            <h2>Laps</h2>
+            <ul id="lapList">
+                </ul>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,238 @@
+:root {
+    /* Base Colors */
+    --black: #010101;
+    --crt-black: #0f0f0f;
+    --crt-gray: #2b2b2b;
+    --crt-white: #d7d7d7;
+    --crt-dark-gray: #1a1a1a; /* Chosen for background */
+    --crt-medium-gray: #404040;
+    --crt-light-gray: #b0b0b0;
+    --crt-off-white: #f0f0f0;
+    --crt-soft-black: #191919;
+    --crt-charcoal: #333333; /* Chosen for container/elements */
+    --crt-steel-gray: #505050;
+    --crt-silver: #c0c0c0;
+    
+    /* Neon Colors */
+    --crt-green: #00ff7f; /* Chosen for accents */
+    --crt-blue: #00ccff;
+    --crt-pink: #ff007f;
+    --crt-purple: #d700ff;
+    --crt-orange: #ff5f00;
+    --crt-yellow: #ffcc00;
+    --crt-neon-turquoise: #00ffd0;
+    --crt-neon-lavender: #cc00ff;
+    --crt-neon-aqua: #00ffff;
+    --crt-neon-salmon: #ff5e7d;
+    --crt-neon-mint: #7fff00;
+    --crt-neon-amber: #ffaa00;
+    --crt-neon-magenta: #ff00cc;
+    --crt-neon-chartreuse: #b6ff00;
+
+    /* Soft Glowing Colors */
+    --crt-soft-green: #66ffcc;
+    --crt-soft-blue: #6699ff;
+    --crt-soft-pink: #ff66b2;
+    --crt-soft-purple: #bb88ff;
+    --crt-soft-orange: #ffb366;
+    --crt-soft-yellow: #ffee99;
+    --crt-soft-cyan: #99ffff;
+    --crt-soft-lime: #b3ff66;
+    --crt-soft-red: #ff9999;
+    --crt-soft-teal: #66d9c2;
+    --crt-soft-violet: #d1a3ff;
+    --crt-soft-mint: #99ffbb;
+
+    /* Accent Colors */
+    --crt-cyan: #00ffee;
+    --crt-lime: #aaff33;
+    --crt-red: #ff3344;
+    --crt-magenta: #ff66ff;
+    --crt-deep-orange: #ff9933;
+    --crt-bright-yellow: #ffd633;
+    --crt-electric-blue: #3399ff;
+    --crt-bright-teal: #33ffee;
+    --crt-bright-green: #66ff33;
+    --crt-hot-pink: #ff3399;
+    --crt-deep-purple: #9933ff;
+    --crt-bright-amber: #ffcc33;
+}
+
+body {
+    font-family: 'Roboto Mono', 'Lucida Console', 'Courier New', monospace; /* Monospace font stack */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    background-color: var(--crt-dark-gray);
+    color: var(--crt-white);
+}
+
+.container {
+    background-color: var(--crt-charcoal);
+    padding: 30px;
+    text-align: center;
+    width: 90%;
+    max-width: 450px;
+    border: 1px solid var(--crt-gray);
+}
+
+h1 {
+    color: var(--crt-green);
+    margin-bottom: 25px;
+    font-size: 2em;
+}
+
+.stopwatch-display {
+    font-family: 'Roboto Mono', 'Lucida Console', 'Courier New', monospace; /* Explicitly keep monospace for display */
+    font-size: 3.5em;
+    margin-bottom: 30px;
+    color: var(--crt-green);
+}
+
+.stopwatch-display #milliseconds {
+    font-size: 0.5em;
+    vertical-align: super;
+    opacity: 0.8;
+}
+
+.controls button {
+    background-color: var(--crt-gray);
+    color: var(--crt-white);
+    border: none;
+    padding: 10px 20px;
+    margin: 0 5px;
+    font-size: 1em;
+    cursor: pointer;
+    transition: background-color 0.1s;
+}
+
+.controls button:hover {
+    background-color: var(--crt-medium-gray);
+}
+
+.controls button:active {
+    background-color: var(--crt-steel-gray);
+}
+
+#startBtn { background-color: var(--crt-green); color: var(--black);}
+#startBtn:hover { background-color: #00e670; }
+#pauseBtn { background-color: var(--crt-gray); }
+#pauseBtn:hover { background-color: var(--crt-medium-gray); }
+#resetBtn { background-color: var(--crt-gray); }
+#resetBtn:hover { background-color: var(--crt-medium-gray); }
+#lapBtn { background-color: var(--crt-gray); }
+#lapBtn:hover { background-color: var(--crt-medium-gray); }
+
+
+.lap-duration-setting {
+    margin-top: 25px;
+    margin-bottom: 25px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+
+.lap-duration-setting label {
+    font-size: 0.9em;
+    color: var(--crt-light-gray);
+}
+
+.lap-duration-setting input[type="number"] {
+    background-color: var(--crt-soft-black);
+    border: 1px solid var(--crt-gray);
+    color: var(--crt-white);
+    padding: 8px 10px;
+    font-size: 1em;
+    width: 60px;
+    text-align: center;
+    outline: none;
+}
+
+.lap-duration-setting input[type="number"]:focus {
+    border-color: var(--crt-green);
+}
+
+.lap-list-container {
+    margin-top: 30px;
+    background-color: var(--crt-charcoal);
+    padding: 15px;
+    border: 1px solid var(--crt-gray);
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.lap-list-container h2 {
+    color: var(--crt-green);
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 1.5em;
+}
+
+#lapList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+#lapList li {
+    background-color: var(--crt-gray);
+    padding: 8px 12px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    font-family: 'Roboto Mono', 'Lucida Console', 'Courier New', monospace; /* Explicitly keep monospace for lap items */
+    font-size: 0.9em;
+    color: var(--crt-light-gray);
+    border-left: 3px solid var(--crt-green);
+}
+
+#lapList li:last-child {
+    margin-bottom: 0;
+}
+
+#lapList li span:first-child {
+    font-weight: bold;
+    color: var(--crt-green);
+}
+
+/* Minimal Scrollbar styles */
+.lap-list-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.lap-list-container::-webkit-scrollbar-track {
+    background: var(--crt-charcoal);
+}
+
+.lap-list-container::-webkit-scrollbar-thumb {
+    background: var(--crt-green);
+}
+
+.lap-list-container::-webkit-scrollbar-thumb:hover {
+    background: #00e670;
+}
+
+/* Minimal Responsive adjustments */
+@media (max-width: 600px) {
+    .container {
+        padding: 20px;
+    }
+    .stopwatch-display {
+        font-size: 2.8em;
+    }
+    .controls button {
+        padding: 8px 15px;
+        font-size: 0.9em;
+        margin: 3px;
+    }
+    .lap-list-container {
+        padding: 10px;
+    }
+    #lapList li {
+        font-size: 0.85em;
+        padding: 7px 10px;
+    }
+}

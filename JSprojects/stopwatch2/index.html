@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minimal CRT Stopwatch</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Define your custom CRT colors as CSS variables */
+        :root {
+            /* Base Colors */
+            --black: #010101;
+            --crt-black: #0f0f0f;
+            --crt-gray: #2b2b2b;
+            --crt-white: #d7d7d7;
+            --crt-dark-gray: #1a1a1a;
+            --crt-medium-gray: #404040;
+            --crt-light-gray: #b0b0b0;
+            --crt-off-white: #f0f0f0;
+            --crt-soft-black: #191919;
+            --crt-charcoal: #333333;
+            --crt-steel-gray: #505050;
+            --crt-silver: #c0c0c0;
+            
+            /* Neon Colors */
+            --crt-green: #00ff7f; /* Used for Start button and display text */
+            --crt-blue: #00ccff;
+            --crt-pink: #ff007f;
+            --crt-purple: #d700ff;
+            --crt-orange: #ff5f00;
+            --crt-yellow: #ffcc00;
+            --crt-neon-turquoise: #00ffd0;
+            --crt-neon-lavender: #cc00ff;
+            --crt-neon-aqua: #00ffff;
+            --crt-neon-salmon: #ff5e7d;
+            --crt-neon-mint: #7fff00;
+            --crt-neon-amber: #ffaa00;
+            --crt-neon-magenta: #ff00cc;
+            --crt-neon-chartreuse: #b6ff00;
+
+            /* Soft Glowing Colors */
+            --crt-soft-green: #66ffcc;
+            --crt-soft-blue: #6699ff;
+            --crt-soft-pink: #ff66b2;
+            --crt-soft-purple: #bb88ff;
+            --crt-soft-orange: #ffb366;
+            --crt-soft-yellow: #ffee99;
+            --crt-soft-cyan: #99ffff;
+            --crt-soft-lime: #b3ff66;
+            --crt-soft-red: #ff9999;
+            --crt-soft-teal: #66d9c2;
+            --crt-soft-violet: #d1a3ff;
+            --crt-soft-mint: #99ffbb;
+
+            /* Accent Colors */
+            --crt-cyan: #00ffee;
+            --crt-lime: #aaff33; /* Used for display and outline */
+            --crt-red: #ff3344; /* Used for Stop button */
+            --crt-magenta: #ff66ff;
+            --crt-deep-orange: #ff9933;
+            --crt-bright-yellow: #ffd633;
+            --crt-electric-blue: #3399ff;
+            --crt-bright-teal: #33ffee;
+            --crt-bright-green: #66ff33;
+            --crt-hot-pink: #ff3399;
+            --crt-deep-purple: #9933ff;
+            --crt-bright-amber: #ffcc33;
+        }
+
+        /* Custom font for a modern feel */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Share+Tech+Mono&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--crt-soft-black); /* Dark background */
+        }
+
+        /* Applying a CRT-like mono font to the display for aesthetic */
+        #display {
+            font-family: 'Share Tech Mono', monospace;
+            color: var(--crt-green); /* CRT green for the display */
+            background-color: var(--crt-dark-gray); /* Darker background for the display area */
+            border: 2px solid var(--crt-charcoal); /* Subtle border */
+        }
+
+        /* Styling for the h1 title */
+        .stopwatch-title {
+            font-family: 'Share Tech Mono', monospace; /* Apply CRT font to title */
+            color: var(--crt-green); /* Ensure consistent color */
+        }
+
+        /* General styling for buttons */
+        .btn-base {
+            padding: 0.75rem 1.5rem; /* px-6 py-3 */
+            font-weight: 600; /* font-semibold */
+            border-radius: 0.5rem; /* rounded-lg */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1); /* shadow-md */
+            transition: all 0.2s ease-in-out; /* transition duration-200 ease-in-out */
+            transform: scale(1); /* Initial scale for hover effect */
+        }
+
+        .btn-base:hover {
+            transform: scale(1.05); /* hover:scale-105 */
+        }
+
+        .btn-base:active {
+            transform: scale(0.95); /* active:scale-95 */
+        }
+
+        .btn-base:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(170, 255, 51, 0.5); /* focus:ring-2 with crt-lime */
+        }
+
+        .btn-base:disabled {
+            opacity: 0.4; /* disabled:opacity-50 */
+            cursor: not-allowed;
+            filter: grayscale(1); /* Make disabled buttons grayscale */
+        }
+
+        /* Specific button colors */
+        #startButton {
+            background-color: var(--crt-green); /* Neon green for start */
+            color: var(--crt-soft-black); /* Dark text for contrast */
+            border: 1px solid var(--crt-green);
+        }
+
+        #startButton:hover {
+            background-color: var(--crt-neon-mint); /* Slightly lighter green on hover */
+        }
+
+        #startButton:focus {
+            box-shadow: 0 0 0 3px rgba(0, 255, 127, 0.5); /* Focus ring for green */
+        }
+
+        #stopButton {
+            background-color: var(--crt-red); /* Red for stop */
+            color: var(--crt-soft-black);
+            border: 1px solid var(--crt-red);
+        }
+
+        #stopButton:hover {
+            background-color: var(--crt-soft-red); /* Slightly softer red on hover */
+        }
+
+        #stopButton:focus {
+            box-shadow: 0 0 0 3px rgba(255, 51, 68, 0.5); /* Focus ring for red */
+        }
+
+        #resetButton {
+            background-color: var(--crt-medium-gray); /* Dark gray for reset */
+            color: var(--crt-off-white); /* Off-white text */
+            border: 1px solid var(--crt-charcoal);
+        }
+
+        #resetButton:hover {
+            background-color: var(--crt-charcoal);
+        }
+
+        #resetButton:focus {
+            box-shadow: 0 0 0 3px rgba(64, 64, 64, 0.5); /* Focus ring for gray */
+        }
+
+        /* Main container styling */
+        .main-container {
+            background-color: var(--crt-black); /* Even darker container background */
+            border: 2px solid var(--crt-charcoal); /* A subtle border */
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4), 0 0 15px rgba(170, 255, 51, 0.0); /* Reduced glow on container */
+        }
+
+        /* Custom scrollbar for a cleaner look */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--crt-dark-gray); /* Dark gray */
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--crt-medium-gray); /* Slightly lighter gray */
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--crt-charcoal); /* Even lighter gray on hover */
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+    <div class="main-container flex flex-col items-center justify-center p-8 rounded-xl max-w-sm w-full">
+        <h1 class="text-3xl font-bold mb-8 tracking-wide stopwatch-title">Stopwatch</h1>
+
+        <div id="display" class="text-6xl md:text-7xl font-bold mb-10 px-8 py-4 rounded-lg shadow-inner select-none">
+            00.000
+        </div>
+
+        <div class="flex space-x-4 w-full justify-center">
+            <button id="startButton" class="flex-1 btn-base">
+                Start
+            </button>
+
+            <button id="stopButton" disabled class="flex-1 btn-base">
+                Stop
+            </button>
+
+            <button id="resetButton" disabled class="flex-1 btn-base">
+                Reset
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Get references to DOM elements
+        const display = document.getElementById('display');
+        const startButton = document.getElementById('startButton');
+        const stopButton = document.getElementById('stopButton');
+        const resetButton = document.getElementById('resetButton');
+
+        // Stopwatch variables
+        let startTime = 0;          // Stores the time when the stopwatch was started or last resumed
+        let elapsedTime = 0;        // Stores the total elapsed time in milliseconds
+        let timerInterval;          // Stores the interval ID for clearing the timer
+        let isRunning = false;      // Flag to check if the stopwatch is currently running
+
+        /**
+         * Formats a given number of milliseconds into a string "SS.MMM" (seconds.milliseconds).
+         * @param {number} ms - The total milliseconds to format.
+         * @returns {string} The formatted time string.
+         */
+        function formatTime(ms) {
+            // Calculate total seconds from milliseconds
+            const totalSeconds = Math.floor(ms / 1000);
+            // Calculate remaining milliseconds after removing full seconds
+            const milliseconds = ms % 1000;
+
+            // Pad seconds with leading zeros if less than 10
+            const formattedSeconds = String(totalSeconds).padStart(2, '0');
+            // Pad milliseconds with leading zeros to always be 3 digits
+            const formattedMilliseconds = String(milliseconds).padStart(3, '0');
+
+            return `${formattedSeconds}.${formattedMilliseconds}`;
+        }
+
+        /**
+         * Updates the stopwatch display.
+         * This function is called repeatedly by setInterval when the stopwatch is running.
+         */
+        function updateDisplay() {
+            // Calculate the current elapsed time.
+            // If running, it's the current time minus the start time plus any previously elapsed time.
+            // If not running (e.g., after stop), it's just the stored elapsedTime.
+            const currentTime = Date.now();
+            const currentElapsedTime = isRunning ? elapsedTime + (currentTime - startTime) : elapsedTime;
+            display.textContent = formatTime(currentElapsedTime);
+        }
+
+        /**
+         * Starts or resumes the stopwatch.
+         */
+        function startTimer() {
+            if (!isRunning) {
+                isRunning = true;
+                startTime = Date.now(); // Record the current time as the start time
+                // Update display every 10 milliseconds for smooth millisecond counting
+                timerInterval = setInterval(updateDisplay, 10);
+
+                // Disable Start button, enable Stop and Reset buttons
+                startButton.disabled = true;
+                stopButton.disabled = false;
+                resetButton.disabled = false;
+            }
+        }
+
+        /**
+         * Stops the stopwatch.
+         */
+        function stopTimer() {
+            if (isRunning) {
+                isRunning = false;
+                clearInterval(timerInterval); // Stop the interval updates
+                // Update elapsed time to store the total time when stopped
+                elapsedTime += Date.now() - startTime;
+
+                // Enable Start button, disable Stop button
+                startButton.disabled = false;
+                stopButton.disabled = true;
+            }
+        }
+
+        /**
+         * Resets the stopwatch to its initial state (00.000).
+         */
+        function resetTimer() {
+            // Ensure the timer is stopped before resetting
+            stopTimer(); // This will also update elapsedTime if it was running
+
+            elapsedTime = 0;        // Reset total elapsed time
+            display.textContent = '00.000'; // Reset display text
+            
+            // Re-enable Start button, disable Stop and Reset buttons
+            startButton.disabled = false;
+            stopButton.disabled = true;
+            resetButton.disabled = true;
+        }
+
+        // Add event listeners to buttons
+        startButton.addEventListener('click', startTimer);
+        stopButton.addEventListener('click', stopTimer);
+        resetButton.addEventListener('click', resetTimer);
+
+        // Initial update to ensure display shows 00.000 on load and buttons are in correct state
+        updateDisplay();
+        stopButton.disabled = true;
+        resetButton.disabled = true;
+    </script>
+</body>
+</html>
