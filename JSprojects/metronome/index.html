@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minimal CRT Stopwatch</title>
+    <title>CIRCLE</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         /* Define your custom CRT colors as CSS variables */
@@ -79,14 +79,6 @@
         #display {
             font-family: 'Share Tech Mono', monospace;
             color: var(--crt-green); /* CRT green for the display */
-            background-color: var(--crt-dark-gray); /* Darker background for the display area */
-            border: 2px solid var(--crt-charcoal); /* Subtle border */
-        }
-
-        /* Styling for the h1 title */
-        .stopwatch-title {
-            font-family: 'Share Tech Mono', monospace; /* Apply CRT font to title */
-            color: var(--crt-green); /* Ensure consistent color */
         }
 
         /* General styling for buttons */
@@ -116,6 +108,19 @@
             opacity: 0.4; /* disabled:opacity-50 */
             cursor: not-allowed;
             filter: grayscale(1); /* Make disabled buttons grayscale */
+        }
+        
+        #bpmInput {
+            background-color: var(--crt-dark-gray);
+            color: var(--crt-green);
+            border: 1px solid var(--crt-charcoal);
+            font-family: 'Share Tech Mono', monospace;
+        }
+
+        #bpmInput:focus {
+            outline: none;
+            border-color: var(--crt-green);
+            box-shadow: 0 0 0 2px rgba(0, 255, 127, 0.5);
         }
 
         /* Specific button colors */
@@ -167,6 +172,11 @@
             border: 2px solid var(--crt-charcoal); /* A subtle border */
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4), 0 0 15px rgba(170, 255, 51, 0.0); /* Reduced glow on container */
         }
+        
+        #progress-dot {
+            /* Add a smooth transition for radius and fill changes */
+            transition: r 0.1s ease-out, fill 0.1s ease-out;
+        }
 
         /* Custom scrollbar for a cleaner look */
         ::-webkit-scrollbar {
@@ -191,11 +201,28 @@
 <body class="min-h-screen flex items-center justify-center p-4">
 
     <div class="main-container flex flex-col items-center justify-center p-8 rounded-xl max-w-sm w-full">
-        <h1 class="text-3xl font-bold mb-8 tracking-wide stopwatch-title">Stopwatch</h1>
 
-        <div id="display" class="text-6xl md:text-7xl font-bold mb-10 px-8 py-4 rounded-lg shadow-inner select-none">
-            00.000
+        <!-- BPM Input -->
+        <div class="mb-6 flex items-center space-x-2">
+            <label for="bpmInput" class="text-lg font-semibold" style="font-family: 'Share Tech Mono', monospace; color: var(--crt-green);">BPM:</label>
+            <input type="number" id="bpmInput" value="60" class="w-24 text-center text-lg p-1 rounded-md">
         </div>
+
+        <!-- Container for the timer display and the progress ring -->
+        <div class="relative w-56 h-56 md:w-64 md:h-64 mb-8 flex items-center justify-center">
+            <!-- SVG for the circular progress bar -->
+            <svg class="absolute w-full h-full" viewBox="0 0 100 100">
+                <!-- Background track -->
+                <circle stroke-width="2" stroke="var(--crt-charcoal)" fill="transparent" r="45" cx="50" cy="50" />
+                <!-- The traveling dot -->
+                <circle id="progress-dot" r="4" fill="var(--crt-green)" />
+            </svg>
+            <!-- The time display, now positioned inside the circle -->
+            <div id="display" class="relative text-7xl md:text-8xl font-bold select-none z-10">
+                00
+            </div>
+        </div>
+
 
         <div class="flex space-x-4 w-full justify-center">
             <button id="startButton" class="flex-1 btn-base">
@@ -218,43 +245,90 @@
         const startButton = document.getElementById('startButton');
         const stopButton = document.getElementById('stopButton');
         const resetButton = document.getElementById('resetButton');
+        const progressDot = document.getElementById('progress-dot');
+        const bpmInput = document.getElementById('bpmInput');
+
+        // --- Traveling Dot Setup ---
+        const radius = 45; // The radius of the path
+        const centerX = 50; // The center X coordinate of the path
+        const centerY = 50; // The center Y coordinate of the path
+
+        /**
+         * Updates the position of the traveling dot based on progress.
+         * @param {number} percent - The progress percentage (from 0 to 1).
+         */
+        function updateDotPosition(percent) {
+            // Calculate the angle in radians. Start from the top (-90 degrees or -PI/2).
+            const angle = (percent * 2 * Math.PI) - (Math.PI / 2);
+            
+            // Calculate the x and y coordinates for the dot
+            const x = centerX + radius * Math.cos(angle);
+            const y = centerY + radius * Math.sin(angle);
+
+            // Set the new position of the dot
+            progressDot.setAttribute('cx', x);
+            progressDot.setAttribute('cy', y);
+        }
+        // --- End of Traveling Dot Setup ---
+
 
         // Stopwatch variables
         let startTime = 0;          // Stores the time when the stopwatch was started or last resumed
         let elapsedTime = 0;        // Stores the total elapsed time in milliseconds
         let timerInterval;          // Stores the interval ID for clearing the timer
         let isRunning = false;      // Flag to check if the stopwatch is currently running
+        let lastBeatCount = 0;      // Stores the last beat count to detect a new beat
 
         /**
-         * Formats a given number of milliseconds into a string "SS.MMM" (seconds.milliseconds).
-         * @param {number} ms - The total milliseconds to format.
-         * @returns {string} The formatted time string.
+         * Calculates the duration of one beat in milliseconds from the BPM value.
+         * @returns {number} The duration of a beat in ms.
          */
-        function formatTime(ms) {
-            // Calculate total seconds from milliseconds
-            const totalSeconds = Math.floor(ms / 1000);
-            // Calculate remaining milliseconds after removing full seconds
-            const milliseconds = ms % 1000;
-
-            // Pad seconds with leading zeros if less than 10
-            const formattedSeconds = String(totalSeconds).padStart(2, '0');
-            // Pad milliseconds with leading zeros to always be 3 digits
-            const formattedMilliseconds = String(milliseconds).padStart(3, '0');
-
-            return `${formattedSeconds}.${formattedMilliseconds}`;
+        function getBeatDuration() {
+            const bpm = parseInt(bpmInput.value, 10) || 60;
+            return 60000 / bpm;
         }
 
         /**
-         * Updates the stopwatch display.
-         * This function is called repeatedly by setInterval when the stopwatch is running.
+         * Formats a given number of milliseconds into a beat count.
+         * @param {number} ms - The total milliseconds to format.
+         * @returns {string} The formatted beat count string.
+         */
+        function formatTime(ms) {
+            const beatDuration = getBeatDuration();
+            const totalBeats = Math.floor(ms / beatDuration);
+            const formattedBeats = String(totalBeats).padStart(2, '0');
+            return formattedBeats;
+        }
+
+        /**
+         * Updates the stopwatch display and the progress dot.
          */
         function updateDisplay() {
-            // Calculate the current elapsed time.
-            // If running, it's the current time minus the start time plus any previously elapsed time.
-            // If not running (e.g., after stop), it's just the stored elapsedTime.
             const currentTime = Date.now();
             const currentElapsedTime = isRunning ? elapsedTime + (currentTime - startTime) : elapsedTime;
+            const beatDuration = getBeatDuration();
+
+            // Update the text display
             display.textContent = formatTime(currentElapsedTime);
+
+            // Update the visual progress dot based on the progress through the current beat
+            const beatProgress = (currentElapsedTime % beatDuration) / beatDuration;
+            updateDotPosition(beatProgress);
+
+            // Check if a new beat has started
+            const currentBeatCount = Math.floor(currentElapsedTime / beatDuration);
+            if (currentBeatCount > lastBeatCount) {
+                // Directly manipulate attributes for the flash effect
+                progressDot.setAttribute('r', '8'); // Make it bigger
+                progressDot.setAttribute('fill', 'var(--crt-off-white)'); // Flash white
+
+                // Revert back to normal after a short delay
+                setTimeout(() => {
+                    progressDot.setAttribute('r', '4'); // Back to original size
+                    progressDot.setAttribute('fill', 'var(--crt-green)'); // Back to green
+                }, 50); // Flash duration of 100ms
+            }
+            lastBeatCount = currentBeatCount;
         }
 
         /**
@@ -263,14 +337,15 @@
         function startTimer() {
             if (!isRunning) {
                 isRunning = true;
-                startTime = Date.now(); // Record the current time as the start time
-                // Update display every 10 milliseconds for smooth millisecond counting
+                startTime = Date.now(); 
+                // Reset lastBeatCount relative to the new start time
+                lastBeatCount = Math.floor(elapsedTime / getBeatDuration());
                 timerInterval = setInterval(updateDisplay, 10);
 
-                // Disable Start button, enable Stop and Reset buttons
                 startButton.disabled = true;
                 stopButton.disabled = false;
                 resetButton.disabled = false;
+                bpmInput.disabled = true; // Disable BPM input while running
             }
         }
 
@@ -280,41 +355,45 @@
         function stopTimer() {
             if (isRunning) {
                 isRunning = false;
-                clearInterval(timerInterval); // Stop the interval updates
-                // Update elapsed time to store the total time when stopped
+                clearInterval(timerInterval); 
                 elapsedTime += Date.now() - startTime;
 
-                // Enable Start button, disable Stop button
                 startButton.disabled = false;
                 stopButton.disabled = true;
+                bpmInput.disabled = false; // Re-enable BPM input
             }
         }
 
         /**
-         * Resets the stopwatch to its initial state (00.000).
+         * Resets the stopwatch to its initial state (00).
          */
         function resetTimer() {
-            // Ensure the timer is stopped before resetting
-            stopTimer(); // This will also update elapsedTime if it was running
+            // Stop the timer if it's running
+            if (isRunning) {
+                stopTimer();
+            }
 
-            elapsedTime = 0;        // Reset total elapsed time
-            display.textContent = '00.000'; // Reset display text
+            elapsedTime = 0;
+            lastBeatCount = 0;
+            display.textContent = '00'; 
+            updateDotPosition(0); // Reset the dot to the starting position
             
-            // Re-enable Start button, disable Stop and Reset buttons
             startButton.disabled = false;
             stopButton.disabled = true;
             resetButton.disabled = true;
+            bpmInput.disabled = false;
         }
 
-        // Add event listeners to buttons
+        // Add event listeners
         startButton.addEventListener('click', startTimer);
         stopButton.addEventListener('click', stopTimer);
         resetButton.addEventListener('click', resetTimer);
+        // When BPM changes, reset the timer to apply the new tempo cleanly
+        bpmInput.addEventListener('change', resetTimer);
 
-        // Initial update to ensure display shows 00.000 on load and buttons are in correct state
-        updateDisplay();
-        stopButton.disabled = true;
-        resetButton.disabled = true;
+        // Set initial state on page load
+        resetTimer();
+
     </script>
 </body>
 </html>
