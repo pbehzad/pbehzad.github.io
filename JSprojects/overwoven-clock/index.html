@@ -1,0 +1,1077 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>overwoven - clock</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #000;
+            --fg: #fff;
+            --dim: #666;
+            --accent: #111;
+            --border: #222;
+            --progress: #00ff88;
+            --current: #00ff88;
+            --approaching: #ff6b6b;
+        }
+
+        [data-theme="light"] {
+            --bg: #fff;
+            --fg: #000;
+            --dim: #999;
+            --accent: #f8f8f8;
+            --border: #eee;
+            --progress: #00aa55;
+            --current: #00aa55;
+            --approaching: #ff4444;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--fg);
+            line-height: 1.2;
+            font-weight: 300;
+            transition: all 0.3s ease;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .title {
+            font-size: 1.8rem;
+            font-weight: 200;
+            letter-spacing: -0.02em;
+        }
+
+        .theme-toggle {
+            background: transparent;
+            border: 1px solid var(--dim);
+            color: var(--fg);
+            padding: 8px 14px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .theme-toggle:hover {
+            background: var(--fg);
+            color: var(--bg);
+        }
+
+        .circle-container {
+            position: relative;
+            width: 400px;
+            height: 400px;
+            margin: 20px 0;
+        }
+
+        .circle-svg {
+            width: 100%;
+            height: 100%;
+            transform: rotate(-90deg);
+        }
+
+        .circle-track {
+            fill: none;
+            stroke: var(--border);
+            stroke-width: 2;
+        }
+
+        .circle-progress {
+            fill: none;
+            stroke: var(--progress);
+            stroke-width: 3;
+            stroke-linecap: round;
+            transition: stroke-dasharray 0.1s ease;
+        }
+
+        .circle-progress.flash {
+            stroke: var(--fg);
+            stroke-width: 4;
+        }
+
+        .circle-container.flash {
+            animation: timerFlash 0.15s ease-out;
+        }
+
+        @keyframes timerFlash {
+            0% { 
+                background: transparent; 
+                border-radius: 50%;
+            }
+            50% { 
+                background: var(--fg); 
+                border-radius: 50%;
+            }
+            100% { 
+                background: transparent; 
+                border-radius: 50%;
+            }
+        }
+
+        .timer-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        .count-display {
+            font-size: 1.2rem;
+            font-weight: 200;
+            color: var(--dim);
+            margin-bottom: 5px;
+            min-height: 1.5rem;
+        }
+
+        .timer-display {
+            font-size: 4rem;
+            font-weight: 100;
+            font-family: 'SF Mono', Monaco, monospace;
+            letter-spacing: 0.02em;
+            margin-bottom: 10px;
+        }
+
+        .center-status {
+            font-size: 1rem;
+            color: var(--dim);
+            font-family: 'SF Mono', Monaco, monospace;
+        }
+
+        .rehearsal-mark {
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--dim);
+            border: 2px solid var(--bg);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            transform: translate(-50%, -50%);
+        }
+
+        .rehearsal-mark:hover {
+            background: var(--fg);
+            transform: translate(-50%, -50%) scale(1.2);
+        }
+
+        .rehearsal-mark.current {
+            background: var(--current);
+            box-shadow: 0 0 15px var(--current);
+            transform: translate(-50%, -50%) scale(1.3);
+        }
+
+        .rehearsal-mark.approaching {
+            background: var(--approaching);
+            animation: pulse-mark 1s infinite;
+        }
+
+        .rehearsal-mark.passed {
+            background: var(--border);
+            opacity: 0.4;
+        }
+
+        @keyframes pulse-mark {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.2); }
+        }
+
+        .mark-label {
+            position: absolute;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--fg);
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+
+        .mark-label.current {
+            color: var(--current);
+            font-weight: 600;
+        }
+
+        .mark-label.approaching {
+            color: var(--approaching);
+        }
+
+        .mark-label.passed {
+            opacity: 0.4;
+        }
+
+        .progress-indicator {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: var(--progress);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 10px var(--progress);
+            transition: all 0.1s ease;
+        }
+
+        .controls-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .metronome-controls {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .controls {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn {
+            padding: 10px 16px;
+            background: transparent;
+            color: var(--fg);
+            border: 1px solid var(--dim);
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 400;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            transition: all 0.2s ease;
+            min-width: 80px;
+        }
+
+        .btn:hover {
+            background: var(--fg);
+            color: var(--bg);
+        }
+
+        .btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .btn:disabled:hover {
+            background: transparent;
+            color: var(--fg);
+        }
+
+        .btn.active {
+            background: var(--progress);
+            color: var(--bg);
+            border-color: var(--progress);
+        }
+
+        .small-btn {
+            padding: 8px 12px;
+            font-size: 0.75rem;
+            min-width: auto;
+        }
+
+        .tempo-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .tempo-btn {
+            padding: 8px 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            min-width: 40px;
+        }
+
+        .tempo-display {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--fg);
+            font-family: 'SF Mono', Monaco, monospace;
+            min-width: 80px;
+            text-align: center;
+        }
+
+        .metronome-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .control-group {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .control-label {
+            font-size: 0.8rem;
+            color: var(--dim);
+            font-weight: 500;
+            min-width: 70px;
+            text-align: right;
+        }
+
+        .status-info {
+            display: flex;
+            gap: 20px;
+            margin-top: 15px;
+            font-size: 0.85rem;
+            color: var(--dim);
+        }
+
+        .status-item {
+            text-align: center;
+        }
+
+        .status-value {
+            display: block;
+            color: var(--fg);
+            font-family: 'SF Mono', Monaco, monospace;
+            margin-top: 2px;
+        }
+
+        .config-note {
+            background: var(--accent);
+            border: 1px solid var(--border);
+            padding: 14px;
+            font-size: 0.8rem;
+            color: var(--dim);
+            line-height: 1.4;
+            text-align: center;
+            margin-top: 20px;
+            max-width: 400px;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .circle-container {
+                width: 320px;
+                height: 320px;
+            }
+            
+            .timer-display {
+                font-size: 2.8rem;
+            }
+            
+            .header {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .metronome-controls, .controls {
+                flex-wrap: wrap;
+            }
+
+            .status-info {
+                flex-direction: column;
+                gap: 8px;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .circle-container {
+                width: 280px;
+                height: 280px;
+            }
+            
+            .timer-display {
+                font-size: 2.4rem;
+            }
+        }
+    </style>
+</head>
+<body data-theme="dark">
+    <div class="container">
+        <header class="header">
+            <h1 class="title">overwoven - clock</h1>
+            <button class="theme-toggle" id="themeToggle">light</button>
+        </header>
+
+        <div class="circle-container" id="circleContainer">
+            <svg class="circle-svg" viewBox="0 0 200 200">
+                <circle cx="100" cy="100" r="90" class="circle-track"></circle>
+                <circle cx="100" cy="100" r="90" class="circle-progress" id="progressCircle"
+                        stroke-dasharray="0 565.48"></circle>
+            </svg>
+            
+            <div class="timer-center">
+                <div class="count-display" id="countDisplay"></div>
+                <div class="timer-display" id="timerDisplay">00:00</div>
+                <div class="center-status" id="centerStatus">—</div>
+            </div>
+
+            <div class="progress-indicator" id="progressIndicator"></div>
+        </div>
+
+        <div class="controls-section">
+            <div class="metronome-controls">
+                <div class="control-group">
+                    <span class="control-label">count-in:</span>
+                    <button class="btn small-btn" id="countInBtn">4 beats</button>
+                </div>
+                <div class="control-group">
+                    <span class="control-label">metronome:</span>
+                    <button class="btn small-btn" id="soundToggle">audio</button>
+                    <button class="btn small-btn" id="visualBeatBtn">visual</button>
+                    <button class="btn small-btn" id="metronomeBtn">continuous</button>
+                </div>
+            </div>
+            
+            <div class="tempo-controls">
+                <button class="btn tempo-btn" id="tempoDown">-</button>
+                <span class="tempo-display" id="tempoDisplay">100 BPM</span>
+                <button class="btn tempo-btn" id="tempoUp">+</button>
+            </div>
+            
+            <div class="controls">
+                <button class="btn" id="startBtn">start</button>
+                <button class="btn" id="pauseBtn" disabled>pause</button>
+                <button class="btn" id="resetBtn">reset</button>
+            </div>
+        </div>
+
+        <div class="status-info">
+            <div class="status-item">
+                <span>current</span>
+                <span class="status-value" id="currentMark">—</span>
+            </div>
+            <div class="status-item">
+                <span>next</span>
+                <span class="status-value" id="nextMark">—</span>
+            </div>
+            <div class="status-item">
+                <span>in</span>
+                <span class="status-value" id="timeToNext">—</span>
+            </div>
+        </div>
+
+        <div class="config-note">
+            click marks around circle to jump • green arc shows progress • current mark glows
+        </div>
+    </div>
+
+    <script>
+        // ============================================================================
+        // REHEARSAL MARKS CONFIGURATION
+        // ============================================================================
+        const rehearsalMarks = [
+            { name: "A", time: 2.797 },     // 0:02.797 (2797ms)
+            { name: "B", time: 86.797 },    // 1:26.797 (86797ms)
+            { name: "C", time: 151.597 },   // 2:31.597 (151597ms)
+            { name: "D", time: 355.597 },   // 5:55.597 (355597ms)
+            { name: "E", time: 485.197 },   // 8:05.197 (485197ms)
+            { name: "F", time: 547.597 }    // 9:07.597 (547597ms)
+        ];
+
+        class CircularRehearsalClock {
+            constructor() {
+                this.startTime = 0;
+                this.elapsedTime = 0;
+                this.timerInterval = null;
+                this.isRunning = false;
+                this.currentMarkIndex = -1;
+                this.isCountingIn = false;
+                this.countInBeat = 0;
+                this.bpm = 100;
+                this.beatInterval = 60000 / this.bpm;
+                
+                // Total duration is exactly 10 minutes (600 seconds)
+                this.totalDuration = 600; // 10 minutes
+                this.circumference = 2 * Math.PI * 90; // radius = 90
+                
+                // Precise metronome timing
+                this.audioContext = null;
+                this.nextBeatTime = 0;
+                this.schedulerInterval = null;
+                this.lookahead = 25.0; // milliseconds
+                this.scheduleAheadTime = 0.1; // seconds
+                this.clickBuffer = null;
+                this.downbeatBuffer = null;
+                this.countInBuffer = null;
+                
+                // Settings
+                this.countInEnabled = false;
+                this.soundEnabled = true;
+                this.continuousMetronome = false;
+                this.visualBeatEnabled = false;
+                
+                this.initializeElements();
+                this.setupEventListeners();
+                this.setupTheme();
+                this.initializeAudio();
+                this.renderRehearsalMarks();
+                this.updateDisplay();
+                this.updateStatus();
+                this.updateButtons();
+            }
+
+            initializeElements() {
+                this.timerDisplay = document.getElementById('timerDisplay');
+                this.countDisplay = document.getElementById('countDisplay');
+                this.centerStatus = document.getElementById('centerStatus');
+                this.startBtn = document.getElementById('startBtn');
+                this.pauseBtn = document.getElementById('pauseBtn');
+                this.resetBtn = document.getElementById('resetBtn');
+                this.circleContainer = document.getElementById('circleContainer');
+                this.progressCircle = document.getElementById('progressCircle');
+                this.progressIndicator = document.getElementById('progressIndicator');
+                this.currentMark = document.getElementById('currentMark');
+                this.nextMark = document.getElementById('nextMark');
+                this.timeToNext = document.getElementById('timeToNext');
+                this.themeToggle = document.getElementById('themeToggle');
+                this.countInBtn = document.getElementById('countInBtn');
+                this.soundToggle = document.getElementById('soundToggle');
+                this.metronomeBtn = document.getElementById('metronomeBtn');
+                this.visualBeatBtn = document.getElementById('visualBeatBtn');
+                this.tempoDisplay = document.getElementById('tempoDisplay');
+                this.tempoDown = document.getElementById('tempoDown');
+                this.tempoUp = document.getElementById('tempoUp');
+            }
+
+            setupEventListeners() {
+                this.startBtn.addEventListener('click', () => this.start());
+                this.pauseBtn.addEventListener('click', () => this.pause());
+                this.resetBtn.addEventListener('click', () => this.reset());
+                
+                this.countInBtn.addEventListener('click', () => this.toggleCountIn());
+                this.soundToggle.addEventListener('click', () => this.toggleSound());
+                this.metronomeBtn.addEventListener('click', () => this.toggleMetronome());
+                this.visualBeatBtn.addEventListener('click', () => this.toggleVisualBeat());
+                this.tempoDown.addEventListener('click', () => this.decreaseTempo());
+                this.tempoUp.addEventListener('click', () => this.increaseTempo());
+                
+                // Recalculate mark positions on window resize
+                window.addEventListener('resize', () => {
+                    // Clear existing marks and rerender
+                    document.querySelectorAll('.rehearsal-mark, .mark-label').forEach(el => el.remove());
+                    this.renderRehearsalMarks();
+                });
+            }
+
+            initializeAudio() {
+                try {
+                    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    this.createClickBuffers();
+                } catch (error) {
+                    console.log('Audio context not supported');
+                }
+            }
+
+            createClickBuffers() {
+                if (!this.audioContext) return;
+
+                const sampleRate = this.audioContext.sampleRate;
+                const bufferLength = sampleRate * 0.1; // 100ms
+                
+                // Create regular click buffer (woodblock-like sound)
+                this.clickBuffer = this.audioContext.createBuffer(1, bufferLength, sampleRate);
+                const clickData = this.clickBuffer.getChannelData(0);
+                
+                // Generate woodblock-like sound for main metronome
+                for (let i = 0; i < bufferLength; i++) {
+                    const t = i / sampleRate;
+                    if (t < 0.005) { // 5ms attack for woody sound
+                        const env = Math.exp(-t * 800) * (1 - t / 0.005);
+                        // Mix of frequencies for woodblock-like sound
+                        const freq1 = 1800;
+                        const freq2 = 3200;
+                        const freq3 = 4800;
+                        const noise = (Math.random() * 2 - 1) * 0.6; // More noise for woody texture
+                        const tone1 = Math.sin(2 * Math.PI * freq1 * t);
+                        const tone2 = Math.sin(2 * Math.PI * freq2 * t) * 0.6;
+                        const tone3 = Math.sin(2 * Math.PI * freq3 * t) * 0.3;
+                        clickData[i] = (tone1 + tone2 + tone3 + noise) * env * 0.4;
+                    } else {
+                        clickData[i] = 0;
+                    }
+                }
+                
+                // Create downbeat buffer (higher pitch)
+                this.downbeatBuffer = this.audioContext.createBuffer(1, bufferLength, sampleRate);
+                const downbeatData = this.downbeatBuffer.getChannelData(0);
+                
+                for (let i = 0; i < bufferLength; i++) {
+                    const t = i / sampleRate;
+                    if (t < 0.003) { // 3ms attack
+                        const env = Math.exp(-t * 1000) * (1 - t / 0.003);
+                        const freq = 3000; // Higher for downbeat
+                        const noise = (Math.random() * 2 - 1) * 0.3;
+                        const tone = Math.sin(2 * Math.PI * freq * t);
+                        downbeatData[i] = (tone * 0.7 + noise * 0.3) * env * 0.45; // Increased from 0.18 to 0.45
+                    } else {
+                        downbeatData[i] = 0;
+                    }
+                }
+                
+                // Create count-in buffer (sharp click sound)
+                this.countInBuffer = this.audioContext.createBuffer(1, bufferLength, sampleRate);
+                const countInData = this.countInBuffer.getChannelData(0);
+                
+                // Generate sharp click sound for count-in
+                for (let i = 0; i < bufferLength; i++) {
+                    const t = i / sampleRate;
+                    if (t < 0.003) { // 3ms attack for sharp sound
+                        const env = Math.exp(-t * 1000) * (1 - t / 0.003);
+                        const freq = 2500;
+                        const noise = (Math.random() * 2 - 1) * 0.3;
+                        const tone = Math.sin(2 * Math.PI * freq * t);
+                        countInData[i] = (tone * 0.7 + noise * 0.3) * env * 0.5;
+                    } else {
+                        countInData[i] = 0;
+                    }
+                }
+            }
+
+            setupTheme() {
+                const savedTheme = localStorage.getItem('theme') || 'dark';
+                document.body.setAttribute('data-theme', savedTheme);
+                this.updateThemeToggle(savedTheme);
+
+                this.themeToggle.addEventListener('click', () => {
+                    const currentTheme = document.body.getAttribute('data-theme');
+                    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                    
+                    document.body.setAttribute('data-theme', newTheme);
+                    localStorage.setItem('theme', newTheme);
+                    this.updateThemeToggle(newTheme);
+                });
+            }
+
+            updateThemeToggle(theme) {
+                this.themeToggle.textContent = theme === 'dark' ? 'light' : 'dark';
+            }
+
+            toggleCountIn() {
+                this.countInEnabled = !this.countInEnabled;
+                this.updateButtons();
+            }
+
+            toggleSound() {
+                this.soundEnabled = !this.soundEnabled;
+                this.updateButtons();
+            }
+
+            toggleMetronome() {
+                this.continuousMetronome = !this.continuousMetronome;
+                this.updateButtons();
+                
+                if (!this.continuousMetronome && this.schedulerInterval && !this.isCountingIn) {
+                    clearInterval(this.schedulerInterval);
+                    this.schedulerInterval = null;
+                }
+            }
+
+            toggleVisualBeat() {
+                this.visualBeatEnabled = !this.visualBeatEnabled;
+                this.updateButtons();
+            }
+
+            updateButtons() {
+                this.countInBtn.classList.toggle('active', this.countInEnabled);
+                this.soundToggle.classList.toggle('active', this.soundEnabled);
+                this.metronomeBtn.classList.toggle('active', this.continuousMetronome);
+                this.visualBeatBtn.classList.toggle('active', this.visualBeatEnabled);
+                this.tempoDisplay.textContent = `${this.bpm} BPM`;
+            }
+
+            increaseTempo() {
+                if (this.bpm < 200) {
+                    this.bpm += 5;
+                    this.beatInterval = 60000 / this.bpm;
+                    this.updateButtons();
+                }
+            }
+
+            decreaseTempo() {
+                if (this.bpm > 40) {
+                    this.bpm -= 5;
+                    this.beatInterval = 60000 / this.bpm;
+                    this.updateButtons();
+                }
+            }
+
+            start() {
+                if (!this.isRunning && !this.isCountingIn) {
+                    if (this.countInEnabled) {
+                        this.startCountIn();
+                    } else {
+                        this.startTimer();
+                    }
+                }
+            }
+
+            startCountIn() {
+                this.isCountingIn = true;
+                this.countInBeat = 0;
+                this.startBtn.disabled = true;
+                this.countDisplay.textContent = 'ready...';
+                
+                setTimeout(() => {
+                    this.playCountIn();
+                }, 500);
+            }
+
+            playCountIn() {
+                this.countInBeat++;
+                this.countDisplay.textContent = this.countInBeat;
+                
+                if (this.soundEnabled) {
+                    this.scheduleCountIn(this.audioContext.currentTime);
+                }
+                
+                if (this.visualBeatEnabled) {
+                    this.flashBeat();
+                }
+                
+                if (this.countInBeat < 4) {
+                    setTimeout(() => this.playCountIn(), this.beatInterval);
+                } else {
+                    setTimeout(() => {
+                        this.countDisplay.textContent = '';
+                        this.isCountingIn = false;
+                        this.startTimer();
+                    }, this.beatInterval);
+                }
+            }
+
+            startTimer() {
+                this.startTime = Date.now() - this.elapsedTime;
+                this.timerInterval = setInterval(() => this.updateTimer(), 100);
+                this.isRunning = true;
+                
+                this.startBtn.disabled = true;
+                this.pauseBtn.disabled = false;
+                
+                if (this.continuousMetronome) {
+                    this.startPreciseMetronome();
+                }
+                
+                this.flashBeat();
+            }
+
+            startPreciseMetronome() {
+                if (!this.audioContext) return;
+                
+                this.nextBeatTime = this.audioContext.currentTime;
+                this.scheduler();
+            }
+
+            scheduler() {
+                if (this.schedulerInterval) clearInterval(this.schedulerInterval);
+                
+                this.schedulerInterval = setInterval(() => {
+                    while (this.nextBeatTime < this.audioContext.currentTime + this.scheduleAheadTime) {
+                        if (this.soundEnabled) {
+                            this.scheduleClick(this.nextBeatTime);
+                        }
+                        if (this.visualBeatEnabled) {
+                            this.scheduleVisualBeat(this.nextBeatTime);
+                        }
+                        this.nextBeatTime += (60.0 / this.bpm);
+                    }
+                }, this.lookahead);
+            }
+
+            pause() {
+                if (this.isRunning) {
+                    clearInterval(this.timerInterval);
+                    if (this.schedulerInterval) {
+                        clearInterval(this.schedulerInterval);
+                        this.schedulerInterval = null;
+                    }
+                    this.isRunning = false;
+                    
+                    this.startBtn.disabled = false;
+                    this.pauseBtn.disabled = true;
+                }
+            }
+
+            reset() {
+                clearInterval(this.timerInterval);
+                if (this.schedulerInterval) {
+                    clearInterval(this.schedulerInterval);
+                    this.schedulerInterval = null;
+                }
+                
+                this.isRunning = false;
+                this.isCountingIn = false;
+                this.elapsedTime = 0;
+                this.currentMarkIndex = -1;
+                this.countInBeat = 0;
+                
+                this.startBtn.disabled = false;
+                this.pauseBtn.disabled = true;
+                
+                this.countDisplay.textContent = '';
+                this.updateDisplay();
+                this.updateCircularProgress();
+                this.updateMarksDisplay();
+                this.updateStatus();
+            }
+
+            jumpToTime(seconds) {
+                this.elapsedTime = seconds * 1000;
+                if (this.isRunning) {
+                    this.startTime = Date.now() - this.elapsedTime;
+                }
+                this.updateDisplay();
+                this.updateCircularProgress();
+                this.updateMarksDisplay();
+                this.updateStatus();
+            }
+
+            updateTimer() {
+                this.elapsedTime = Date.now() - this.startTime;
+                this.updateDisplay();
+                this.updateCircularProgress();
+                this.updateMarksDisplay();
+                this.updateStatus();
+            }
+
+            updateDisplay() {
+                const totalSeconds = Math.floor(this.elapsedTime / 1000);
+                const minutes = Math.floor(totalSeconds / 60);
+                const seconds = totalSeconds % 60;
+                
+                this.timerDisplay.textContent = 
+                    `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }
+
+            updateCircularProgress() {
+                const currentSeconds = Math.floor(this.elapsedTime / 1000);
+                const progress = Math.min(currentSeconds / this.totalDuration, 1);
+                const strokeDasharray = progress * this.circumference;
+                
+                this.progressCircle.setAttribute('stroke-dasharray', `${strokeDasharray} ${this.circumference}`);
+                
+                // Update progress indicator position using same calculations as marks
+                const containerRect = this.circleContainer.getBoundingClientRect();
+                const containerSize = Math.min(containerRect.width, containerRect.height);
+                // SVG viewBox is 200x200 with circle radius 90, so: (containerSize / 200) * 90
+                const circleRadius = (containerSize / 200) * 90;
+                const center = containerSize / 2;
+                const angle = progress * 360;
+                const radians = (angle - 90) * (Math.PI / 180);
+                
+                const indicatorRadius = circleRadius;
+                const x = center + indicatorRadius * Math.cos(radians);
+                const y = center + indicatorRadius * Math.sin(radians);
+                
+                this.progressIndicator.style.left = `${x}px`;
+                this.progressIndicator.style.top = `${y}px`;
+            }
+
+            updateMarksDisplay() {
+                const currentSeconds = Math.floor(this.elapsedTime / 1000);
+                
+                let newCurrentMarkIndex = -1;
+                for (let i = 0; i < rehearsalMarks.length; i++) {
+                    if (currentSeconds >= rehearsalMarks[i].time) {
+                        newCurrentMarkIndex = i;
+                    } else {
+                        break;
+                    }
+                }
+
+                // Update mark styles
+                rehearsalMarks.forEach((mark, index) => {
+                    const markElement = document.querySelector(`[data-mark="${mark.name}"]`);
+                    const labelElement = document.querySelector(`[data-label="${mark.name}"]`);
+                    
+                    if (markElement && labelElement) {
+                        markElement.classList.remove('current', 'approaching', 'passed');
+                        labelElement.classList.remove('current', 'approaching', 'passed');
+                        
+                        const timeUntilMark = mark.time - currentSeconds;
+                        
+                        if (index === newCurrentMarkIndex) {
+                            markElement.classList.add('current');
+                            labelElement.classList.add('current');
+                        } else if (index === newCurrentMarkIndex + 1 && timeUntilMark <= 10 && timeUntilMark > 0) {
+                            markElement.classList.add('approaching');
+                            labelElement.classList.add('approaching');
+                        } else if (index < newCurrentMarkIndex) {
+                            markElement.classList.add('passed');
+                            labelElement.classList.add('passed');
+                        }
+                    }
+                });
+
+                this.currentMarkIndex = newCurrentMarkIndex;
+            }
+
+            updateStatus() {
+                const currentSeconds = Math.floor(this.elapsedTime / 1000);
+                
+                if (this.currentMarkIndex >= 0) {
+                    const currentMarkName = rehearsalMarks[this.currentMarkIndex].name;
+                    this.currentMark.textContent = currentMarkName;
+                    this.centerStatus.textContent = `mark ${currentMarkName}`;
+                } else {
+                    this.currentMark.textContent = '—';
+                    this.centerStatus.textContent = '—';
+                }
+                
+                const nextMarkIndex = this.currentMarkIndex + 1;
+                if (nextMarkIndex < rehearsalMarks.length) {
+                    const nextMark = rehearsalMarks[nextMarkIndex];
+                    this.nextMark.textContent = nextMark.name;
+                    
+                    const timeUntil = nextMark.time - currentSeconds;
+                    if (timeUntil > 0) {
+                        this.timeToNext.textContent = this.formatTime(timeUntil);
+                    } else {
+                        this.timeToNext.textContent = '—';
+                    }
+                } else {
+                    this.nextMark.textContent = '—';
+                    this.timeToNext.textContent = '—';
+                }
+            }
+
+            renderRehearsalMarks() {
+                // Get actual container dimensions for responsive sizing
+                const containerRect = this.circleContainer.getBoundingClientRect();
+                const containerSize = Math.min(containerRect.width, containerRect.height);
+                // SVG viewBox is 200x200 with circle radius 90, so: (containerSize / 200) * 90
+                const circleRadius = (containerSize / 200) * 90;
+                const center = containerSize / 2;
+                
+                rehearsalMarks.forEach((mark, index) => {
+                    const angle = (mark.time / this.totalDuration) * 360;
+                    const radians = (angle - 90) * (Math.PI / 180);
+                    
+                    // Position marks exactly on the circle perimeter
+                    const markRadius = circleRadius; // Use actual circle radius
+                    const x = center + markRadius * Math.cos(radians);
+                    const y = center + markRadius * Math.sin(radians);
+                    
+                    // Create mark element
+                    const markElement = document.createElement('div');
+                    markElement.className = 'rehearsal-mark';
+                    markElement.setAttribute('data-mark', mark.name);
+                    markElement.style.left = `${x}px`;
+                    markElement.style.top = `${y}px`;
+                    
+                    markElement.addEventListener('click', () => {
+                        this.jumpToTime(mark.time);
+                    });
+                    
+                    // Position labels outside the circle
+                    const labelRadius = markRadius + 25; // 25px outside the circle
+                    const labelX = center + labelRadius * Math.cos(radians);
+                    const labelY = center + labelRadius * Math.sin(radians);
+                    
+                    const labelElement = document.createElement('div');
+                    labelElement.className = 'mark-label';
+                    labelElement.setAttribute('data-label', mark.name);
+                    labelElement.textContent = mark.name;
+                    labelElement.style.left = `${labelX}px`;
+                    labelElement.style.top = `${labelY}px`;
+                    
+                    this.circleContainer.appendChild(markElement);
+                    this.circleContainer.appendChild(labelElement);
+                });
+            }
+
+            formatTime(seconds) {
+                const mins = Math.floor(seconds / 60);
+                const secs = Math.floor(seconds % 60);
+                return `${mins}:${secs.toString().padStart(2, '0')}`;
+            }
+
+            flashBeat() {
+                this.circleContainer.classList.add('flash');
+                setTimeout(() => {
+                    this.circleContainer.classList.remove('flash');
+                }, 150);
+            }
+
+            scheduleClick(time, isDownbeat = false) {
+                if (!this.audioContext || (!this.clickBuffer && !this.downbeatBuffer)) return;
+                
+                const bufferSource = this.audioContext.createBufferSource();
+                const gainNode = this.audioContext.createGain();
+                
+                // Use pre-generated buffer for consistent sound
+                bufferSource.buffer = isDownbeat ? this.downbeatBuffer : this.clickBuffer;
+                
+                // Simple gain envelope
+                gainNode.gain.setValueAtTime(1, time);
+                
+                bufferSource.connect(gainNode);
+                gainNode.connect(this.audioContext.destination);
+                
+                bufferSource.start(time);
+            }
+
+            scheduleCountIn(time) {
+                if (!this.audioContext || !this.countInBuffer) return;
+                
+                const bufferSource = this.audioContext.createBufferSource();
+                const gainNode = this.audioContext.createGain();
+                
+                // Use count-in buffer for woodblock-like sound
+                bufferSource.buffer = this.countInBuffer;
+                
+                // Simple gain envelope
+                gainNode.gain.setValueAtTime(1, time);
+                
+                bufferSource.connect(gainNode);
+                gainNode.connect(this.audioContext.destination);
+                
+                bufferSource.start(time);
+            }
+
+            scheduleVisualBeat(time) {
+                const currentTime = this.audioContext.currentTime;
+                const delay = (time - currentTime) * 1000; // Convert to milliseconds
+                
+                setTimeout(() => {
+                    this.flashBeat();
+                }, Math.max(0, delay));
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            new CircularRehearsalClock();
+        });
+    </script>
+</body>
+</html>
