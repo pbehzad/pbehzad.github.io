@@ -6,12 +6,15 @@ const Home: React.FC = () => {
 
       {/* Hero - Ultra Minimal */}
       <div className="space-y-6">
-        <h2 className="text-3xl md:text-5xl font-black text-white tracking-tight uppercase">
+        <h1 className="text-4xl md:text-6xl font-black text-white tracking-wider uppercase">
+          PARHAM BEHZAD
+        </h1>
+        <div className="w-16 h-1 bg-white mx-auto" />
+        <h2 className="text-2xl md:text-3xl font-bold text-white tracking-tight uppercase opacity-80">
           COMPOSER<br/>
           DEVELOPER
         </h2>
-        <div className="w-16 h-1 bg-white mx-auto" />
-        <p className="text-sm md:text-base font-bold uppercase tracking-wide">
+        <p className="text-sm md:text-base font-bold uppercase tracking-wide opacity-70">
           MUSIC × PHILOSOPHY × TECHNOLOGY
         </p>
       </div>

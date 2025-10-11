@@ -134,13 +134,6 @@ const Portal: React.FC<PortalProps> = ({ onNavigate }) => {
   return (
     <div className="fixed inset-0 flex flex-col items-center justify-center p-4 bg-black" style={{ perspective: '1200px' }}>
 
-      {/* Header - Outside Portal, Above */}
-      <div className="text-center mb-4 md:mb-8 z-50">
-        <h1 className="text-3xl md:text-4xl lg:text-6xl font-black text-white tracking-wider">
-          PARHAM BEHZAD
-        </h1>
-      </div>
-
       {/* Knob Container */}
       <div className="relative">
 
