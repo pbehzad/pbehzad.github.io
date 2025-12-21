@@ -1,45 +1,29 @@
+'use client';
+
 import React from 'react';
-
-interface Composition {
-  title: string;
-  year: number;
-  instruments: string;
-}
-
-const compositions: Composition[] = [
-  {
-    title: "ONE COMING...",
-    year: 2025,
-    instruments: "VOICE, LIVE-ELECTRONIC"
-  },
-  {
-    title: "OVERCOMPLICATION",
-    year: 2025,
-    instruments: "PIANO, MIDI-KEYBOARD"
-  },
-  {
-    title: "MICRO-CLONES",
-    year: 2025,
-    instruments: "ENSEMBLE"
-  },
-  {
-    title: "SHIFTS",
-    year: 2025,
-    instruments: "DOUBLE BASS, 8CH ELECTRONICS"
-  },
-  {
-    title: "SIMIYYA",
-    year: 2023,
-    instruments: "SEXTET"
-  },
-  {
-    title: "BRAHMS AT THE SEWING MACHINE",
-    year: 2023,
-    instruments: "VIOLA, CELLO, PIANO"
-  }
-];
+import { useCompositions } from '@/services/hooks/useContent';
 
 const Compositions: React.FC = () => {
+  const { compositions, loading, error } = useCompositions();
+
+  if (loading) {
+    return (
+      <div className="space-y-8 w-full text-center">
+        <div className="text-sm font-bold uppercase opacity-70">LOADING...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-8 w-full text-center">
+        <div className="text-sm font-bold uppercase text-red-500">ERROR LOADING COMPOSITIONS</div>
+      </div>
+    );
+  }
+  // Enable scroll for lists with more than 4 items
+  const needsScroll = compositions.length > 4;
+
   return (
     <div className="space-y-8 w-full">
 
@@ -50,11 +34,14 @@ const Compositions: React.FC = () => {
         </h2>
       </div>
 
-      {/* List - Ultra Minimal */}
-      <div className="space-y-4 text-sm">
-        {compositions.map((comp, index) => (
+      {/* List - Ultra Minimal - Shows ~7 items in viewport */}
+      <div
+        className={`space-y-4 text-sm ${needsScroll ? 'max-h-[300px] overflow-y-auto brutalist-scroll pr-2' : ''}`}
+        data-scrollable-section={needsScroll}
+      >
+        {compositions.map((comp) => (
           <div
-            key={index}
+            key={comp.id}
             className="border-2 border-white p-4 hover:bg-white hover:text-black transition-all duration-100"
           >
             <div className="flex justify-between items-start mb-2">

@@ -1,0 +1,27 @@
+{
+  "hero": {
+    "name": "PARHAM BEHZAD",
+    "title": "COMPOSER",
+    "subtitle": "DEVELOPER",
+    "tagline": "MUSIC × PHILOSOPHY × TECHNOLOGY"
+  },
+  "recent_works": [
+    {
+      "title": "ONE COMING...",
+      "year": 2025
+    },
+    {
+      "title": "OVERCOMPLICATION",
+      "year": 2025
+    },
+    {
+      "title": "MICRO-CLONES",
+      "year": 2025
+    },
+    {
+      "title": "SHIFTS",
+      "year": 2025
+    }
+  ],
+  "updated_at": "2025-01-01T00:00:00Z"
+}

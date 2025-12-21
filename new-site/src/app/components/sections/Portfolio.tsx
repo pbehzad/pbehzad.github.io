@@ -18,7 +18,6 @@ const projects: Project[] = [
     title: "overcomplication",
     year: 2025,
     instruments: "piano, midi-keyboard",
-    description: null,
     tags: ["Piano Duo", "Ensemble", "keys"],
     showInPortfolio: true
   },
@@ -28,7 +27,6 @@ const projects: Project[] = [
     title: "SIMIYYA",
     year: 2023,
     instruments: "flute, bassoon, bass trombone, 3x double basses",
-    description: null,
     tags: ["ensemble", "sextet", "flute", "bassoon", "bass", "trombone", "double bass"],
     showInPortfolio: true
   },
@@ -38,7 +36,6 @@ const projects: Project[] = [
     title: "...where two and two makes up five",
     year: 2022,
     instruments: "ensemble",
-    description: null,
     tags: ["ensemble", "viola", "cello", "piano"],
     showInPortfolio: true
   },
@@ -48,7 +45,6 @@ const projects: Project[] = [
     title: "CRUX",
     year: 2021,
     instruments: "fixed media",
-    description: null,
     tags: ["electronics", "fixed-media"],
     showInPortfolio: true
   },

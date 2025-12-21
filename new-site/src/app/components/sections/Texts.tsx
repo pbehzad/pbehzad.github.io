@@ -1,30 +1,30 @@
+'use client';
+
 import React from 'react';
-
-interface Text {
-  title: string;
-  year: number;
-  type: string;
-}
-
-const texts: Text[] = [
-  {
-    title: "ON POST-HEIDEGGERIAN AESTHETICS IN MUSIC",
-    year: 2023,
-    type: "ESSAY"
-  },
-  {
-    title: "CIRCULAR TEMPORALITIES IN ELECTROACOUSTIC COMPOSITION",
-    year: 2022,
-    type: "ARTICLE"
-  },
-  {
-    title: "NOTATION AS INTERFACE: RETHINKING SCORE-BASED COMPOSITION",
-    year: 2021,
-    type: "ESSAY"
-  }
-];
+import { useTexts } from '@/services/hooks/useContent';
 
 const Texts: React.FC = () => {
+  const { texts, loading, error } = useTexts();
+
+  if (loading) {
+    return (
+      <div className="space-y-8 w-full text-center">
+        <div className="text-sm font-bold uppercase opacity-70">LOADING...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-8 w-full text-center">
+        <div className="text-sm font-bold uppercase text-red-500">ERROR LOADING TEXTS</div>
+      </div>
+    );
+  }
+
+  // Enable scroll for lists with more than 4 items
+  const needsScroll = texts.length > 4;
+
   return (
     <div className="space-y-8 w-full">
 
@@ -35,11 +35,14 @@ const Texts: React.FC = () => {
         </h2>
       </div>
 
-      {/* List - Ultra Minimal */}
-      <div className="space-y-4 text-sm">
-        {texts.map((text, index) => (
+      {/* List - Ultra Minimal - Shows ~7 items in viewport */}
+      <div
+        className={`space-y-4 text-sm ${needsScroll ? 'max-h-[300px] overflow-y-auto brutalist-scroll pr-2' : ''}`}
+        data-scrollable-section={needsScroll}
+      >
+        {texts.map((text) => (
           <div
-            key={index}
+            key={text.id}
             className="border-2 border-white p-4 hover:bg-white hover:text-black transition-all duration-100"
           >
             <div className="flex justify-between items-start mb-2">
@@ -48,7 +51,7 @@ const Texts: React.FC = () => {
               </h3>
             </div>
             <div className="text-xs font-bold uppercase opacity-70">
-              {text.year} • {text.type}
+              {text.year} • {text.type.toUpperCase()}
             </div>
           </div>
         ))}

@@ -1,12 +1,13 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Home from './sections/Home';
 import Compositions from './sections/Compositions';
 import Texts from './sections/Texts';
 import Tools from './sections/Tools';
 import About from './sections/About';
 import Contact from './sections/Contact';
+import { PortalProvider } from './PortalContext';
 
 interface PortalProps {
   onNavigate?: (section: string) => void;
@@ -17,6 +18,11 @@ const Portal: React.FC<PortalProps> = ({ onNavigate }) => {
   const [activeSection, setActiveSection] = useState('home');
   const [isPortrait, setIsPortrait] = useState(false);
   const [isScrolling, setIsScrolling] = useState(false);
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+
+  // Track subsection scroll positions (0-1 normalized)
+  const subsectionScrolls = useRef<Map<string, number>>(new Map());
+  const sectionRefs = useRef<Map<string, HTMLElement | null>>(new Map());
 
   const sections = [
     {
@@ -68,55 +74,167 @@ const Portal: React.FC<PortalProps> = ({ onNavigate }) => {
     return () => window.removeEventListener('resize', checkOrientation);
   }, []);
 
+  // Find and cache scrollable elements
   useEffect(() => {
-    let scrollTimeout: NodeJS.Timeout;
-
-    const handleScroll = (e: WheelEvent) => {
-      e.preventDefault();
-
-      setIsScrolling(true);
-      clearTimeout(scrollTimeout);
-      scrollTimeout = setTimeout(() => setIsScrolling(false), 150);
-
-      setScrollDepth(prev => {
-        const sensitivity = 0.002;
-        const newDepth = prev + (e.deltaY * sensitivity);
-        return Math.max(0, Math.min(sections.length - 1, newDepth));
+    const findElements = () => {
+      sections.forEach(section => {
+        const el = document.querySelector(
+          `[data-section-id="${section.id}"] [data-scrollable-section="true"]`
+        ) as HTMLElement;
+        if (el) {
+          sectionRefs.current.set(section.id, el);
+        }
       });
     };
 
-    const handleKeyPress = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowDown' || e.key === ' ') {
-        e.preventDefault();
-        setScrollDepth(prev => Math.min(sections.length - 1, prev + 1));
-      } else if (e.key === 'ArrowUp') {
-        e.preventDefault();
-        setScrollDepth(prev => Math.max(0, prev - 1));
-      }
-    };
+    // Initial search
+    findElements();
 
-    window.addEventListener('wheel', handleScroll, { passive: false });
-    window.addEventListener('keydown', handleKeyPress);
+    // Retry a few times to catch lazy-loaded elements
+    const timer1 = setTimeout(findElements, 100);
+    const timer2 = setTimeout(findElements, 500);
 
     return () => {
-      window.removeEventListener('wheel', handleScroll);
-      window.removeEventListener('keydown', handleKeyPress);
-      clearTimeout(scrollTimeout);
+      clearTimeout(timer1);
+      clearTimeout(timer2);
     };
-  }, [sections.length]);
+  }, [sections]);
+
+  // Apply scroll positions to DOM (render loop)
+  useEffect(() => {
+    const applyScrollPositions = () => {
+      subsectionScrolls.current.forEach((scrollPos, sectionId) => {
+        const el = sectionRefs.current.get(sectionId);
+        if (el) {
+          const maxScroll = el.scrollHeight - el.clientHeight;
+          el.scrollTop = scrollPos * maxScroll;
+        }
+      });
+      requestAnimationFrame(applyScrollPositions);
+    };
+
+    const rafId = requestAnimationFrame(applyScrollPositions);
+    return () => cancelAnimationFrame(rafId);
+  }, []);
+
+  // Scroll handler - clean and simple
+  useEffect(() => {
+    let scrollTimeout: NodeJS.Timeout | undefined;
+    let snapTimeout: NodeJS.Timeout | undefined;
+
+    const handleWheel = (e: WheelEvent) => {
+      e.preventDefault();
+
+      clearTimeout(scrollTimeout);
+      clearTimeout(snapTimeout);
+
+      setIsScrolling(true);
+      scrollTimeout = setTimeout(() => setIsScrolling(false), 150);
+
+      const sectionIndex = Math.round(scrollDepth);
+      const distFromCenter = Math.abs(scrollDepth - sectionIndex);
+      const atCenter = distFromCenter < 0.05;
+
+      const sectionId = sections[sectionIndex]?.id;
+      const hasScrollableContent = sectionRefs.current.has(sectionId);
+      const currentScroll = subsectionScrolls.current.get(sectionId) || 0;
+
+      const delta = e.deltaY;
+      const ZOOM_SPEED = 0.002;
+
+      // DOWN: Scroll content if at center, else zoom
+      if (delta > 0) {
+        if (atCenter && hasScrollableContent && currentScroll < 1) {
+          // Scroll subsection down
+          const newScroll = Math.min(1, currentScroll + delta * 0.001);
+          subsectionScrolls.current.set(sectionId, newScroll);
+        } else {
+          // Zoom forward with magnetic snap
+          setScrollDepth(prev => {
+            let newDepth = prev + delta * ZOOM_SPEED;
+
+            // Apply magnetic pull when approaching center
+            const nextIndex = Math.round(newDepth);
+            const distToNext = Math.abs(newDepth - nextIndex);
+            const SNAP_ZONE = 0.12;
+
+            if (distToNext < SNAP_ZONE) {
+              const snapPull = (SNAP_ZONE - distToNext) / SNAP_ZONE;
+              newDepth += (nextIndex - newDepth) * snapPull * 0.3;
+            }
+
+            return Math.max(0, Math.min(sections.length - 1, newDepth));
+          });
+        }
+      }
+      // UP: Scroll content if at center, else zoom
+      else {
+        if (atCenter && hasScrollableContent && currentScroll > 0) {
+          // Scroll subsection up
+          const newScroll = Math.max(0, currentScroll + delta * 0.001);
+          subsectionScrolls.current.set(sectionId, newScroll);
+        } else {
+          // Zoom backward - reset previous section to bottom
+          setScrollDepth(prev => {
+            let newDepth = prev + delta * ZOOM_SPEED;
+
+            // Apply magnetic pull when approaching center
+            const nextIndex = Math.round(newDepth);
+            const distToNext = Math.abs(newDepth - nextIndex);
+            const SNAP_ZONE = 0.12;
+
+            if (distToNext < SNAP_ZONE) {
+              const snapPull = (SNAP_ZONE - distToNext) / SNAP_ZONE;
+              newDepth += (nextIndex - newDepth) * snapPull * 0.3;
+            }
+
+            newDepth = Math.max(0, Math.min(sections.length - 1, newDepth));
+            const newIndex = Math.round(newDepth);
+
+            // Reset previous section to bottom when zooming back
+            if (newIndex < sectionIndex) {
+              const prevSectionId = sections[newIndex]?.id;
+              if (prevSectionId && sectionRefs.current.has(prevSectionId)) {
+                subsectionScrolls.current.set(prevSectionId, 1);
+              }
+            }
+
+            return newDepth;
+          });
+        }
+      }
+
+      // Snap to center when idle
+      snapTimeout = setTimeout(() => {
+        setScrollDepth(prev => {
+          const nearest = Math.round(prev);
+          const dist = Math.abs(prev - nearest);
+          return dist < 0.15 ? nearest : prev;
+        });
+      }, 200);
+    };
+
+    window.addEventListener('wheel', handleWheel, { passive: false });
+    return () => {
+      window.removeEventListener('wheel', handleWheel);
+      clearTimeout(scrollTimeout);
+      clearTimeout(snapTimeout);
+    };
+  }, [scrollDepth, sections]);
 
   useEffect(() => {
     const currentSectionIndex = Math.floor(scrollDepth);
     setActiveSection(sections[currentSectionIndex]?.id || 'home');
   }, [scrollDepth, sections]);
 
-  const navigateToSection = (sectionId: string) => {
-    const sectionIndex = sections.findIndex(s => s.id === sectionId);
-    if (sectionIndex !== -1) {
-      setScrollDepth(sectionIndex);
-      setActiveSection(sectionId);
-    }
-  };
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      setMousePosition({ x: e.clientX, y: e.clientY });
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
 
   // Calculate rotation based on scroll depth (full rotation = 360deg across all sections)
   const rotation = (scrollDepth / (sections.length - 1)) * 360;
@@ -132,7 +250,18 @@ const Portal: React.FC<PortalProps> = ({ onNavigate }) => {
   });
 
   return (
-    <div className="fixed inset-0 flex flex-col items-center justify-center p-4 bg-black" style={{ perspective: '1200px' }}>
+    <div className="fixed inset-0 flex flex-col items-center justify-center p-4 bg-black" style={{ perspective: '1200px', cursor: 'none' }}>
+
+      {/* Custom Mouse Cursor */}
+      <div
+        className="fixed w-3 h-3 rounded-full bg-white pointer-events-none z-[9999]"
+        style={{
+          left: `${mousePosition.x}px`,
+          top: `${mousePosition.y}px`,
+          transform: 'translate(-50%, -50%)',
+          boxShadow: '0 0 10px rgba(255, 255, 255, 0.5)'
+        }}
+      />
 
       {/* Knob Container */}
       <div className="relative">
@@ -140,7 +269,7 @@ const Portal: React.FC<PortalProps> = ({ onNavigate }) => {
         {/* Knob Markers - Outside the circle */}
         {knobMarkers.map((marker, i) => {
           const markerAngle = marker.angle - 90; // Start from top
-          const radius = isPortrait ? 'calc(45vw + 20px)' : 'calc(min(45vw, 45vh) + 20px)';
+          const radius = isPortrait ? 'calc(48vw + 20px)' : 'calc(min(48vw, 48vh) + 20px)';
 
           return (
             <div
@@ -173,8 +302,8 @@ const Portal: React.FC<PortalProps> = ({ onNavigate }) => {
         <div
           className="relative z-10 transition-transform"
           style={{
-            width: isPortrait ? '90vw' : 'min(90vw, 90vh)',
-            height: isPortrait ? '75vh' : 'min(85vw, 85vh)',
+            width: isPortrait ? '96vw' : 'min(96vw, 96vh)',
+            height: isPortrait ? '80vh' : 'min(92vw, 92vh)',
             background: '#000000',
             border: '6px solid #FFFFFF',
             borderRadius: '50%',
@@ -229,6 +358,7 @@ const Portal: React.FC<PortalProps> = ({ onNavigate }) => {
                 return (
                   <div
                     key={section.id}
+                    data-section-id={section.id}
                     className="absolute inset-0 flex items-center justify-center"
                     style={{
                       transform: `translateZ(${translateZ}px) scale(${scale})`,
@@ -240,7 +370,9 @@ const Portal: React.FC<PortalProps> = ({ onNavigate }) => {
                     }}
                   >
                     <div className="w-full max-w-5xl px-8 md:px-12 pt-8 md:pt-12">
-                      {section.component}
+                      <PortalProvider isActive={isActive}>
+                        {section.component}
+                      </PortalProvider>
                     </div>
                   </div>
                 );
@@ -249,30 +381,20 @@ const Portal: React.FC<PortalProps> = ({ onNavigate }) => {
 
           </div>
 
-          {/* Navigation - Bottom Minimal - Counter-rotates */}
+          {/* Single Square Position Indicator - Bottom - Counter-rotates */}
           <div
-            className="absolute bottom-6 md:bottom-8 left-0 right-0 z-50 flex items-center justify-center gap-3"
+            className="absolute bottom-2 md:bottom-3 left-1/2 -translate-x-1/2 z-50"
             style={{
-              transform: `rotate(-${rotation}deg)`,
+              transform: `translateX(-50%) rotate(-${rotation}deg)`,
               transition: 'transform 0.3s ease-out'
             }}
           >
-            {sections.map((section, index) => {
-              const isCurrentSection = Math.floor(scrollDepth) === index;
-
-              return (
-                <button
-                  key={section.id}
-                  className={`w-3 h-3 border-2 transition-all ${
-                    isCurrentSection
-                      ? 'bg-white border-white'
-                      : 'bg-black border-white hover:bg-white'
-                  }`}
-                  onClick={() => navigateToSection(section.id)}
-                  title={section.label}
-                />
-              );
-            })}
+            <div
+              className="w-3 h-3 bg-white"
+              style={{
+                boxShadow: '0 0 10px rgba(255, 255, 255, 0.6)'
+              }}
+            />
           </div>
 
         </div>
