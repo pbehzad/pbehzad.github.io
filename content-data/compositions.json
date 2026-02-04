@@ -1,0 +1,90 @@
+[
+  {
+    "id": "overcomplication",
+    "slug": "overcomplication",
+    "title": "OVERCOMPLICATION",
+    "year": "2025-03-01",
+    "instruments": "PIANO, MIDI-KEYBOARD",
+    "duration": null,
+    "description": null,
+    "program_notes": null,
+    "score_url": null,
+    "audio_urls": [],
+    "video_url": null,
+    "tags": [
+      "piano",
+      "midi",
+      "contemporary"
+    ],
+    "featured": true,
+    "status": "published",
+    "premiere": null,
+    "related_texts": [],
+    "created_at": "2025-01-01T00:00:00Z",
+    "updated_at": "2025-01-01T00:00:00Z"
+  },
+  {
+    "id": "shifts",
+    "slug": "shifts",
+    "title": "SHIFTS",
+    "year": "2025-01-01",
+    "instruments": "DOUBLE BASS, 8CH ELECTRONICS",
+    "duration": null,
+    "description": null,
+    "program_notes": null,
+    "score_url": null,
+    "audio_urls": [],
+    "video_url": null,
+    "tags": [
+      "double-bass",
+      "electronics",
+      "8-channel"
+    ],
+    "featured": true,
+    "status": "published",
+    "premiere": null,
+    "related_texts": [],
+    "created_at": "2025-01-01T00:00:00Z",
+    "updated_at": "2025-01-01T00:00:00Z"
+  },
+  {
+    "id": "simiyya",
+    "slug": "simiyya",
+    "title": "SIMIYYA",
+    "year": "2023-06-01",
+    "instruments": "SEXTET",
+    "duration": null,
+    "description": null,
+    "program_notes": null,
+    "score_url": null,
+    "audio_urls": [],
+    "video_url": null,
+    "tags": [
+      "chamber",
+      "sextet"
+    ],
+    "featured": false,
+    "status": "published",
+    "premiere": null,
+    "related_texts": [],
+    "created_at": "2023-01-01T00:00:00Z",
+    "updated_at": "2023-01-01T00:00:00Z"
+  },
+  {
+    "id": "one-is-coming",
+    "slug": "one-is-coming",
+    "title": "one is coming...",
+    "year": "2025-06-01",
+    "instruments": "Voice, Smartphones",
+    "duration": "7",
+    "description": null,
+    "program_notes": null,
+    "audio_urls": [],
+    "tags": [],
+    "featured": false,
+    "status": "published",
+    "related_texts": [],
+    "created_at": "2026-01-29T14:29:13.585Z",
+    "updated_at": "2026-01-29T14:40:42.892Z"
+  }
+]

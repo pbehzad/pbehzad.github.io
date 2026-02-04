@@ -1,0 +1,80 @@
+[
+  {
+    "id": "one-coming",
+    "slug": "one-coming",
+    "title": "ONE COMING... (premiere)",
+    "date": "2026-06-14",
+    "venue": "Musikverein",
+    "city": "Vienna",
+    "country": "Austria",
+    "role": "Composer",
+    "status": "published",
+    "created_at": "2025-01-01T00:00:00Z",
+    "updated_at": "2025-01-01T00:00:00Z"
+  },
+  {
+    "id": "shifts",
+    "slug": "shifts",
+    "title": "SHIFTS",
+    "date": "2026-04-20",
+    "venue": "ZKM",
+    "city": "Karlsruhe",
+    "country": "Germany",
+    "role": "Composer / Electronics",
+    "status": "published",
+    "created_at": "2025-01-01T00:00:00Z",
+    "updated_at": "2025-01-01T00:00:00Z"
+  },
+  {
+    "id": "overcomplication",
+    "slug": "overcomplication",
+    "title": "OVERCOMPLICATION",
+    "date": "2026-03-10",
+    "venue": "Elbphilharmonie",
+    "city": "Hamburg",
+    "country": "Germany",
+    "role": "Composer",
+    "status": "published",
+    "created_at": "2025-01-01T00:00:00Z",
+    "updated_at": "2025-01-01T00:00:00Z"
+  },
+  {
+    "id": "micro-clones",
+    "slug": "micro-clones",
+    "title": "MICRO-CLONES",
+    "date": "2025-11-22",
+    "venue": "Konzerthaus",
+    "city": "Berlin",
+    "country": "Germany",
+    "role": "Composer",
+    "status": "published",
+    "created_at": "2025-01-01T00:00:00Z",
+    "updated_at": "2025-01-01T00:00:00Z"
+  },
+  {
+    "id": "simiyya",
+    "slug": "simiyya",
+    "title": "SIMIYYA",
+    "date": "2025-06-08",
+    "venue": "IRCAM",
+    "city": "Paris",
+    "country": "France",
+    "role": "Composer",
+    "status": "published",
+    "created_at": "2025-01-01T00:00:00Z",
+    "updated_at": "2025-01-01T00:00:00Z"
+  },
+  {
+    "id": "brahms-sewing-machine",
+    "slug": "brahms-sewing-machine",
+    "title": "BRAHMS AT THE SEWING MACHINE",
+    "date": "2024-09-15",
+    "venue": "Muziekgebouw",
+    "city": "Amsterdam",
+    "country": "Netherlands",
+    "role": "Composer",
+    "status": "published",
+    "created_at": "2025-01-01T00:00:00Z",
+    "updated_at": "2025-01-01T00:00:00Z"
+  }
+]

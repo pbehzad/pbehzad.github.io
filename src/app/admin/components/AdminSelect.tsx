@@ -1,0 +1,31 @@
+'use client';
+
+import React from 'react';
+
+interface AdminSelectProps {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  options: { value: string; label: string }[];
+}
+
+export default function AdminSelect({ label, value, onChange, options }: AdminSelectProps) {
+  return (
+    <div className="flex flex-col gap-1.5">
+      <label className="text-xs font-normal uppercase tracking-wider opacity-40">
+        {label}
+      </label>
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="bg-black border-b border-white/15 text-sm font-normal py-2 outline-none focus:border-white/50 transition-colors text-white"
+      >
+        {options.map((opt) => (
+          <option key={opt.value} value={opt.value}>
+            {opt.label}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+}

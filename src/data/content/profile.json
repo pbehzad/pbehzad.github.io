@@ -1,0 +1,26 @@
+{
+  "name": "Parham Behzad",
+  "title": "COMPOSER",
+  "subtitle": "DEVELOPER",
+  "tagline": "MUSIC × PHILOSOPHY × TECHNOLOGY",
+  "bio": "ACOUSTIC COMPOSITION, LIVE ELECTRONICS, AUDIO PROGRAMMING, AND THEORETICAL RESEARCH INTO POST-HEIDEGGERIAN AESTHETICS",
+  "specializations": [
+    "COMPOSITION",
+    "AUDIO PROGRAMMING",
+    "MUSIC ENGRAVING",
+    "THEORETICAL RESEARCH"
+  ],
+  "skills": [
+    {
+      "category": "PROGRAMMING",
+      "items": ["MAX/MSP", "JAVASCRIPT"]
+    },
+    {
+      "category": "NOTATION & PRODUCTION",
+      "items": ["SIBELIUS", "REAPER"]
+    }
+  ],
+  "education": [],
+  "awards": [],
+  "updated_at": "2025-01-01T00:00:00Z"
+}
