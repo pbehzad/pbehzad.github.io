@@ -365,27 +365,28 @@ const Portal: React.FC = () => {
     window.history.pushState({}, '', sections[index].path);
   }, []);
 
-  // Desktop: single click navigates to nearest section, double click expands.
-  // Mobile: single tap expands.
+  // Clicking the orb always navigates to the nearest section.
+  // Exception: mobile corner orb expands to show the full section menu.
   const handleOrbClick = useCallback(() => {
     if (didDrag.current) {
       didDrag.current = false;
       return;
     }
-    if (!isOrbInCorner || isOrbExpanded) return;
+    if (isOrbExpanded) return;
     setHasInteracted(true);
-    if (isMobile) {
+    // Mobile corner orb: expand so the user can switch sections
+    if (isOrbInCorner && isMobile) {
       setIsOrbExpanded(true);
+      return;
+    }
+    // All other cases: navigate to nearest section
+    const nearestIndex = Math.round(scrollDepth);
+    if (nearestIndex === 0) {
+      handleGoHome();
     } else {
-      // Desktop: navigate to the nearest section
-      const nearestIndex = Math.round(scrollDepth);
-      if (nearestIndex === 0) {
-        handleGoHome();
-      } else {
-        setActiveSection(nearestIndex);
-        setScrollDepth(nearestIndex);
-        window.history.pushState({}, '', sections[nearestIndex].path);
-      }
+      setActiveSection(nearestIndex);
+      setScrollDepth(nearestIndex);
+      window.history.pushState({}, '', sections[nearestIndex].path);
     }
   }, [isOrbInCorner, isOrbExpanded, isMobile, scrollDepth]);
 
@@ -580,8 +581,8 @@ const Portal: React.FC = () => {
           <div className="text-[10px] md:text-xs uppercase tracking-wider opacity-60">
             {showOrbLarge
               ? (isMobile
-                ? 'Swipe to explore. Tap a title to open.'
-                : 'Scroll to explore. Click a title to open.')
+                ? 'Swipe to explore. Tap to open.'
+                : 'Scroll to explore. Click to open.')
               : (isMobile
                 ? 'Tap orb to open section list.'
                 : 'Click orb to jump. Double-click to expand.')}
