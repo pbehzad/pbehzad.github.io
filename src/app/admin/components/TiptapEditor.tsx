@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 
 interface TiptapEditorProps {
   content: string;
@@ -9,42 +9,28 @@ interface TiptapEditorProps {
 }
 
 export default function TiptapEditor({ content, onChange, placeholder }: TiptapEditorProps) {
-  const [isPreview, setIsPreview] = useState(false);
-
   return (
     <div className="border border-white/20 rounded">
-      {/* Mode toggle */}
-      <div className="flex items-center border-b border-white/10 px-1 py-1">
-        <button
-          type="button"
-          onClick={() => setIsPreview(false)}
-          className={`px-2 py-1 text-xs font-mono transition-opacity ${!isPreview ? 'opacity-100' : 'opacity-40 hover:opacity-70'}`}
-        >
-          Code
-        </button>
-        <button
-          type="button"
-          onClick={() => setIsPreview(true)}
-          className={`px-2 py-1 text-xs font-mono transition-opacity ${isPreview ? 'opacity-100' : 'opacity-40 hover:opacity-70'}`}
-        >
-          Preview
-        </button>
+      {/* Labels */}
+      <div className="flex border-b border-white/10">
+        <div className="w-1/2 px-4 py-1 text-xs font-mono opacity-40 border-r border-white/10">Code</div>
+        <div className="w-1/2 px-4 py-1 text-xs font-mono opacity-40">Preview</div>
       </div>
 
-      {isPreview ? (
-        <div
-          className="prose prose-invert prose-sm max-w-none px-4 py-3 min-h-[200px]"
-          dangerouslySetInnerHTML={{ __html: content || '<p class="opacity-30">Nothing to preview</p>' }}
-        />
-      ) : (
+      {/* Side-by-side panels */}
+      <div className="flex min-h-[400px]">
         <textarea
           value={content}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder || 'Write HTML content...'}
-          className="w-full min-h-[200px] bg-transparent text-white/80 font-mono text-xs px-4 py-3 focus:outline-none resize-y"
+          className="w-1/2 bg-transparent text-white/80 font-mono text-xs px-4 py-3 focus:outline-none resize-none border-r border-white/10"
           spellCheck={false}
         />
-      )}
+        <div
+          className="w-1/2 prose prose-invert prose-sm max-w-none px-4 py-3 overflow-auto"
+          dangerouslySetInnerHTML={{ __html: content || '<p style="opacity:0.3">Nothing to preview</p>' }}
+        />
+      </div>
     </div>
   );
 }
