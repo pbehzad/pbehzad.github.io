@@ -28,7 +28,7 @@ export default async function CompositionPage({
         </Link>
       </div>
 
-      <div className="max-w-3xl mx-auto px-6 py-16 md:py-24">
+      <div className="max-w-3xl mx-auto px-6 pt-5 pb-16 md:pb-24">
         {/* Back link */}
         <Link
           href="/compositions"
