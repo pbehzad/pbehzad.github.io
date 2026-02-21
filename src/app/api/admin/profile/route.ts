@@ -4,7 +4,7 @@ import { profileSchema } from '@/data/schemas';
 
 export async function GET() {
   try {
-    const { data, error } = getProfile();
+    const { data, error } = await getProfile();
     if (error) return NextResponse.json({ error }, { status: 500 });
     return NextResponse.json(data);
   } catch {
@@ -20,7 +20,7 @@ export async function PUT(request: NextRequest) {
       updated_at: new Date().toISOString(),
     };
 
-    const result = writeJsonContent('profile.json', updated, profileSchema);
+    const result = await writeJsonContent('profile.json', updated, profileSchema);
     if (!result.success) {
       return NextResponse.json({ error: result.error }, { status: 400 });
     }

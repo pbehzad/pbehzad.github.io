@@ -4,16 +4,16 @@ export interface Text {
   title: string;
   year: number;
   type: 'essay' | 'article' | 'paper' | 'note';
-  description?: string;
-  abstract?: string;
-  content_file?: string; // Markdown file path
-  pdf_url?: string;
-  external_url?: string;
+  description?: string | null;
+  abstract?: string | null;
+  content_file?: string | null;
+  pdf_url?: string | null;
+  external_url?: string | null;
   tags?: string[];
   featured?: boolean;
   status: 'draft' | 'published';
-  published_in?: string;
-  related_compositions?: string[]; // IDs of related compositions
+  published_in?: string | null;
+  related_compositions?: string[];
   created_at: string;
   updated_at: string;
 }

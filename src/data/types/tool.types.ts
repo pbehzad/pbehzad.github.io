@@ -3,12 +3,12 @@ export interface Tool {
   slug: string;
   name: string;
   year: string;
-  description?: string;
+  description?: string | null;
   category?: 'web-audio' | 'max-msp' | 'notation' | 'composition' | 'other';
   technologies?: string[];
-  url?: string;
-  github_url?: string;
-  image_url?: string;
+  url?: string | null;
+  github_url?: string | null;
+  image_url?: string | null;
   featured?: boolean;
   status: 'draft' | 'published' | 'in-progress' | 'archived';
   created_at: string;

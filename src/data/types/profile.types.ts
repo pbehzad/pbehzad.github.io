@@ -24,11 +24,11 @@ export interface Profile {
 
 export interface ContactInfo {
   email: string;
-  github?: string;
-  website?: string;
-  linkedin?: string;
-  soundcloud?: string;
-  bandcamp?: string;
+  github?: string | null;
+  website?: string | null;
+  linkedin?: string | null;
+  soundcloud?: string | null;
+  bandcamp?: string | null;
   availability_status: string;
   updated_at: string;
 }

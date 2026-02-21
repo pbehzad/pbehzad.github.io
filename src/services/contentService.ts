@@ -1,5 +1,4 @@
-import fs from 'fs';
-import path from 'path';
+import { getStorageAdapter } from '@/lib/storage-adapter';
 import type {
   Composition,
   Text,
@@ -19,34 +18,50 @@ import {
   contactSchema,
   homeContentSchema
 } from '@/data/schemas';
-
-const contentDirectory = path.join(process.cwd(), 'src/data/content');
+import { z } from 'zod';
 
 /**
- * Generic function to load and validate JSON content
+ * Generic function to load and validate JSON content from storage adapter
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function loadJsonContent<T>(filename: string, schema: any): T {
-  try {
-    const filePath = path.join(contentDirectory, filename);
-    const fileContents = fs.readFileSync(filePath, 'utf8');
-    const data = JSON.parse(fileContents);
+async function loadJsonContent<T>(filename: string, schema: z.ZodSchema<T>): Promise<T> {
+  const adapter = getStorageAdapter();
+  const file = await adapter.readFile(filename);
+  if (!file) {
+    throw new Error(`File not found: ${filename}`);
+  }
+  const data = JSON.parse(file.content);
+  return schema.parse(data);
+}
 
-    // Validate with Zod schema
+/**
+ * Generic function to write JSON content via storage adapter
+ */
+async function writeJsonContentToStorage<T>(
+  filename: string,
+  data: T,
+  schema: z.ZodSchema<T>
+): Promise<{ success: boolean; error?: string }> {
+  try {
     const validated = schema.parse(data);
-    return validated;
+    const adapter = getStorageAdapter();
+    const existing = await adapter.readFile(filename);
+    const content = JSON.stringify(validated, null, 2);
+    await adapter.writeFile(filename, content, existing?.sha);
+    return { success: true };
   } catch (error) {
-    console.error(`Error loading ${filename}:`, error);
-    throw error;
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Validation or write failed'
+    };
   }
 }
 
 /**
  * COMPOSITIONS
  */
-export function getAllCompositions(): ContentResponse<Composition[]> {
+export async function getAllCompositions(): Promise<ContentResponse<Composition[]>> {
   try {
-    const compositions = loadJsonContent<Composition[]>('compositions.json', compositionsArraySchema);
+    const compositions = await loadJsonContent('compositions.json', compositionsArraySchema);
     const published = compositions
       .filter(c => c.status === 'published')
       .sort((a, b) => b.year.localeCompare(a.year));
@@ -62,9 +77,9 @@ export function getAllCompositions(): ContentResponse<Composition[]> {
   }
 }
 
-export function getCompositionBySlug(slug: string): ContentResponse<Composition | null> {
+export async function getCompositionBySlug(slug: string): Promise<ContentResponse<Composition | null>> {
   try {
-    const { data: compositions } = getAllCompositions();
+    const { data: compositions } = await getAllCompositions();
     const composition = compositions.find(c => c.slug === slug);
     return { data: composition || null };
   } catch (error) {
@@ -75,9 +90,9 @@ export function getCompositionBySlug(slug: string): ContentResponse<Composition 
   }
 }
 
-export function getFeaturedCompositions(limit?: number): ContentResponse<Composition[]> {
+export async function getFeaturedCompositions(limit?: number): Promise<ContentResponse<Composition[]>> {
   try {
-    const { data: compositions } = getAllCompositions();
+    const { data: compositions } = await getAllCompositions();
     const featured = compositions.filter(c => c.featured);
     return {
       data: limit ? featured.slice(0, limit) : featured
@@ -90,12 +105,24 @@ export function getFeaturedCompositions(limit?: number): ContentResponse<Composi
   }
 }
 
+export async function getAllCompositionsRaw(): Promise<ContentResponse<Composition[]>> {
+  try {
+    const compositions = await loadJsonContent('compositions.json', compositionsArraySchema);
+    return { data: compositions, metadata: { total: compositions.length } };
+  } catch (error) {
+    return {
+      data: [],
+      error: error instanceof Error ? error.message : 'Unknown error'
+    };
+  }
+}
+
 /**
  * TEXTS
  */
-export function getAllTexts(): ContentResponse<Text[]> {
+export async function getAllTexts(): Promise<ContentResponse<Text[]>> {
   try {
-    const texts = loadJsonContent<Text[]>('texts.json', textsArraySchema);
+    const texts = await loadJsonContent('texts.json', textsArraySchema);
     return {
       data: texts.filter(t => t.status === 'published'),
       metadata: { total: texts.length }
@@ -108,9 +135,9 @@ export function getAllTexts(): ContentResponse<Text[]> {
   }
 }
 
-export function getTextBySlug(slug: string): ContentResponse<Text | null> {
+export async function getTextBySlug(slug: string): Promise<ContentResponse<Text | null>> {
   try {
-    const { data: texts } = getAllTexts();
+    const { data: texts } = await getAllTexts();
     const text = texts.find(t => t.slug === slug);
     return { data: text || null };
   } catch (error) {
@@ -124,9 +151,9 @@ export function getTextBySlug(slug: string): ContentResponse<Text | null> {
 /**
  * TOOLS
  */
-export function getAllTools(): ContentResponse<Tool[]> {
+export async function getAllTools(): Promise<ContentResponse<Tool[]>> {
   try {
-    const tools = loadJsonContent<Tool[]>('tools.json', toolsArraySchema);
+    const tools = await loadJsonContent('tools.json', toolsArraySchema);
     return {
       data: tools.filter(t => t.status === 'published' || t.status === 'in-progress'),
       metadata: { total: tools.length }
@@ -139,9 +166,9 @@ export function getAllTools(): ContentResponse<Tool[]> {
   }
 }
 
-export function getToolBySlug(slug: string): ContentResponse<Tool | null> {
+export async function getToolBySlug(slug: string): Promise<ContentResponse<Tool | null>> {
   try {
-    const { data: tools } = getAllTools();
+    const { data: tools } = await getAllTools();
     const tool = tools.find(t => t.slug === slug);
     return { data: tool || null };
   } catch (error) {
@@ -155,18 +182,18 @@ export function getToolBySlug(slug: string): ContentResponse<Tool | null> {
 /**
  * PROFILE & CONTACT
  */
-export function getProfile(): ContentResponse<Profile> {
+export async function getProfile(): Promise<ContentResponse<Profile>> {
   try {
-    const profile = loadJsonContent<Profile>('profile.json', profileSchema);
+    const profile = await loadJsonContent('profile.json', profileSchema);
     return { data: profile };
   } catch (error) {
     throw error;
   }
 }
 
-export function getContactInfo(): ContentResponse<ContactInfo> {
+export async function getContactInfo(): Promise<ContentResponse<ContactInfo>> {
   try {
-    const contact = loadJsonContent<ContactInfo>('contact.json', contactSchema);
+    const contact = await loadJsonContent('contact.json', contactSchema);
     return { data: contact };
   } catch (error) {
     throw error;
@@ -176,9 +203,9 @@ export function getContactInfo(): ContentResponse<ContactInfo> {
 /**
  * HOME
  */
-export function getHomeContent(): ContentResponse<HomeContent> {
+export async function getHomeContent(): Promise<ContentResponse<HomeContent>> {
   try {
-    const home = loadJsonContent<HomeContent>('home.json', homeContentSchema);
+    const home = await loadJsonContent('home.json', homeContentSchema);
     return { data: home };
   } catch (error) {
     throw error;
@@ -188,9 +215,9 @@ export function getHomeContent(): ContentResponse<HomeContent> {
 /**
  * EVENTS
  */
-export function getAllEvents(): ContentResponse<Event[]> {
+export async function getAllEvents(): Promise<ContentResponse<Event[]>> {
   try {
-    const events = loadJsonContent<Event[]>('events.json', eventsArraySchema);
+    const events = await loadJsonContent('events.json', eventsArraySchema);
     return {
       data: events.filter(e => e.status === 'published'),
       metadata: { total: events.length }
@@ -203,9 +230,9 @@ export function getAllEvents(): ContentResponse<Event[]> {
   }
 }
 
-export function getAllEventsRaw(): ContentResponse<Event[]> {
+export async function getAllEventsRaw(): Promise<ContentResponse<Event[]>> {
   try {
-    const events = loadJsonContent<Event[]>('events.json', eventsArraySchema);
+    const events = await loadJsonContent('events.json', eventsArraySchema);
     return { data: events, metadata: { total: events.length } };
   } catch (error) {
     return {
@@ -216,50 +243,28 @@ export function getAllEventsRaw(): ContentResponse<Event[]> {
 }
 
 /**
- * WRITE UTILITY
+ * WRITE UTILITIES
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function writeJsonContent<T>(filename: string, data: T, schema: any): { success: boolean; error?: string } {
-  try {
-    const validated = schema.parse(data);
-    const filePath = path.join(contentDirectory, filename);
-    fs.writeFileSync(filePath, JSON.stringify(validated, null, 2) + '\n', 'utf8');
-    return { success: true };
-  } catch (error) {
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Validation or write failed'
-    };
-  }
-}
-
-/**
- * RAW LOADERS (include drafts, for admin)
- */
-export function getAllCompositionsRaw(): ContentResponse<Composition[]> {
-  try {
-    const compositions = loadJsonContent<Composition[]>('compositions.json', compositionsArraySchema);
-    return { data: compositions, metadata: { total: compositions.length } };
-  } catch (error) {
-    return {
-      data: [],
-      error: error instanceof Error ? error.message : 'Unknown error'
-    };
-  }
+export async function writeJsonContent<T>(
+  filename: string,
+  data: T,
+  schema: z.ZodSchema<T>
+): Promise<{ success: boolean; error?: string }> {
+  return writeJsonContentToStorage(filename, data, schema);
 }
 
 /**
  * SEARCH & FILTER UTILITIES
  */
-export function searchContent(query: string): ContentResponse<{
+export async function searchContent(query: string): Promise<ContentResponse<{
   compositions: Composition[];
   texts: Text[];
   tools: Tool[];
-}> {
+}>> {
   try {
-    const { data: compositions } = getAllCompositions();
-    const { data: texts } = getAllTexts();
-    const { data: tools } = getAllTools();
+    const { data: compositions } = await getAllCompositions();
+    const { data: texts } = await getAllTexts();
+    const { data: tools } = await getAllTools();
 
     const lowerQuery = query.toLowerCase();
 

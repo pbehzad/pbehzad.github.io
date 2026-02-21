@@ -4,7 +4,7 @@ import { contactSchema } from '@/data/schemas';
 
 export async function GET() {
   try {
-    const { data, error } = getContactInfo();
+    const { data, error } = await getContactInfo();
     if (error) return NextResponse.json({ error }, { status: 500 });
     return NextResponse.json(data);
   } catch {
@@ -20,7 +20,7 @@ export async function PUT(request: NextRequest) {
       updated_at: new Date().toISOString(),
     };
 
-    const result = writeJsonContent('contact.json', updated, contactSchema);
+    const result = await writeJsonContent('contact.json', updated, contactSchema);
     if (!result.success) {
       return NextResponse.json({ error: result.error }, { status: 400 });
     }

@@ -4,7 +4,7 @@ import { eventsArraySchema } from '@/data/schemas';
 import type { Event } from '@/data/types';
 
 export async function GET() {
-  const { data, error } = getAllEventsRaw();
+  const { data, error } = await getAllEventsRaw();
   if (error) return NextResponse.json({ error }, { status: 500 });
   return NextResponse.json(data);
 }
@@ -12,7 +12,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { data: existing } = getAllEventsRaw();
+    const { data: existing } = await getAllEventsRaw();
 
     const now = new Date().toISOString();
     const slug = body.title
@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
     };
 
     const updated = [...existing, newItem];
-    const result = writeJsonContent('events.json', updated, eventsArraySchema);
+    const result = await writeJsonContent('events.json', updated, eventsArraySchema);
 
     if (!result.success) {
       return NextResponse.json({ error: result.error }, { status: 400 });
@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json();
-    const { data: existing } = getAllEventsRaw();
+    const { data: existing } = await getAllEventsRaw();
 
     const index = existing.findIndex(e => e.id === body.id);
     if (index === -1) {
@@ -61,7 +61,7 @@ export async function PUT(request: NextRequest) {
       updated_at: new Date().toISOString(),
     };
 
-    const result = writeJsonContent('events.json', existing, eventsArraySchema);
+    const result = await writeJsonContent('events.json', existing, eventsArraySchema);
     if (!result.success) {
       return NextResponse.json({ error: result.error }, { status: 400 });
     }
@@ -78,14 +78,14 @@ export async function PUT(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   try {
     const { id } = await request.json();
-    const { data: existing } = getAllEventsRaw();
+    const { data: existing } = await getAllEventsRaw();
 
     const filtered = existing.filter(e => e.id !== id);
     if (filtered.length === existing.length) {
       return NextResponse.json({ error: 'Not found' }, { status: 404 });
     }
 
-    const result = writeJsonContent('events.json', filtered, eventsArraySchema);
+    const result = await writeJsonContent('events.json', filtered, eventsArraySchema);
     if (!result.success) {
       return NextResponse.json({ error: result.error }, { status: 400 });
     }

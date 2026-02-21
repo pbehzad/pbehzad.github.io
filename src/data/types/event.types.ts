@@ -5,11 +5,11 @@ export interface Event {
   date: string;
   venue: string;
   city: string;
-  country?: string;
+  country?: string | null;
   role: string;
-  program?: string;
-  ensemble?: string;
-  url?: string;
+  program?: string | null;
+  ensemble?: string | null;
+  url?: string | null;
   status: 'draft' | 'published';
   created_at: string;
   updated_at: string;
