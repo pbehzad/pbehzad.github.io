@@ -174,7 +174,7 @@ const Portal: React.FC = () => {
       orbEl.removeEventListener('touchmove', handleTouchMoveDrag);
       orbEl.removeEventListener('touchend', handleTouchEndDrag);
     };
-  }, [isOrbInCorner]);
+  }, [isOrbInCorner, isOrbExpanded]);
 
   // Handle wheel + touch events on the orb (section scrolling)
   useEffect(() => {
@@ -354,8 +354,6 @@ const Portal: React.FC = () => {
   }, []);
 
   const handleSectionClick = useCallback((index: number) => {
-    // When orb is small in corner, don't navigate — the orb click handler will expand it
-    if (isOrbInCorner && !isOrbExpanded) return;
     setHasInteracted(true);
     if (index === 0) {
       handleGoHome();
@@ -365,7 +363,7 @@ const Portal: React.FC = () => {
     setScrollDepth(index);
     setIsOrbExpanded(false);
     window.history.pushState({}, '', sections[index].path);
-  }, [isOrbInCorner, isOrbExpanded]);
+  }, []);
 
   // Desktop: single click navigates to nearest section, double click expands.
   // Mobile: single tap expands.
@@ -408,7 +406,8 @@ const Portal: React.FC = () => {
 
   const TILT_SENSITIVITY = 0.1;
   const TILT_MAX = 15;
-  const tiltAngle = Math.max(-TILT_MAX, Math.min(TILT_MAX, scrollVelocity * TILT_SENSITIVITY));
+  // Disable tilt on mobile — rotateY + preserve-3d + overflow:hidden causes iOS rendering bugs
+  const tiltAngle = isMobile ? 0 : Math.max(-TILT_MAX, Math.min(TILT_MAX, scrollVelocity * TILT_SENSITIVITY));
 
   // Compute warped border-radius: bulge the contour toward the mouse
   const WARP_AMOUNT = 8; // max % deviation from 50%
@@ -527,7 +526,7 @@ const Portal: React.FC = () => {
                       transformStyle: 'preserve-3d',
                       transition: isScrolling ? 'none' : 'all 0.3s ease-out',
                     }}
-                    onClick={() => handleSectionClick(index)}
+                    onClick={(e) => { e.stopPropagation(); handleSectionClick(index); }}
                   >
                     <div className="text-center">
                       {section.id === 'home' && (
@@ -551,7 +550,7 @@ const Portal: React.FC = () => {
                             showOrbLarge
                               ? 'text-4xl md:text-6xl'
                               : 'text-[10px]'
-                          }`}
+                          } ${isClickable ? 'underline' : ''}`}
                         >
                           {section.title}
                         </h2>
@@ -592,10 +591,14 @@ const Portal: React.FC = () => {
 
       {/* Content area — center, slightly right */}
       <div
-        className={`absolute inset-0 flex items-start justify-center overflow-y-auto transition-all duration-500 ${
+        className={`absolute inset-0 flex items-start justify-center overflow-y-auto transition-opacity duration-500 ${
           ActiveComponent && !isOrbExpanded ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
         }`}
-        style={{ zIndex: 30 }}
+        style={{
+          zIndex: 30,
+          WebkitOverflowScrolling: 'touch',
+          touchAction: 'pan-y',
+        } as React.CSSProperties}
       >
         <div
           className="w-full max-w-4xl px-4 md:px-12 py-16 md:py-24 md:ml-[5%]"
