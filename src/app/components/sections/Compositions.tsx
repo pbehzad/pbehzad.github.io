@@ -39,7 +39,7 @@ const Compositions: React.FC = () => {
             className="block cursor-pointer hover:opacity-60 transition-opacity"
           >
             <div className="flex flex-col md:flex-row md:items-baseline gap-1 md:gap-0">
-              <span className="text-sm font-normal md:w-[600px] md:ml-[-100px]">
+              <span className="inline-block py-1 text-base md:text-lg font-normal leading-tight md:w-[600px] md:ml-[-100px]">
                 {comp.title}
               </span>
               <span className="text-xs font-normal opacity-40 shrink-0">

@@ -43,7 +43,7 @@ const Events: React.FC = () => {
             {upcoming.map((event) => (
               <div key={event.id} className="cursor-pointer hover:opacity-60 transition-opacity">
                 <div className="flex flex-col md:flex-row md:items-baseline gap-1 md:gap-0">
-                  <span className="text-sm font-normal md:w-[600px] md:ml-[-100px]">
+                  <span className="inline-block py-1 text-base md:text-lg font-normal leading-tight md:w-[600px] md:ml-[-100px]">
                     {event.title}
                   </span>
                   <span className="text-xs font-normal opacity-40 shrink-0">
@@ -69,7 +69,7 @@ const Events: React.FC = () => {
             {past.map((event) => (
               <div key={event.id} className="cursor-pointer hover:opacity-60 transition-opacity">
                 <div className="flex flex-col md:flex-row md:items-baseline gap-1 md:gap-0">
-                  <span className="text-sm font-normal opacity-50 md:w-[600px] md:ml-[-100px]">
+                  <span className="inline-block py-1 text-base md:text-lg font-normal leading-tight opacity-50 md:w-[600px] md:ml-[-100px]">
                     {event.title}
                   </span>
                   <span className="text-xs font-normal opacity-30 shrink-0">

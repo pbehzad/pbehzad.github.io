@@ -34,6 +34,7 @@ const Portal: React.FC = () => {
   const [isDragging, setIsDragging] = useState(false);
   const [orbPosition, setOrbPosition] = useState<{ x: number; y: number } | null>(null);
   const [isOrbExpanded, setIsOrbExpanded] = useState(false);
+  const [hasInteracted, setHasInteracted] = useState(false);
   const orbRef = useRef<HTMLDivElement>(null);
   const dragOffset = useRef({ x: 0, y: 0 });
   const didDrag = useRef(false);
@@ -48,6 +49,14 @@ const Portal: React.FC = () => {
     return () => window.removeEventListener('resize', check);
   }, []);
 
+  // Lock body scroll while portal is mounted
+  useEffect(() => {
+    document.body.classList.add('portal-lock');
+    return () => {
+      document.body.classList.remove('portal-lock');
+    };
+  }, []);
+
   // Initialize from URL on mount
   useEffect(() => {
     const path = window.location.pathname;
@@ -55,6 +64,7 @@ const Portal: React.FC = () => {
     if (idx !== undefined && idx > 0) {
       setActiveSection(idx);
       setScrollDepth(idx);
+      setHasInteracted(true);
     }
   }, []);
 
@@ -66,6 +76,7 @@ const Portal: React.FC = () => {
       if (idx !== undefined && idx > 0) {
         setActiveSection(idx);
         setScrollDepth(idx);
+        setHasInteracted(true);
       } else {
         setActiveSection(null);
         setScrollDepth(0);
@@ -175,6 +186,7 @@ const Portal: React.FC = () => {
     const handleWheel = (e: WheelEvent) => {
       e.preventDefault();
       e.stopPropagation();
+      setHasInteracted(true);
 
       clearTimeout(scrollTimeout);
       setIsScrolling(true);
@@ -206,6 +218,7 @@ const Portal: React.FC = () => {
 
     const handleWheel = (e: WheelEvent) => {
       e.preventDefault();
+      setHasInteracted(true);
 
       clearTimeout(scrollTimeout);
       setIsScrolling(true);
@@ -225,6 +238,7 @@ const Portal: React.FC = () => {
     const handleTouchStart = (e: TouchEvent) => {
       lastTouchY = e.touches[0].clientY;
       setIsScrolling(true);
+      setHasInteracted(true);
     };
 
     const handleTouchMove = (e: TouchEvent) => {
@@ -342,6 +356,7 @@ const Portal: React.FC = () => {
   const handleSectionClick = useCallback((index: number) => {
     // When orb is small in corner, don't navigate — the orb click handler will expand it
     if (isOrbInCorner && !isOrbExpanded) return;
+    setHasInteracted(true);
     if (index === 0) {
       handleGoHome();
       return;
@@ -360,6 +375,7 @@ const Portal: React.FC = () => {
       return;
     }
     if (!isOrbInCorner || isOrbExpanded) return;
+    setHasInteracted(true);
     if (isMobile) {
       setIsOrbExpanded(true);
     } else {
@@ -377,6 +393,7 @@ const Portal: React.FC = () => {
 
   const handleOrbDoubleClick = useCallback(() => {
     if (isOrbInCorner && !isOrbExpanded) {
+      setHasInteracted(true);
       setIsOrbExpanded(true);
     }
   }, [isOrbInCorner, isOrbExpanded]);
@@ -403,6 +420,7 @@ const Portal: React.FC = () => {
   const brBR = 50 - (( w.x +  w.y) * 0.5 * WARP_AMOUNT);
   const brBL = 50 - ((-w.x +  w.y) * 0.5 * WARP_AMOUNT);
   const warpedBorderRadius = `${brTL}% ${brTR}% ${brBR}% ${brBL}%`;
+  const nearestSectionIndex = Math.round(scrollDepth);
 
   const ActiveComponent = activeSection !== null && activeSection > 0
     ? sections[activeSection].component
@@ -487,7 +505,7 @@ const Portal: React.FC = () => {
               {sections.map((section, index) => {
                 const distance = index - scrollDepth;
                 const isVisible = Math.abs(distance) < 5;
-                const isClickable = Math.abs(distance) < 3;
+                const isClickable = index === nearestSectionIndex;
 
                 if (!isVisible) return null;
 
@@ -499,12 +517,12 @@ const Portal: React.FC = () => {
                 return (
                   <div
                     key={section.id}
-                    className="absolute inset-0 flex items-center justify-center cursor-pointer"
+                    className={`absolute inset-0 flex items-center justify-center ${isClickable ? 'cursor-pointer' : 'cursor-default'}`}
                     style={{
                       transform: `translateZ(${translateZ}px) scale(${scale})`,
                       opacity,
                       filter: `blur(${blur}px)`,
-                      zIndex: Math.floor(100 - index * 10 + distance * 5),
+                      zIndex: Math.floor(1000 - absDistance * 100),
                       pointerEvents: isClickable ? 'auto' : 'none',
                       transformStyle: 'preserve-3d',
                       transition: isScrolling ? 'none' : 'all 0.3s ease-out',
@@ -556,6 +574,21 @@ const Portal: React.FC = () => {
           />
         </div>
       </div>
+
+      {/* First-visit guidance */}
+      {!hasInteracted && (
+        <div className="fixed left-1/2 bottom-8 -translate-x-1/2 z-50 pointer-events-none text-center">
+          <div className="text-[10px] md:text-xs uppercase tracking-wider opacity-60">
+            {showOrbLarge
+              ? (isMobile
+                ? 'Swipe to explore. Tap a title to open.'
+                : 'Scroll to explore. Click a title to open.')
+              : (isMobile
+                ? 'Tap orb to open section list.'
+                : 'Click orb to jump. Double-click to expand.')}
+          </div>
+        </div>
+      )}
 
       {/* Content area — center, slightly right */}
       <div

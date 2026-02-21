@@ -29,13 +29,20 @@ body {
   font-family: 'JetBrains Mono', monospace !important;
   margin: 0;
   padding: 0;
-  overflow: hidden;
-  height: 100vh;
-  height: 100svh;
+  overflow-x: hidden;
+  overflow-y: auto;
+  min-height: 100vh;
+  min-height: 100svh;
   touch-action: manipulation;
   font-weight: 700;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+body.portal-lock {
+  overflow: hidden;
+  height: 100vh;
+  height: 100svh;
 }
 
 /* Brutalist Button Reset */
