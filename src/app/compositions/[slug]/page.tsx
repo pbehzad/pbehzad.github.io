@@ -28,7 +28,7 @@ export default async function CompositionPage({
         </Link>
       </div>
 
-      <div className="max-w-3xl mx-auto px-6 pt-5 pb-16 md:pb-24">
+      <div className="max-w-3xl mx-auto px-6 pb-16 md:pb-24" style={{ paddingTop: '80px' }}>
         {/* Back link */}
         <Link
           href="/compositions"
