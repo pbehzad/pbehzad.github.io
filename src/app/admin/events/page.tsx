@@ -28,20 +28,21 @@ export default function EventsAdmin() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-xs font-normal uppercase tracking-wider opacity-40">
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-lg font-normal" style={{ color: '#e5e5e5' }}>
           Events
         </h1>
         <Link
           href="/admin/events/new"
-          className="text-xs font-normal uppercase tracking-wider px-3 py-1.5 border border-white/20 hover:border-white/50 transition-colors"
+          className="text-sm font-normal px-4 py-2 rounded transition-colors"
+          style={{ background: '#ffffff', color: '#000000' }}
         >
-          + new
+          + New
         </Link>
       </div>
 
       {loading ? (
-        <div className="text-sm font-normal opacity-30">loading...</div>
+        <div className="text-sm" style={{ color: '#555' }}>Loading…</div>
       ) : (
         <AdminTable
           columns={[
@@ -53,7 +54,7 @@ export default function EventsAdmin() {
               key: 'status',
               label: 'Status',
               render: (v) => (
-                <span className={`text-xs ${v === 'published' ? 'opacity-60' : 'opacity-30'}`}>
+                <span style={{ color: v === 'published' ? '#4ade80' : '#888', fontSize: '12px' }}>
                   {String(v)}
                 </span>
               ),

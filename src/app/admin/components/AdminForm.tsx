@@ -14,41 +14,48 @@ interface AdminFormProps {
 
 export default function AdminForm({ children, onSave, onCancel, onDelete, saving, error, success }: AdminFormProps) {
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-5">
       {children}
 
       {error && (
-        <div className="text-xs font-normal text-red-400">{error}</div>
+        <div className="text-sm px-4 py-3 rounded" style={{ background: '#2a1010', color: '#f87171', border: '1px solid #5a1a1a' }}>
+          {error}
+        </div>
       )}
 
       {success && (
-        <div className="text-xs font-normal text-green-400">{success}</div>
+        <div className="text-sm px-4 py-3 rounded" style={{ background: '#0f2a18', color: '#4ade80', border: '1px solid #1a5a2a' }}>
+          {success}
+        </div>
       )}
 
-      <div className="flex items-center gap-4 pt-4 border-t border-white/10">
+      <div className="flex items-center gap-3 pt-5" style={{ borderTop: '1px solid #222' }}>
         <button
           onClick={onSave}
           disabled={saving}
-          className="text-xs font-normal uppercase tracking-wider px-4 py-2 border border-white/30 hover:border-white/60 transition-colors disabled:opacity-20"
+          className="text-sm font-normal px-5 py-2 rounded transition-opacity disabled:opacity-40"
+          style={{ background: '#ffffff', color: '#000000' }}
         >
-          {saving ? 'saving...' : 'save'}
+          {saving ? 'Saving…' : 'Save'}
         </button>
 
         {onCancel && (
           <button
             onClick={onCancel}
-            className="text-xs font-normal uppercase tracking-wider opacity-40 hover:opacity-100 transition-opacity"
+            className="text-sm font-normal px-5 py-2 rounded transition-colors"
+            style={{ background: 'transparent', color: '#888', border: '1px solid #333' }}
           >
-            cancel
+            Cancel
           </button>
         )}
 
         {onDelete && (
           <button
             onClick={onDelete}
-            className="text-xs font-normal uppercase tracking-wider opacity-30 hover:opacity-100 hover:text-red-400 transition-all ml-auto"
+            className="text-sm font-normal px-5 py-2 rounded transition-colors ml-auto"
+            style={{ background: 'transparent', color: '#f87171', border: '1px solid #5a1a1a' }}
           >
-            delete
+            Delete
           </button>
         )}
       </div>

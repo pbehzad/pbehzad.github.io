@@ -22,13 +22,18 @@ export default function Sidebar() {
   };
 
   return (
-    <nav className="w-48 shrink-0 border-r border-white/10 h-screen sticky top-0 flex flex-col justify-between py-8 px-6">
+    <nav
+      className="w-56 shrink-0 h-screen sticky top-0 flex flex-col justify-between py-8 px-5"
+      style={{ background: '#0a0a0a', borderRight: '1px solid #222' }}
+    >
       <div>
-        <Link href="/" className="text-xs font-normal uppercase tracking-wider opacity-40 hover:opacity-100 transition-opacity">
-          site
-        </Link>
+        <div className="mb-8">
+          <span className="text-xs font-normal uppercase tracking-widest" style={{ color: '#555' }}>
+            Admin
+          </span>
+        </div>
 
-        <div className="mt-12 flex flex-col gap-1">
+        <div className="flex flex-col gap-0.5">
           {navItems.map((item) => {
             const isActive = pathname === item.href ||
               (item.href !== '/admin' && pathname.startsWith(item.href));
@@ -37,22 +42,35 @@ export default function Sidebar() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`text-sm font-normal py-1.5 transition-opacity ${
-                  isActive ? 'opacity-100' : 'opacity-40 hover:opacity-70'
-                }`}
+                className="text-sm font-normal px-3 py-2 rounded transition-colors"
+                style={{
+                  color: isActive ? '#ffffff' : '#888',
+                  background: isActive ? '#1e1e1e' : 'transparent',
+                }}
               >
                 {item.label}
               </Link>
             );
           })}
         </div>
+
+        <div className="mt-8 pt-6" style={{ borderTop: '1px solid #1a1a1a' }}>
+          <Link
+            href="/"
+            className="text-xs font-normal px-3 py-2 rounded block transition-colors"
+            style={{ color: '#555' }}
+          >
+            ← View site
+          </Link>
+        </div>
       </div>
 
       <button
         onClick={handleLogout}
-        className="text-xs font-normal uppercase tracking-wider opacity-30 hover:opacity-100 transition-opacity text-left"
+        className="text-xs font-normal px-3 py-2 rounded text-left transition-colors"
+        style={{ color: '#555' }}
       >
-        logout
+        Sign out
       </button>
     </nav>
   );
