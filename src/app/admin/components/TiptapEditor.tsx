@@ -18,7 +18,7 @@ export default function TiptapEditor({ content, onChange, placeholder }: TiptapE
       </div>
 
       {/* Side-by-side panels */}
-      <div className="flex min-h-[400px]">
+      <div className="flex min-h-[600px]">
         <textarea
           value={content}
           onChange={(e) => onChange(e.target.value)}

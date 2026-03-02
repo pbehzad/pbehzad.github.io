@@ -93,12 +93,12 @@ export default function EditComposition() {
   };
 
   if (loading) {
-    return <div className="text-sm font-normal opacity-30">loading...</div>;
+    return <div className="text-sm" style={{ color: '#555' }}>Loading…</div>;
   }
 
   return (
-    <div className="max-w-2xl">
-      <h1 className="text-xs font-normal uppercase tracking-wider opacity-40 mb-8">
+    <div>
+      <h1 className="text-lg font-normal mb-6" style={{ color: '#e5e5e5' }}>
         Edit Composition
       </h1>
 
@@ -110,22 +110,17 @@ export default function EditComposition() {
         error={error}
         success={success}
       >
-        <AdminInput label="Title" value={title} onChange={setTitle} required />
-        <AdminInput label="Date" value={year} onChange={setYear} type="date" required />
-        <AdminInput label="Instruments" value={instruments} onChange={setInstruments} required />
-        <AdminInput label="Duration" value={duration} onChange={setDuration} placeholder="e.g. 12'" />
-        <AdminTextarea label="Description" value={description} onChange={setDescription} />
-        <AdminTextarea label="Program Notes" value={programNotes} onChange={setProgramNotes} rows={6} />
+        {/* Metadata — compact grid */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <AdminInput label="Title" value={title} onChange={setTitle} required />
+          <AdminInput label="Date" value={year} onChange={setYear} type="date" required />
+          <AdminInput label="Instruments" value={instruments} onChange={setInstruments} required />
+          <AdminInput label="Duration" value={duration} onChange={setDuration} placeholder="e.g. 12'" />
+        </div>
 
-        <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-normal uppercase tracking-wider opacity-40">
-            Content
-          </label>
-          <TiptapEditor
-            content={htmlContent}
-            onChange={setHtmlContent}
-            placeholder="Write detailed composition page content..."
-          />
+        <div className="grid grid-cols-2 gap-4">
+          <AdminTextarea label="Description" value={description} onChange={setDescription} rows={3} />
+          <AdminTextarea label="Program Notes" value={programNotes} onChange={setProgramNotes} rows={3} />
         </div>
 
         <AdminSelect
@@ -137,6 +132,18 @@ export default function EditComposition() {
             { value: 'published', label: 'Published' },
           ]}
         />
+
+        {/* Full-width HTML editor */}
+        <div className="flex flex-col gap-1.5">
+          <label className="text-xs font-normal uppercase tracking-wider" style={{ color: '#888' }}>
+            Content
+          </label>
+          <TiptapEditor
+            content={htmlContent}
+            onChange={setHtmlContent}
+            placeholder="Write detailed composition page content..."
+          />
+        </div>
       </AdminForm>
     </div>
   );
