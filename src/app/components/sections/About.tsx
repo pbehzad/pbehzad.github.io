@@ -36,27 +36,12 @@ const About: React.FC = () => {
           {profile.bio}
         </p>
 
-        <div className="mt-12 md:mt-16 flex flex-col gap-8">
-          <div>
-            <h3 className="text-xs font-normal uppercase opacity-40 mb-4">specializations</h3>
-            <div className="flex flex-col gap-2">
-              {profile.specializations.map((spec, i) => (
-                <span key={i} className="text-sm font-normal">{spec}</span>
-              ))}
-            </div>
-          </div>
-
-          {profile.skills.map((skillGroup, i) => (
-            <div key={i}>
-              <h3 className="text-xs font-normal uppercase opacity-40 mb-4">{skillGroup.category}</h3>
-              <div className="flex flex-col gap-2">
-                {skillGroup.items.map((skill, j) => (
-                  <span key={j} className="text-sm font-normal">{skill}</span>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
+        {profile.html_content && (
+          <div
+            className="mt-12 prose prose-invert prose-sm max-w-none"
+            dangerouslySetInnerHTML={{ __html: profile.html_content }}
+          />
+        )}
       </div>
 
     </div>

@@ -2,15 +2,16 @@ import { z } from 'zod';
 
 export const profileSchema = z.object({
   name: z.string().min(1),
-  title: z.string().min(1),
-  subtitle: z.string().min(1),
-  tagline: z.string().min(1),
+  title: z.string().optional().default(''),
+  subtitle: z.string().optional().default(''),
+  tagline: z.string().optional().default(''),
   bio: z.string().min(1),
-  specializations: z.array(z.string()),
+  html_content: z.string().nullable().optional(),
+  specializations: z.array(z.string()).optional().default([]),
   skills: z.array(z.object({
     category: z.string(),
     items: z.array(z.string()),
-  })),
+  })).optional().default([]),
   education: z.array(z.object({
     degree: z.string(),
     institution: z.string(),

@@ -1,11 +1,12 @@
 export interface Profile {
   name: string;
-  title: string;
-  subtitle: string;
-  tagline: string;
+  title?: string;
+  subtitle?: string;
+  tagline?: string;
   bio: string;
-  specializations: string[];
-  skills: {
+  html_content?: string | null;
+  specializations?: string[];
+  skills?: {
     category: string;
     items: string[];
   }[];
