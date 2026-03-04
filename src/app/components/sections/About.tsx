@@ -32,7 +32,7 @@ const About: React.FC = () => {
       </div>
 
       <div className="pt-8 md:pt-12 pl-4 md:pl-32">
-        <p className="text-sm font-normal leading-relaxed max-w-lg opacity-80">
+        <p className="text-sm font-normal leading-relaxed max-w-lg opacity-80 whitespace-pre-line">
           {profile.bio}
         </p>
 
