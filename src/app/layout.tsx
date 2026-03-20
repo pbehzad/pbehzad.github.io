@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Parham Behzad",
-  description: "Parham Behzad is a composer exploring emergent musical systems, ecological sound practices, and participatory performance.",
+  description: "Parham Behzad is a composer exploring emergent musical systems, ecological sound practices, and participatory performanc",
   icons: {
     icon: "/branding/logo-primary.svg",
     shortcut: "/branding/logo-primary.svg",

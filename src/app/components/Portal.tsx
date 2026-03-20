@@ -454,8 +454,8 @@ const Portal: React.FC = () => {
         onDoubleClick={handleOrbDoubleClick}
         className="absolute z-40"
         style={{
-          width: showOrbLarge ? (isMobile ? 'min(80vw, 80vh)' : 'min(72vw, 72vh)') : (isMobile ? '160px' : '160px'),
-          height: showOrbLarge ? (isMobile ? 'min(80vw, 80vh)' : 'min(72vw, 72vh)') : (isMobile ? '160px' : '160px'),
+          width: showOrbLarge ? (isMobile ? 'min(99vw, 99vh)' : 'min(99vw, 99vh)') : (isMobile ? '180px' : '180px'),
+          height: showOrbLarge ? (isMobile ? 'min(99vw, 99vh)' : 'min(99vw, 99vh)') : (isMobile ? '180px' : '180px'),
           ...(showOrbLarge
             ? {
                 left: '50%',
@@ -534,8 +534,8 @@ const Portal: React.FC = () => {
                         <div
                           className="rounded-full overflow-hidden border border-white/30"
                           style={{
-                            width: '75%',
-                            height: '75%',
+                            width: '98%',
+                            height: '98%',
                             margin: '0 auto',
                             opacity: Math.max(0, 1 - absDistance * 1.2),
                             filter: `blur(${absDistance * 6}px)`,
