@@ -454,8 +454,8 @@ const Portal: React.FC = () => {
         onDoubleClick={handleOrbDoubleClick}
         className="absolute z-40"
         style={{
-          width: showOrbLarge ? 'min(55vw, 55vh)' : (isMobile ? '110px' : '120px'),
-          height: showOrbLarge ? 'min(55vw, 55vh)' : (isMobile ? '110px' : '120px'),
+          width: showOrbLarge ? (isMobile ? 'min(80vw, 80vh)' : 'min(72vw, 72vh)') : (isMobile ? '160px' : '160px'),
+          height: showOrbLarge ? (isMobile ? 'min(80vw, 80vh)' : 'min(72vw, 72vh)') : (isMobile ? '160px' : '160px'),
           ...(showOrbLarge
             ? {
                 left: '50%',
