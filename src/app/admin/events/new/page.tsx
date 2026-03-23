@@ -103,7 +103,7 @@ export default function NewEvent() {
 
       <div className="mt-8">
         <div className="text-xs font-normal uppercase tracking-wider opacity-40 mb-4">HTML Content</div>
-        <TiptapEditor value={htmlContent} onChange={setHtmlContent} />
+        <TiptapEditor content={htmlContent} onChange={setHtmlContent} />
       </div>
     </div>
   );
