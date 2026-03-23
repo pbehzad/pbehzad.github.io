@@ -31,6 +31,36 @@ const Events: React.FC = () => {
     .filter(e => new Date(e.date) < now)
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
+  const hasContent = (event: { description?: string | null; html_content?: string | null }) =>
+    !!(event.description || event.html_content);
+
+  const EventRow = ({ event, dim }: { event: typeof events[0]; dim?: boolean }) => {
+    const inner = (
+      <>
+        <div className="flex flex-col md:flex-row md:items-baseline gap-1 md:gap-0">
+          <span className={`inline-block py-1 text-base md:text-lg font-normal leading-tight md:w-[600px] md:ml-[-100px] ${dim ? 'opacity-50' : ''}`}>
+            {event.title}
+          </span>
+          <span className={`text-xs font-normal shrink-0 ${dim ? 'opacity-30' : 'opacity-40'}`}>
+            {event.date}
+          </span>
+        </div>
+        <div className={`text-xs font-normal mt-0.5 md:ml-[-100px] ${dim ? 'opacity-20' : 'opacity-30'}`}>
+          {event.venue}, {event.city}
+        </div>
+      </>
+    );
+
+    if (hasContent(event)) {
+      return (
+        <Link href={`/events/${event.slug}`} className="hover:opacity-60 transition-opacity block" style={{ borderBottom: 'none' }}>
+          {inner}
+        </Link>
+      );
+    }
+    return <div>{inner}</div>;
+  };
+
   return (
     <div className="w-full">
 
@@ -46,21 +76,7 @@ const Events: React.FC = () => {
             <span className="text-xs font-normal uppercase opacity-40">upcoming</span>
           </div>
           <div className="flex flex-col gap-6 pt-6 pl-4 md:pl-32">
-            {upcoming.map((event) => (
-              <Link key={event.id} href={`/events/${event.slug}`} className="no-underline hover:opacity-60 transition-opacity">
-                <div className="flex flex-col md:flex-row md:items-baseline gap-1 md:gap-0">
-                  <span className="inline-block py-1 text-base md:text-lg font-normal leading-tight md:w-[600px] md:ml-[-100px]">
-                    {event.title}
-                  </span>
-                  <span className="text-xs font-normal opacity-40 shrink-0">
-                    {event.date}
-                  </span>
-                </div>
-                <div className="text-xs font-normal opacity-30 mt-0.5 md:ml-[-100px]">
-                  {event.venue}, {event.city}
-                </div>
-              </Link>
-            ))}
+            {upcoming.map((event) => <EventRow key={event.id} event={event} />)}
           </div>
         </>
       )}
@@ -72,21 +88,7 @@ const Events: React.FC = () => {
             <span className="text-xs font-normal uppercase opacity-40">past</span>
           </div>
           <div className="flex flex-col gap-6 pt-6 pl-4 md:pl-32">
-            {past.map((event) => (
-              <Link key={event.id} href={`/events/${event.slug}`} className="no-underline hover:opacity-60 transition-opacity">
-                <div className="flex flex-col md:flex-row md:items-baseline gap-1 md:gap-0">
-                  <span className="inline-block py-1 text-base md:text-lg font-normal leading-tight opacity-50 md:w-[600px] md:ml-[-100px]">
-                    {event.title}
-                  </span>
-                  <span className="text-xs font-normal opacity-30 shrink-0">
-                    {event.date}
-                  </span>
-                </div>
-                <div className="text-xs font-normal opacity-20 mt-0.5 md:ml-[-100px]">
-                  {event.venue}, {event.city}
-                </div>
-              </Link>
-            ))}
+            {past.map((event) => <EventRow key={event.id} event={event} dim />)}
           </div>
         </>
       )}
