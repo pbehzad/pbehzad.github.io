@@ -3,8 +3,10 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import AdminInput from '../../components/AdminInput';
+import AdminTextarea from '../../components/AdminTextarea';
 import AdminSelect from '../../components/AdminSelect';
 import AdminForm from '../../components/AdminForm';
+import TiptapEditor from '../../components/TiptapEditor';
 
 export default function EditEvent() {
   const router = useRouter();
@@ -25,6 +27,8 @@ export default function EditEvent() {
   const [program, setProgram] = useState('');
   const [ensemble, setEnsemble] = useState('');
   const [url, setUrl] = useState('');
+  const [description, setDescription] = useState('');
+  const [htmlContent, setHtmlContent] = useState('');
   const [status, setStatus] = useState('draft');
 
   useEffect(() => {
@@ -42,6 +46,8 @@ export default function EditEvent() {
           setProgram(item.program || '');
           setEnsemble(item.ensemble || '');
           setUrl(item.url || '');
+          setDescription(item.description || '');
+          setHtmlContent(item.html_content || '');
           setStatus(item.status);
         }
         setLoading(false);
@@ -68,6 +74,8 @@ export default function EditEvent() {
           program: program || null,
           ensemble: ensemble || null,
           url: url || null,
+          description: description || null,
+          html_content: htmlContent || null,
           status,
         }),
       });
@@ -102,7 +110,7 @@ export default function EditEvent() {
   }
 
   return (
-    <div className="max-w-lg">
+    <div>
       <h1 className="text-xs font-normal uppercase tracking-wider opacity-40 mb-8">
         Edit Event
       </h1>
@@ -124,6 +132,7 @@ export default function EditEvent() {
         <AdminInput label="Program" value={program} onChange={setProgram} />
         <AdminInput label="Ensemble" value={ensemble} onChange={setEnsemble} />
         <AdminInput label="URL" value={url} onChange={setUrl} />
+        <AdminTextarea label="Description" value={description} onChange={setDescription} rows={4} />
         <AdminSelect
           label="Status"
           value={status}
@@ -134,6 +143,11 @@ export default function EditEvent() {
           ]}
         />
       </AdminForm>
+
+      <div className="mt-8">
+        <div className="text-xs font-normal uppercase tracking-wider opacity-40 mb-4">HTML Content</div>
+        <TiptapEditor value={htmlContent} onChange={setHtmlContent} />
+      </div>
     </div>
   );
 }

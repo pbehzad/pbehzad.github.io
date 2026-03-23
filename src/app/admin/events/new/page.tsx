@@ -3,8 +3,10 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import AdminInput from '../../components/AdminInput';
+import AdminTextarea from '../../components/AdminTextarea';
 import AdminSelect from '../../components/AdminSelect';
 import AdminForm from '../../components/AdminForm';
+import TiptapEditor from '../../components/TiptapEditor';
 
 export default function NewEvent() {
   const router = useRouter();
@@ -20,6 +22,8 @@ export default function NewEvent() {
   const [program, setProgram] = useState('');
   const [ensemble, setEnsemble] = useState('');
   const [url, setUrl] = useState('');
+  const [description, setDescription] = useState('');
+  const [htmlContent, setHtmlContent] = useState('');
   const [status, setStatus] = useState('draft');
 
   const handleSave = async () => {
@@ -45,6 +49,8 @@ export default function NewEvent() {
           program: program || null,
           ensemble: ensemble || null,
           url: url || null,
+          description: description || null,
+          html_content: htmlContent || null,
           status,
         }),
       });
@@ -63,7 +69,7 @@ export default function NewEvent() {
   };
 
   return (
-    <div className="max-w-lg">
+    <div>
       <h1 className="text-xs font-normal uppercase tracking-wider opacity-40 mb-8">
         New Event
       </h1>
@@ -83,6 +89,7 @@ export default function NewEvent() {
         <AdminInput label="Program" value={program} onChange={setProgram} placeholder="piece being performed" />
         <AdminInput label="Ensemble" value={ensemble} onChange={setEnsemble} />
         <AdminInput label="URL" value={url} onChange={setUrl} placeholder="https://..." />
+        <AdminTextarea label="Description" value={description} onChange={setDescription} rows={4} />
         <AdminSelect
           label="Status"
           value={status}
@@ -93,6 +100,11 @@ export default function NewEvent() {
           ]}
         />
       </AdminForm>
+
+      <div className="mt-8">
+        <div className="text-xs font-normal uppercase tracking-wider opacity-40 mb-4">HTML Content</div>
+        <TiptapEditor value={htmlContent} onChange={setHtmlContent} />
+      </div>
     </div>
   );
 }

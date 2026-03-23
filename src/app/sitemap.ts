@@ -13,7 +13,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
 
   try {
-    const { data: compositions } = await getAllCompositions();
+    const [{ data: compositions }, { data: events }] = await Promise.all([
+      getAllCompositions(),
+      getAllEvents(),
+    ]);
+
     const compositionRoutes: MetadataRoute.Sitemap = compositions.map((c) => ({
       url: `${BASE_URL}/compositions/${c.slug}`,
       lastModified: new Date(),
@@ -21,7 +25,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.7,
     }));
 
-    return [...staticRoutes, ...compositionRoutes];
+    const eventRoutes: MetadataRoute.Sitemap = events.map((e) => ({
+      url: `${BASE_URL}/events/${e.slug}`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.6,
+    }));
+
+    return [...staticRoutes, ...compositionRoutes, ...eventRoutes];
   } catch {
     return staticRoutes;
   }

@@ -10,6 +10,8 @@ export interface Event {
   program?: string | null;
   ensemble?: string | null;
   url?: string | null;
+  description?: string | null;
+  html_content?: string | null;
   status: 'draft' | 'published';
   created_at: string;
   updated_at: string;

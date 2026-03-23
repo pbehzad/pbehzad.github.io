@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
 import { useEvents } from '@/services/hooks/useContent';
 
 const Events: React.FC = () => {
@@ -22,8 +23,13 @@ const Events: React.FC = () => {
     );
   }
 
-  const upcoming = events.filter(e => new Date(e.date) >= new Date());
-  const past = events.filter(e => new Date(e.date) < new Date());
+  const now = new Date();
+  const upcoming = events
+    .filter(e => new Date(e.date) >= now)
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  const past = events
+    .filter(e => new Date(e.date) < now)
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
   return (
     <div className="w-full">
@@ -41,7 +47,7 @@ const Events: React.FC = () => {
           </div>
           <div className="flex flex-col gap-6 pt-6 pl-4 md:pl-32">
             {upcoming.map((event) => (
-              <div key={event.id} className="cursor-pointer hover:opacity-60 transition-opacity">
+              <Link key={event.id} href={`/events/${event.slug}`} className="no-underline hover:opacity-60 transition-opacity">
                 <div className="flex flex-col md:flex-row md:items-baseline gap-1 md:gap-0">
                   <span className="inline-block py-1 text-base md:text-lg font-normal leading-tight md:w-[600px] md:ml-[-100px]">
                     {event.title}
@@ -53,7 +59,7 @@ const Events: React.FC = () => {
                 <div className="text-xs font-normal opacity-30 mt-0.5 md:ml-[-100px]">
                   {event.venue}, {event.city}
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         </>
@@ -67,7 +73,7 @@ const Events: React.FC = () => {
           </div>
           <div className="flex flex-col gap-6 pt-6 pl-4 md:pl-32">
             {past.map((event) => (
-              <div key={event.id} className="cursor-pointer hover:opacity-60 transition-opacity">
+              <Link key={event.id} href={`/events/${event.slug}`} className="no-underline hover:opacity-60 transition-opacity">
                 <div className="flex flex-col md:flex-row md:items-baseline gap-1 md:gap-0">
                   <span className="inline-block py-1 text-base md:text-lg font-normal leading-tight opacity-50 md:w-[600px] md:ml-[-100px]">
                     {event.title}
@@ -79,7 +85,7 @@ const Events: React.FC = () => {
                 <div className="text-xs font-normal opacity-20 mt-0.5 md:ml-[-100px]">
                   {event.venue}, {event.city}
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         </>

@@ -230,6 +230,19 @@ export async function getAllEvents(): Promise<ContentResponse<Event[]>> {
   }
 }
 
+export async function getEventBySlug(slug: string): Promise<ContentResponse<Event | null>> {
+  try {
+    const { data: events } = await getAllEvents();
+    const event = events.find(e => e.slug === slug);
+    return { data: event || null };
+  } catch (error) {
+    return {
+      data: null,
+      error: error instanceof Error ? error.message : 'Unknown error'
+    };
+  }
+}
+
 export async function getAllEventsRaw(): Promise<ContentResponse<Event[]>> {
   try {
     const events = await loadJsonContent('events.json', eventsArraySchema);

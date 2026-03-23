@@ -12,6 +12,8 @@ export const eventSchema = z.object({
   program: z.string().nullable().optional(),
   ensemble: z.string().nullable().optional(),
   url: z.string().url().nullable().optional(),
+  description: z.string().nullable().optional(),
+  html_content: z.string().nullable().optional(),
   status: z.enum(['draft', 'published']).default('published'),
   created_at: z.string().datetime(),
   updated_at: z.string().datetime(),
