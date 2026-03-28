@@ -34,8 +34,8 @@ export default async function AboutPage() {
 
   return (
     <>
-      {/* Visible to search engines, hidden from visual display */}
-      <div aria-hidden="true" style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', opacity: 0, pointerEvents: 'none' }}>
+      {/* SSR content for search engines — visually hidden but indexable */}
+      <div style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', opacity: 0, pointerEvents: 'none' }}>
         <h1>About Parham Behzad</h1>
         {bio && <p>{bio}</p>}
         {htmlContent && <div dangerouslySetInnerHTML={{ __html: htmlContent }} />}
