@@ -19,6 +19,7 @@ export default function EditEvent() {
   const [success, setSuccess] = useState<string | null>(null);
 
   const [title, setTitle] = useState('');
+  const [slug, setSlug] = useState('');
   const [date, setDate] = useState('');
   const [venue, setVenue] = useState('');
   const [city, setCity] = useState('');
@@ -31,6 +32,8 @@ export default function EditEvent() {
   const [htmlContent, setHtmlContent] = useState('');
   const [status, setStatus] = useState('draft');
 
+  const toSlug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+
   useEffect(() => {
     fetch('/api/admin/events')
       .then(r => r.json())
@@ -38,6 +41,7 @@ export default function EditEvent() {
         const item = data.find((e: { id: string }) => e.id === id);
         if (item) {
           setTitle(item.title);
+          setSlug(item.slug || '');
           setDate(item.date);
           setVenue(item.venue);
           setCity(item.city);
@@ -66,6 +70,7 @@ export default function EditEvent() {
         body: JSON.stringify({
           id,
           title,
+          slug,
           date,
           venue,
           city,
@@ -123,7 +128,8 @@ export default function EditEvent() {
         error={error}
         success={success}
       >
-        <AdminInput label="Title" value={title} onChange={setTitle} required />
+        <AdminInput label="Title" value={title} onChange={(v) => { setTitle(v); setSlug(toSlug(v)); }} required />
+        <AdminInput label="Slug (URL)" value={slug} onChange={setSlug} />
         <AdminInput label="Date" value={date} onChange={setDate} type="date" required />
         <AdminInput label="Venue" value={venue} onChange={setVenue} required />
         <AdminInput label="City" value={city} onChange={setCity} required />

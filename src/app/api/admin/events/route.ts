@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
     const { data: existing } = await getAllEventsRaw();
 
     const now = new Date().toISOString();
-    const slug = body.title
+    const slug = (body.slug || body.title)
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/(^-|-$)/g, '');

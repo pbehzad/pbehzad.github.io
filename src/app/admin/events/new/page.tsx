@@ -14,7 +14,10 @@ export default function NewEvent() {
   const [error, setError] = useState<string | null>(null);
 
   const [title, setTitle] = useState('');
+  const [slug, setSlug] = useState('');
   const [date, setDate] = useState('');
+
+  const toSlug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
   const [venue, setVenue] = useState('');
   const [city, setCity] = useState('');
   const [country, setCountry] = useState('');
@@ -41,6 +44,7 @@ export default function NewEvent() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           title,
+          slug: slug || toSlug(title),
           date,
           venue,
           city,
@@ -80,7 +84,8 @@ export default function NewEvent() {
         saving={saving}
         error={error}
       >
-        <AdminInput label="Title" value={title} onChange={setTitle} required />
+        <AdminInput label="Title" value={title} onChange={(v) => { setTitle(v); setSlug(toSlug(v)); }} required />
+        <AdminInput label="Slug (URL)" value={slug} onChange={setSlug} />
         <AdminInput label="Date" value={date} onChange={setDate} type="date" required />
         <AdminInput label="Venue" value={venue} onChange={setVenue} required />
         <AdminInput label="City" value={city} onChange={setCity} required />
