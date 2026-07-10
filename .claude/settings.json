@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx eslint *)",
+      "Bash(npx tsc *)",
+      "Skill(run)",
+      "Skill(run:*)",
+      "Bash(npx --yes playwright --version)",
+      "Bash(npm view *)",
+      "Bash(npm search *)",
+      "Bash(curl -s https://raw.githubusercontent.com/chenglou/pretext/master/README.md)",
+      "Bash(SCREENSHOT_DIR=./shots node drive2.mjs)",
+      "Bash(npx --no-install playwright install --dry-run chromium)",
+      "Read(//Users/parhambehzad/Library/Caches/ms-playwright/**)",
+      "Read(//Users/parhambehzad/.cache/**)",
+      "Bash(npx --no-install playwright screenshot --viewport-size=1600,900 --wait-for-timeout=2000 http://localhost:3002/design-lab __TRACKED_VAR__/v3_a.png)",
+      "Bash(convert /private/tmp/claude-501/-Users-parhambehzad-Projects-parhambehzad-com-pbehzad-github-io/ce95a4cd-03e6-411b-afb1-7ebc9ffad896/scratchpad/v3_a.png -crop 900x40+300+0 +repage -filter point -resize 400% /private/tmp/claude-501/-Users-parhambehzad-Projects-parhambehzad-com-pbehzad-github-io/ce95a4cd-03e6-411b-afb1-7ebc9ffad896/scratchpad/v3_top_zoom.png)"
+    ]
+  }
+}
