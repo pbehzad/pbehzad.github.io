@@ -193,12 +193,27 @@ export default function AsciiSpace() {
     lantern.position.copy(camera.position);
     scene.add(lantern);
 
-    const renderer = new THREE.WebGLRenderer({ antialias: false });
-    // Finer than the library default (0.15): a coarser grid means each
-    // character averages a wider window of source pixels, which is the
-    // other half of diluting the seam away (see createPanelTexture).
-    const effect = new AsciiEffect(renderer, RAMP, { invert: true, resolution: 0.22 });
-    effect.domElement.style.color = '#6e6e6e';
+    let renderer: THREE.WebGLRenderer;
+    let effect: AsciiEffect;
+    try {
+      renderer = new THREE.WebGLRenderer({ antialias: false });
+      // Finer than the library default (0.15): a coarser grid means each
+      // character averages a wider window of source pixels, which is the
+      // other half of diluting the seam away (see createPanelTexture).
+      effect = new AsciiEffect(renderer, RAMP, { invert: true, resolution: 0.22 });
+    } catch {
+      geometry.dispose();
+      materials.forEach((m) => {
+        m.map?.dispose();
+        m.dispose();
+      });
+      baseTexture.dispose();
+      return;
+    }
+    // Dimming lives in the glyph color, NOT in CSS opacity on the wrapper:
+    // opacity < 1 would isolate this layer from backdrop-filter sampling, so
+    // the column glass panes could never blur it (#5a5a5a = #969696 at 60%).
+    effect.domElement.style.color = '#5a5a5a';
     effect.domElement.style.backgroundColor = 'transparent';
     effect.setSize(window.innerWidth, window.innerHeight);
     container.appendChild(effect.domElement);
@@ -222,7 +237,9 @@ export default function AsciiSpace() {
     return () => {
       window.removeEventListener('resize', handleResize);
       cancelAnimationFrame(rafId);
-      container.removeChild(effect.domElement);
+      if (container.contains(effect.domElement)) {
+        container.removeChild(effect.domElement);
+      }
       geometry.dispose();
       materials.forEach((m) => {
         m.map?.dispose();
@@ -237,7 +254,7 @@ export default function AsciiSpace() {
     <div
       ref={containerRef}
       aria-hidden
-      className="pointer-events-none absolute inset-0 z-0 overflow-hidden opacity-45"
+      className="ascii-lens-host pointer-events-none absolute inset-0 z-0 overflow-hidden"
     />
   );
 }

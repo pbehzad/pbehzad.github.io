@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
+import PixelGlassLayer from '../components/PixelGlassLayer';
 import AsciiSpace from './AsciiSpace';
 import { COLUMN_ITEMS, CONTENT_FONT_FAMILY, HEADER_FONT_FAMILY } from './content';
 import {
@@ -25,6 +26,7 @@ const MOBILE_BREAKPOINT = 768;
 // Columns can be squeezed much narrower on phones than on desktop — there's
 // no pointer precision to protect, and screen space is scarce.
 const MOBILE_MIN_WIDTH = 16;
+const EQUAL_COLUMN_SHARE = 1 / 6;
 
 function getMinWidths(): number[] {
   const isMobileNow = typeof window !== 'undefined' && window.innerWidth <= MOBILE_BREAKPOINT;
@@ -39,12 +41,12 @@ type ColumnDef = {
 };
 
 export const COLUMNS: ColumnDef[] = [
-  { id: 'identity', label: null, minWidth: 40, initialShare: 0.24 },
-  { id: 'works', label: 'works', minWidth: 40, initialShare: 0.16 },
-  { id: 'events', label: 'events', minWidth: 40, initialShare: 0.14 },
-  { id: 'texts', label: 'texts', minWidth: 40, initialShare: 0.12 },
-  { id: 'about', label: 'about', minWidth: 40, initialShare: 0.16 },
-  { id: 'contact', label: 'contact', minWidth: 40, initialShare: 0.18 },
+  { id: 'identity', label: null, minWidth: 40, initialShare: EQUAL_COLUMN_SHARE },
+  { id: 'works', label: 'works', minWidth: 40, initialShare: EQUAL_COLUMN_SHARE },
+  { id: 'events', label: 'events', minWidth: 40, initialShare: EQUAL_COLUMN_SHARE },
+  { id: 'texts', label: 'texts', minWidth: 40, initialShare: EQUAL_COLUMN_SHARE },
+  { id: 'about', label: 'about', minWidth: 40, initialShare: EQUAL_COLUMN_SHARE },
+  { id: 'contact', label: 'contact', minWidth: 40, initialShare: EQUAL_COLUMN_SHARE },
 ];
 
 // Column body text is laid out by pretext instead of native CSS wrapping: as a
@@ -394,9 +396,10 @@ export default function ColumnLab() {
 
       <div ref={containerRef} className="grid h-full w-full grid-cols-6">
         {COLUMNS.map((col, i) => (
-          <div key={col.id} className="relative h-full overflow-hidden">
+          <div key={col.id} className="column-surface relative h-full overflow-hidden">
+            <PixelGlassLayer />
             {col.id === 'identity' ? (
-              <div className="flex h-full flex-col">
+              <div className="relative z-10 flex h-full flex-col">
                 <div className="shrink-0" style={{ paddingLeft: COLUMN_PAD_X, paddingRight: COLUMN_PAD_X, paddingTop: 24, paddingBottom: 24 }}>
                   <h1
                     className={isMobile ? 'text-2xl leading-[1.05]' : 'text-4xl leading-[1.05]'}
@@ -421,7 +424,7 @@ export default function ColumnLab() {
                 </div>
               </div>
             ) : (
-              <div className="flex h-full flex-col">
+              <div className="relative z-10 flex h-full flex-col">
                 <button
                   ref={(el) => {
                     headerRefs.current[i] = el;
@@ -431,9 +434,7 @@ export default function ColumnLab() {
                     if (el) el.style.setProperty('font-family', HEADER_FONT_FAMILY, 'important');
                   }}
                   onClick={() => onHeaderClick(i)}
-                  className={`shrink-0 w-full overflow-hidden whitespace-nowrap text-left leading-[0.95] tracking-tight transition-colors ${
-                    activeIndex === i ? 'bg-white text-black' : ''
-                  }`}
+                  className="shrink-0 w-full overflow-hidden whitespace-nowrap text-left leading-[0.95] tracking-tight transition-colors"
                   style={{
                     paddingLeft: COLUMN_PAD_X,
                     paddingRight: COLUMN_PAD_X,
@@ -441,6 +442,11 @@ export default function ColumnLab() {
                     paddingBottom: 20,
                     fontSize: HEADER_MIN_SIZE,
                     fontWeight: HEADER_WEIGHT,
+                    color: activeIndex === i ? '#0d0d0d' : '#ffffff',
+                    background: activeIndex === i ? 'rgba(190,190,190,0.88)' : 'transparent',
+                    boxShadow: activeIndex === i
+                      ? 'inset 0 -1px 0 rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.28)'
+                      : 'none',
                   }}
                 >
                   {col.label}
@@ -547,7 +553,7 @@ export default function ColumnLab() {
             onPointerUp={onDividerPointerUp}
             className="group pointer-events-auto absolute top-0 h-full w-3 -translate-x-1/2 cursor-col-resize touch-none select-none"
           >
-            <div className="mx-auto h-full w-px bg-white/60 transition-colors group-hover:w-[2px] group-hover:bg-white" />
+            <div className="column-glass-divider" />
           </div>
         ))}
       </div>

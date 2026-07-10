@@ -188,3 +188,149 @@ img {
 .brutalist-scroll::-webkit-scrollbar-thumb:hover {
   background: #ffffff;
 }
+
+.column-portal a:hover {
+  background: transparent;
+  color: inherit;
+}
+
+.column-portal .column-portal-row-link:hover {
+  background: transparent !important;
+  color: inherit !important;
+  opacity: 0.72;
+  filter: brightness(1.18);
+}
+
+.column-portal .column-portal-heading-link:hover {
+  background: transparent !important;
+  color: #ffffff !important;
+  opacity: 1 !important;
+}
+
+.column-portal .column-portal-heading-link[data-active="true"]:hover {
+  background: rgba(190, 190, 190, 0.92) !important;
+  color: #0d0d0d !important;
+}
+
+.column-portal .column-portal-identity-link:hover {
+  background: transparent !important;
+  color: #ffffff !important;
+  opacity: 0.82;
+}
+
+/* .column-surface must NOT get isolation/opacity/mask/filter — any of those
+   makes it a backdrop root, cutting the glass pane's backdrop-filter off from
+   the page background behind the column. */
+
+.column-glass-field {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  visibility: hidden;
+}
+
+.column-glass-field[data-visible="true"] {
+  visibility: visible;
+}
+
+/* The blur/refraction lives in an SVG filter applied to .ascii-lens-host (see
+   GlassLens.ts) — NOT in backdrop-filter here: filtering the host makes it a
+   backdrop root, so a backdrop-filter on this pane would sample a void. The
+   pane is only the glass *surface*: a faint tint and hairline; opacity and
+   tint are driven from JS in step with the lens. */
+.column-glass-pane {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.09);
+}
+
+.column-glass-divider {
+  position: relative;
+  width: 16px;
+  height: 100%;
+  margin-inline: auto;
+  overflow: hidden;
+  border: 0;
+  border-radius: 0;
+  opacity: 0.9;
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.03) 22%,
+      rgba(255, 255, 255, 0.05) 50%,
+      rgba(0, 0, 0, 0.06) 78%,
+      transparent
+    );
+  box-shadow:
+    inset 0 0 18px rgba(255, 255, 255, 0.045),
+    0 0 14px rgba(210, 225, 240, 0.08);
+  backdrop-filter: blur(14px) saturate(145%) brightness(1.12) contrast(112%);
+  -webkit-backdrop-filter: blur(14px) saturate(145%) brightness(1.12) contrast(112%);
+  transition:
+    width 140ms linear,
+    opacity 140ms linear,
+    background 140ms linear,
+    box-shadow 140ms linear;
+}
+
+.column-glass-divider::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.075) 36%,
+      rgba(255, 255, 255, 0.025) 52%,
+      rgba(0, 0, 0, 0.055) 70%,
+      transparent
+    ),
+    linear-gradient(
+      180deg,
+      transparent,
+      rgba(255, 255, 255, 0.06) 22%,
+      transparent 48%,
+      rgba(255, 255, 255, 0.045) 76%,
+      transparent
+    );
+  transform: skewX(-5deg);
+  filter: blur(3px);
+  pointer-events: none;
+}
+
+.column-glass-divider::after {
+  content: "";
+  position: absolute;
+  inset: 0 -10px;
+  background:
+    radial-gradient(ellipse at 50% 18%, rgba(255, 255, 255, 0.13), transparent 42%),
+    radial-gradient(ellipse at 50% 84%, rgba(255, 255, 255, 0.08), transparent 48%);
+  opacity: 0.7;
+  filter: blur(8px);
+  pointer-events: none;
+}
+
+.group:hover .column-glass-divider {
+  width: 20px;
+  opacity: 1;
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.045) 22%,
+      rgba(255, 255, 255, 0.075) 50%,
+      rgba(0, 0, 0, 0.07) 78%,
+      transparent
+    );
+  box-shadow:
+    inset 0 0 22px rgba(255, 255, 255, 0.07),
+    0 0 18px rgba(210, 225, 240, 0.12),
+    0 0 34px rgba(255, 255, 255, 0.05);
+}

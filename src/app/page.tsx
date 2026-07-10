@@ -1,8 +1,5 @@
-'use client';
-
-import React from 'react';
-import Portal from './components/Portal';
+import ColumnPortalData from './components/ColumnPortalData';
 
 export default function Home() {
-  return <Portal />;
+  return <ColumnPortalData initialPath="/" />;
 }

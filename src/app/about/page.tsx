@@ -1,6 +1,6 @@
 import React from 'react';
 import type { Metadata } from 'next';
-import Portal from '../components/Portal';
+import ColumnPortalData from '../components/ColumnPortalData';
 import { getProfile } from '@/services/contentService';
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -21,26 +21,5 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function AboutPage() {
-  let bio = '';
-  let htmlContent = '';
-
-  try {
-    const { data: profile } = await getProfile();
-    bio = profile?.bio ?? '';
-    htmlContent = profile?.html_content ?? '';
-  } catch {
-    // silently fall through — Portal handles the visible UI
-  }
-
-  return (
-    <>
-      {/* SSR content for search engines — visually hidden but indexable */}
-      <div style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', opacity: 0, pointerEvents: 'none' }}>
-        <h1>About Parham Behzad</h1>
-        {bio && <p>{bio}</p>}
-        {htmlContent && <div dangerouslySetInnerHTML={{ __html: htmlContent }} />}
-      </div>
-      <Portal />
-    </>
-  );
+  return <ColumnPortalData initialPath="/about" />;
 }
