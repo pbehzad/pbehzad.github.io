@@ -164,9 +164,10 @@ input:focus, textarea:focus, select:focus {
   box-shadow: 0 0 0 3px #ffffff;
 }
 
-/* Image filters for brutalist look */
+/* Image grading for brutalist look. No image-rendering: crisp-edges here —
+   it disables smooth interpolation and makes every scaled photo (the
+   portrait especially) look jagged and low quality. */
 img {
-  image-rendering: crisp-edges;
   filter: contrast(1.1);
 }
 

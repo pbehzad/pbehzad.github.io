@@ -669,12 +669,16 @@ export default function ColumnPortal({
                     </p>
                   </Link>
                   <div className="glass-extra-host relative min-h-0 flex-1">
+                    {/* pre-sized + post-resize-sharpened derivative of the 4160px
+                        original (see ParhamBehzad.jpg), served byte-exact:
+                        Next's resizer applies no output sharpening, which made
+                        the downscaled portrait look soft */}
                     <Image
-                      src="/ParhamBehzad.jpg"
+                      src="/ParhamBehzad-display.jpg"
                       alt="Parham Behzad"
                       fill
                       priority
-                      sizes="(max-width: 768px) 44vw, 24vw"
+                      unoptimized
                       className="object-cover grayscale"
                     />
                     <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/25" />
