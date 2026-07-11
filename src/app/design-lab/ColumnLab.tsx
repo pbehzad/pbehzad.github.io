@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import PixelGlassLayer from '../components/PixelGlassLayer';
-import AsciiSpace from './AsciiSpace';
+import AsciiSpace from '../components/AsciiSpace';
 import { COLUMN_ITEMS, CONTENT_FONT_FAMILY, HEADER_FONT_FAMILY } from './content';
 import {
   prepareWithSegments,

@@ -11,3 +11,4 @@ next-env.d.ts
 
 # Local content storage (dev only)
 content-data/
+tsconfig.tsbuildinfo

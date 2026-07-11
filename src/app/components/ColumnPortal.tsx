@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import AsciiSpace from '../design-lab/AsciiSpace';
+import AsciiSpace from './AsciiSpace';
 import PixelGlassLayer from './PixelGlassLayer';
 import GlassTunerPanel from './GlassTunerPanel';
 import { glassLens } from './GlassLens';
@@ -369,7 +369,14 @@ export default function ColumnPortal({
       meta: `${event.date} - ${[event.venue, event.city].filter(Boolean).join(', ')}`,
       href: `/events/${event.slug}`,
     });
-    const today = new Date().toISOString().slice(0, 10);
+    // local date, not toISOString (UTC): near midnight the grouping would
+    // otherwise flip an event between upcoming and past
+    const now = new Date();
+    const today = [
+      now.getFullYear(),
+      String(now.getMonth() + 1).padStart(2, '0'),
+      String(now.getDate()).padStart(2, '0'),
+    ].join('-');
     const upcoming = data.events
       .filter((event) => event.date >= today)
       .sort((a, b) => a.date.localeCompare(b.date));

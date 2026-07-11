@@ -309,13 +309,21 @@ img {
   left: 0;
   width: 63vw;
   z-index: 10;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
   box-shadow:
     inset 0 1.5px 0 rgba(255, 255, 255, 0.385),
     inset 1.5px 0 0 rgba(255, 255, 255, 0.196),
     inset -1.5px 0 0 rgba(255, 255, 255, 0.098),
     inset 0 -1.5px 0 rgba(0, 0, 0, 0.28),
     inset 0 0 44px rgba(255, 255, 255, 0.035);
+}
+
+/* chrome links on detail pages: neutralize the global brutalist hover flip
+   (white bg / black text), which would read as black-on-black here; opacity
+   hover feedback comes from per-link utility classes */
+.glass-detail-link:hover {
+  background: transparent !important;
+  color: #ffffff !important;
 }
 
 .glass-detail-scroll {
@@ -391,8 +399,9 @@ img {
   box-shadow:
     inset 0 0 18px rgba(255, 255, 255, 0.045),
     0 0 14px rgba(210, 225, 240, 0.08);
-  backdrop-filter: blur(14px) saturate(145%) brightness(1.12) contrast(112%);
-  -webkit-backdrop-filter: blur(14px) saturate(145%) brightness(1.12) contrast(112%);
+  /* no backdrop-filter here: the identity column's resting lens keeps the
+     ASCII layer filtered at all times, which excludes it from any backdrop
+     sampling — a divider blur would cost GPU and see nothing */
   transition:
     width 140ms linear,
     opacity 140ms linear,

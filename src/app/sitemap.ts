@@ -1,5 +1,5 @@
 import type { MetadataRoute } from 'next';
-import { getAllCompositions, getAllEvents } from '@/services/contentService';
+import { getAllCompositions, getAllEvents, getAllTexts } from '@/services/contentService';
 
 const BASE_URL = 'https://www.parhambehzad.com';
 
@@ -14,9 +14,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
 
   try {
-    const [{ data: compositions }, { data: events }] = await Promise.all([
+    const [{ data: compositions }, { data: events }, { data: texts }] = await Promise.all([
       getAllCompositions(),
       getAllEvents(),
+      getAllTexts(),
     ]);
 
     const compositionRoutes: MetadataRoute.Sitemap = compositions.map((c) => ({
@@ -33,7 +34,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.6,
     }));
 
-    return [...staticRoutes, ...compositionRoutes, ...eventRoutes];
+    // only texts with in-app content pages (external-only texts have no route)
+    const textRoutes: MetadataRoute.Sitemap = texts
+      .filter((t) => t.content_file)
+      .map((t) => ({
+        url: `${BASE_URL}/texts/${t.slug}`,
+        lastModified: new Date(),
+        changeFrequency: 'monthly',
+        priority: 0.6,
+      }));
+
+    return [...staticRoutes, ...compositionRoutes, ...eventRoutes, ...textRoutes];
   } catch {
     return staticRoutes;
   }

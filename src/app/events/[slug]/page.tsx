@@ -1,6 +1,25 @@
+import { cache } from 'react';
+import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getEventBySlug } from '@/services/contentService';
 import DetailShell from '@/app/components/DetailShell';
+
+const getEvent = cache(async (slug: string) => (await getEventBySlug(slug)).data);
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const event = await getEvent(slug);
+  if (!event || event.status !== 'published') return {};
+  return {
+    title: `${event.title} — Parham Behzad`,
+    description:
+      event.description ?? `${event.date} — ${[event.venue, event.city].filter(Boolean).join(', ')}`,
+  };
+}
 
 export default async function EventPage({
   params,
@@ -8,7 +27,7 @@ export default async function EventPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const { data: event } = await getEventBySlug(slug);
+  const event = await getEvent(slug);
 
   if (!event || event.status !== 'published') {
     notFound();

@@ -1,6 +1,26 @@
+import { cache } from 'react';
+import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getCompositionBySlug } from '@/lib/content-manager';
 import DetailShell from '@/app/components/DetailShell';
+
+const getComposition = cache(getCompositionBySlug);
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const composition = await getComposition(slug);
+  if (!composition || composition.status !== 'published') return {};
+  return {
+    title: `${composition.title} — Parham Behzad`,
+    description:
+      composition.description ??
+      `${composition.title} (${composition.year.substring(0, 4)}) — ${composition.instruments}`,
+  };
+}
 
 export default async function CompositionPage({
   params,
@@ -8,7 +28,7 @@ export default async function CompositionPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const composition = await getCompositionBySlug(slug);
+  const composition = await getComposition(slug);
 
   if (!composition || composition.status !== 'published') {
     notFound();

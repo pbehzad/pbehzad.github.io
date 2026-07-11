@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, type ReactNode } from 'react';
-import { glassLens } from './GlassLens';
+import { glassLens, glassTuning } from './GlassLens';
 
 // Always-on glass region for detail pages: the lens sits at full strength
 // from mount (the identity-column exception applies here too — glass is
@@ -20,6 +20,8 @@ export default function GlassPanel({ children, className }: { children: ReactNod
       glassLens.update(token, panel.getBoundingClientRect(), 1);
     };
 
+    // the CSS fallback tint is static; pick up the live tuning value here
+    panel.style.background = `rgba(255, 255, 255, ${glassTuning.tint})`;
     glassLens.activate(token, panel.getBoundingClientRect(), 1, null, { freezesBreathing: false });
 
     const resizeObserver = new ResizeObserver(sync);
