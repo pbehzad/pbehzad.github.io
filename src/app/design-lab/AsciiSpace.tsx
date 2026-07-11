@@ -170,8 +170,15 @@ export default function AsciiSpace() {
     const container = containerRef.current;
     if (!container) return;
 
+    // AsciiEffect rounds its glyph grid DOWN to whole cells, which leaves a
+    // dead strip (up to one cell) at the right/bottom of the viewport — so
+    // render slightly oversized and let the wrapper's overflow-hidden clip it
+    const OVERSCAN = 32;
+    const viewW = () => window.innerWidth + OVERSCAN;
+    const viewH = () => window.innerHeight + OVERSCAN;
+
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(FOV, window.innerWidth / window.innerHeight, 0.1, 200);
+    const camera = new THREE.PerspectiveCamera(FOV, viewW() / viewH(), 0.1, 200);
     const { width, height, depth } = ROOM;
     camera.position.set(0, -height / 2 + EYE_HEIGHT, 0);
 
@@ -200,7 +207,10 @@ export default function AsciiSpace() {
       // Finer than the library default (0.15): a coarser grid means each
       // character averages a wider window of source pixels, which is the
       // other half of diluting the seam away (see createPanelTexture).
-      effect = new AsciiEffect(renderer, RAMP, { invert: true, resolution: 0.22 });
+      // glyph size ≈ 2/resolution px — phones get finer type so the scene
+      // doesn't read as a handful of giant characters
+      const resolution = window.innerWidth <= 768 ? 0.3 : 0.22;
+      effect = new AsciiEffect(renderer, RAMP, { invert: true, resolution });
     } catch {
       geometry.dispose();
       materials.forEach((m) => {
@@ -215,13 +225,13 @@ export default function AsciiSpace() {
     // the column glass panes could never blur it (#5a5a5a = #969696 at 60%).
     effect.domElement.style.color = '#5a5a5a';
     effect.domElement.style.backgroundColor = 'transparent';
-    effect.setSize(window.innerWidth, window.innerHeight);
+    effect.setSize(viewW(), viewH());
     container.appendChild(effect.domElement);
 
     const handleResize = () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.aspect = viewW() / viewH();
       camera.updateProjectionMatrix();
-      effect.setSize(window.innerWidth, window.innerHeight);
+      effect.setSize(viewW(), viewH());
     };
     window.addEventListener('resize', handleResize);
 

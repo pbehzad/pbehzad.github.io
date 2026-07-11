@@ -104,7 +104,13 @@ a {
   color: #ffffff;
   text-decoration: none;
   border-bottom: 2px solid #ffffff;
-  transition: all 0.1s linear;
+  /* colors only — `all` would transition font-size too, making the fitted
+     column headers lag ~100ms behind every resize frame */
+  transition:
+    background 0.1s linear,
+    color 0.1s linear,
+    border-color 0.1s linear,
+    opacity 0.1s linear;
 }
 
 a:hover {
@@ -207,11 +213,6 @@ img {
   opacity: 1 !important;
 }
 
-.column-portal .column-portal-heading-link[data-active="true"]:hover {
-  background: rgba(190, 190, 190, 0.92) !important;
-  color: #0d0d0d !important;
-}
-
 .column-portal .column-portal-identity-link:hover {
   background: transparent !important;
   color: #ffffff !important;
@@ -222,16 +223,30 @@ img {
    makes it a backdrop root, cutting the glass pane's backdrop-filter off from
    the page background behind the column. */
 
+/* Above the column content (z-10): the glass surface (specular rim) must
+   draw over everything under the glass, including the identity portrait. */
 .column-glass-field {
   position: absolute;
   inset: 0;
-  z-index: 0;
+  z-index: 15;
   pointer-events: none;
   visibility: hidden;
 }
 
 .column-glass-field[data-visible="true"] {
   visibility: visible;
+}
+
+/* The identity portrait must never paint unglassed: this stylesheet frost
+   covers the first paint before React hydrates (roughly glassTuning's
+   blur/brightness). Once GlassLens takes over it stamps data-lens-managed
+   and drives the real lens via inline filter. */
+.glass-extra-host {
+  filter: blur(16px) brightness(1.15);
+}
+
+.glass-extra-host[data-lens-managed="true"] {
+  filter: none;
 }
 
 /* The blur/refraction lives in an SVG filter applied to .ascii-lens-host (see
@@ -247,6 +262,112 @@ img {
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.18),
     inset 0 0 0 1px rgba(255, 255, 255, 0.09);
+}
+
+/* First-paint column layout, before hydration. Must mirror ColumnPortal's
+   getRestingWidths: equal shares on desktop, identity-dominant on mobile
+   (MOBILE_IDENTITY_SHARE = 0.52), active column at ACTIVE_WIDTH_FACTOR =
+   1.35fr on slug URLs. JS overrides with inline px widths after mount. */
+.column-portal-grid {
+  grid-template-columns: repeat(6, 1fr);
+}
+
+@media (max-width: 768px) {
+  .column-portal-grid {
+    grid-template-columns: 52% 9.6% 9.6% 9.6% 9.6% 9.6%;
+  }
+}
+
+.column-portal-grid[data-active-col="1"] {
+  grid-template-columns: 1fr 1.35fr 1fr 1fr 1fr 1fr;
+}
+
+.column-portal-grid[data-active-col="2"] {
+  grid-template-columns: 1fr 1fr 1.35fr 1fr 1fr 1fr;
+}
+
+.column-portal-grid[data-active-col="3"] {
+  grid-template-columns: 1fr 1fr 1fr 1.35fr 1fr 1fr;
+}
+
+.column-portal-grid[data-active-col="4"] {
+  grid-template-columns: 1fr 1fr 1fr 1fr 1.35fr 1fr;
+}
+
+.column-portal-grid[data-active-col="5"] {
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1.35fr;
+}
+
+/* Detail-page glass panel (compositions/events/texts). The surface must be
+   pure CSS so it's there on first paint; GlassPanel.tsx adds the live lens
+   refraction after hydration. Rim recipe mirrors the column pane at
+   edgeHighlight 0.7, tint mirrors glassTuning.tint. */
+.glass-detail-panel {
+  position: absolute;
+  top: 72px;
+  bottom: 0;
+  left: 0;
+  width: 63vw;
+  z-index: 10;
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow:
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.385),
+    inset 1.5px 0 0 rgba(255, 255, 255, 0.196),
+    inset -1.5px 0 0 rgba(255, 255, 255, 0.098),
+    inset 0 -1.5px 0 rgba(0, 0, 0, 0.28),
+    inset 0 0 44px rgba(255, 255, 255, 0.035);
+}
+
+.glass-detail-scroll {
+  height: 100%;
+  overflow-y: auto;
+  padding: 28px 40px 80px 28px;
+}
+
+@media (max-width: 768px) {
+  .glass-detail-panel {
+    top: 56px;
+    width: auto;
+    right: 12px;
+  }
+
+  .glass-detail-scroll {
+    padding: 20px 20px 64px 16px;
+  }
+}
+
+/* mobile-only swipe affordance on the identity handle */
+.column-swipe-hint {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .column-swipe-hint {
+    display: block;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    z-index: 30;
+    transform: translate(-50%, -50%);
+    font-size: 30px;
+    line-height: 1;
+    color: rgba(255, 255, 255, 0.85);
+    text-shadow: 0 0 10px rgba(0, 0, 0, 0.9);
+    pointer-events: none;
+    animation: swipe-hint-nudge 1.6s infinite;
+  }
+}
+
+@keyframes swipe-hint-nudge {
+  0%,
+  100% {
+    transform: translate(-50%, -50%);
+    opacity: 0.9;
+  }
+  50% {
+    transform: translate(calc(-50% - 12px), -50%);
+    opacity: 0.45;
+  }
 }
 
 .column-glass-divider {

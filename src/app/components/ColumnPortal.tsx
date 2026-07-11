@@ -79,6 +79,7 @@ type ColumnItem = {
   href?: string;
   external?: boolean;
   dim?: boolean;
+  heading?: boolean;
 };
 
 type FlowTextHandle = { setWidth: (width: number) => void };
@@ -136,24 +137,33 @@ function getPathActiveIndex(path: string): number | null {
   return index > 0 ? index : null;
 }
 
-function getRestingWidths(activeIndex: number | null, total: number, mins: number[], current?: number[]): number[] {
+// the selected column (clicked, or matching the URL) gets a gentle emphasis —
+// slightly wider than the equal share — while the rest stay near normal
+const ACTIVE_WIDTH_FACTOR = 1.35;
+
+// mobile opens with the identity column dominant (glass on), others as slim
+// tabs the user swipes open
+const MOBILE_IDENTITY_SHARE = 0.52;
+
+function getRestingWidths(activeIndex: number | null, total: number, mins: number[]): number[] {
   if (activeIndex === null) {
+    const mobile = typeof window !== 'undefined' && window.innerWidth <= MOBILE_BREAKPOINT;
+    const shares = mobile
+      ? COLUMNS.map((_, index) =>
+          index === 0 ? MOBILE_IDENTITY_SHARE : (1 - MOBILE_IDENTITY_SHARE) / (COLUMNS.length - 1)
+        )
+      : COLUMNS.map((column) => column.initialShare);
     return normalizeWidths(
-      COLUMNS.map((column) => column.initialShare * total),
+      shares.map((share) => share * total),
       mins,
       total
     );
   }
 
-  const identityBase = current?.[0] ?? COLUMNS[0].initialShare * total;
-  const identityWidth = Math.max(mins[0], Math.min(identityBase, total * 0.32));
-  const next = COLUMNS.map((_, index) => {
-    if (index === 0) return identityWidth;
-    if (index === activeIndex) return 0;
-    return mins[index];
-  });
-  const usedExceptActive = next.reduce((sum, width, index) => (index === activeIndex ? sum : sum + width), 0);
-  next[activeIndex] = Math.max(total - usedExceptActive, mins[activeIndex]);
+  const share = total / COLUMNS.length;
+  const activeWidth = share * ACTIVE_WIDTH_FACTOR;
+  const otherWidth = (total - activeWidth) / (COLUMNS.length - 1);
+  const next = COLUMNS.map((_, index) => (index === activeIndex ? activeWidth : otherWidth));
   return normalizeWidths(next, mins, total);
 }
 
@@ -245,6 +255,22 @@ function ColumnRow({
   metaFontSize: number;
   metaLineHeight: number;
 }) {
+  if (item.heading) {
+    return (
+      <div
+        style={{
+          fontSize: 11,
+          letterSpacing: 3,
+          textTransform: 'uppercase',
+          fontWeight: 300,
+          opacity: 0.55,
+        }}
+      >
+        {item.title}
+      </div>
+    );
+  }
+
   const content = (
     <>
       <FlowText
@@ -338,21 +364,34 @@ export default function ColumnPortal({
       href: `/compositions/${composition.slug}`,
     }));
 
-    const events = [...data.events]
-      .sort((a, b) => b.date.localeCompare(a.date))
-      .map((event) => ({
-        title: event.title,
-        meta: `${event.date} - ${[event.venue, event.city].filter(Boolean).join(', ')}`,
-        href: `/events/${event.slug}`,
-      }));
+    const toEventItem = (event: Event): ColumnItem => ({
+      title: event.title,
+      meta: `${event.date} - ${[event.venue, event.city].filter(Boolean).join(', ')}`,
+      href: `/events/${event.slug}`,
+    });
+    const today = new Date().toISOString().slice(0, 10);
+    const upcoming = data.events
+      .filter((event) => event.date >= today)
+      .sort((a, b) => a.date.localeCompare(b.date));
+    const past = data.events
+      .filter((event) => event.date < today)
+      .sort((a, b) => b.date.localeCompare(a.date));
+    const events: ColumnItem[] = [
+      ...(upcoming.length ? [{ title: 'upcoming', heading: true }] : []),
+      ...upcoming.map(toEventItem),
+      ...(past.length ? [{ title: 'past', heading: true }] : []),
+      ...past.map(toEventItem),
+    ];
 
     const texts = data.texts.map((text) => {
-      const href = text.external_url || text.pdf_url || undefined;
+      // in-app detail page when the text has markdown content; otherwise
+      // fall back to the external/PDF link
+      const external = !text.content_file ? text.external_url || text.pdf_url || undefined : undefined;
       return {
         title: text.title,
         meta: `${text.year} - ${text.type}`,
-        href,
-        external: !!href,
+        href: text.content_file ? `/texts/${text.slug}` : external,
+        external: !!external,
       };
     });
 
@@ -422,6 +461,21 @@ export default function ColumnPortal({
     });
   }, []);
 
+  // pretext measures via canvas: metrics captured before Major Mono Display
+  // finishes loading are fallback-font metrics, and they were being cached
+  // forever — re-measure and refit the headers once the real font is in
+  useEffect(() => {
+    let cancelled = false;
+    document.fonts.load(`${HEADER_WEIGHT} ${HEADER_REF_SIZE}px ${HEADER_FONT_FAMILY}`).then(() => {
+      if (cancelled) return;
+      headerPreparedCache.clear();
+      if (widthsRef.current.length) reflowHeaders(widthsRef.current);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [reflowHeaders]);
+
   const applyWidths = useCallback(
     (widths: number[]) => {
       widthsRef.current = widths;
@@ -439,7 +493,7 @@ export default function ColumnPortal({
     (nextActiveIndex: number | null) => {
       const total = containerWidthRef.current;
       if (!total) return;
-      const next = getRestingWidths(nextActiveIndex, total, getMinWidths(), widthsRef.current);
+      const next = getRestingWidths(nextActiveIndex, total, getMinWidths());
       applyWidths(next);
     },
     [applyWidths]
@@ -453,14 +507,19 @@ export default function ColumnPortal({
     let amplitude = baseAmplitude;
     let resting = false;
     const tick = (t: number) => {
-      amplitude += ((glassLens.active ? 0 : baseAmplitude) - amplitude) * 0.05;
+      // no breathing on mobile: widths drive the glass there, and the
+      // constant reflow is wasted battery on a touch screen
+      const still = glassLens.active || window.innerWidth <= MOBILE_BREAKPOINT;
+      amplitude += ((still ? 0 : baseAmplitude) - amplitude) * 0.05;
       const base = widthsRef.current;
       const idle = amplitude < 0.05;
       if (base.length && !(idle && resting)) {
         resting = idle;
+        // identity is excluded from the jitter: it rests with glass on, and a
+        // moving column would drag its lens geometry every frame
         const raw = phases.map((phase) => Math.sin(t / 1800 + phase));
-        const mean = raw.reduce((a, b) => a + b, 0) / raw.length;
-        const jittered = base.map((width, i) => width + amplitude * (raw[i] - mean));
+        const mean = raw.slice(1).reduce((a, b) => a + b, 0) / (raw.length - 1);
+        const jittered = base.map((width, i) => (i === 0 ? width : width + amplitude * (raw[i] - mean)));
         if (containerRef.current) {
           containerRef.current.style.gridTemplateColumns = jittered.map((width) => `${width}px`).join(' ');
         }
@@ -549,23 +608,18 @@ export default function ColumnPortal({
     dragRef.current = null;
   };
 
-  const initialGridTemplate = activeIndex === null
-    ? COLUMNS.map((column) => `${column.initialShare}fr`).join(' ')
-    : COLUMNS.map((column, index) => {
-        if (index === 0) return `${EQUAL_COLUMN_SHARE}fr`;
-        if (index === activeIndex) return '1fr';
-        return '44px';
-      }).join(' ');
-
   return (
     <main className="column-portal relative h-dvh w-screen overflow-hidden bg-black text-white">
       <AsciiSpace />
       <div className="pointer-events-none absolute inset-0 z-[1] bg-black/20" />
 
+      {/* initial template comes from CSS (.column-portal-grid) so the first
+          paint is already viewport-correct — JS takes over with inline px
+          widths after hydration */}
       <div
         ref={containerRef}
-        className="relative z-10 grid h-full w-full"
-        style={{ gridTemplateColumns: initialGridTemplate }}
+        className="column-portal-grid relative z-10 grid h-full w-full"
+        data-active-col={activeIndex ?? undefined}
       >
         {COLUMNS.map((column, i) => {
           const isActive = activeIndex === i;
@@ -580,7 +634,7 @@ export default function ColumnPortal({
                 background: isActive ? 'rgba(0,0,0,0.46)' : 'rgba(0,0,0,0.28)',
               }}
             >
-              <PixelGlassLayer />
+              <PixelGlassLayer inverted={column.id === 'identity'} />
               {column.id === 'identity' ? (
                 <div className="relative z-10 flex h-full flex-col">
                   <Link
@@ -607,7 +661,7 @@ export default function ColumnPortal({
                       {data.profile?.title?.toLowerCase() || 'composer'}
                     </p>
                   </Link>
-                  <div className="relative min-h-0 flex-1">
+                  <div className="glass-extra-host relative min-h-0 flex-1">
                     <Image
                       src="/ParhamBehzad.jpg"
                       alt="Parham Behzad"
@@ -651,9 +705,8 @@ export default function ColumnPortal({
                         fontSize: 'inherit',
                         fontWeight: 'inherit',
                         lineHeight: 'inherit',
-                        color: isActive ? '#0d0d0d' : '#ffffff',
-                        background: isActive ? 'rgba(190,190,190,0.88)' : 'transparent',
-                        boxShadow: isActive ? 'inset 0 -1px 0 rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.28)' : 'none',
+                        color: '#ffffff',
+                        background: 'transparent',
                         opacity: isActive ? 1 : 0.72,
                       }}
                     >
@@ -674,9 +727,12 @@ export default function ColumnPortal({
                         <div
                           key={`${column.id}-${idx}-${item.title}`}
                           style={{
-                            paddingTop: 14,
-                            paddingBottom: 14,
-                            borderBottom: idx < arr.length - 1 ? '1px solid rgba(255,255,255,0.18)' : 'none',
+                            paddingTop: item.heading ? (idx === 0 ? 14 : 26) : 14,
+                            paddingBottom: item.heading ? 2 : 14,
+                            borderBottom:
+                              !item.heading && idx < arr.length - 1 && !arr[idx + 1]?.heading
+                                ? '1px solid rgba(255,255,255,0.18)'
+                                : 'none',
                           }}
                         >
                           <ColumnRow
@@ -721,6 +777,11 @@ export default function ColumnPortal({
             className="group pointer-events-auto absolute top-0 h-full w-3 -translate-x-1/2 cursor-col-resize touch-none select-none"
           >
             <div className="column-glass-divider" />
+            {i === 0 && !hasInteracted && (
+              <div className="column-swipe-hint" aria-hidden>
+                ‹
+              </div>
+            )}
           </div>
         ))}
       </div>

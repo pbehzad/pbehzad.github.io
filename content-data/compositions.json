@@ -77,14 +77,19 @@
     "year": "2025-06-01",
     "instruments": "Voice, Smartphones",
     "duration": "7",
-    "description": null,
-    "program_notes": null,
+    "description": "A study in anticipation: six voices and a room full of smartphones negotiate a melody that is always about to arrive. The piece treats notification sounds as a found orchestra, and the audience as its unwitting ensemble.",
+    "program_notes": "The work unfolds in three continuous panels.\n\nIn the first, the singers sustain a single vowel while their phones, placed on music stands, are called one by one from the mixing desk. In the second, the ringtones are transcribed and sung back — the machine imitated by the body. The third panel superimposes both layers until neither origin can be distinguished.\n\nOne is Coming... was written for the REACTOR ensemble and is dedicated to everyone who has ever waited for a message that did not arrive.",
     "audio_urls": [],
     "tags": [],
     "featured": false,
     "status": "published",
     "related_texts": [],
     "created_at": "2026-01-29T14:29:13.585Z",
-    "updated_at": "2026-01-29T14:40:42.892Z"
+    "updated_at": "2026-01-29T14:40:42.892Z",
+    "premiere": {
+      "date": "2026-11-01",
+      "location": "REACTOR, Vienna",
+      "performers": "REACTOR Vocal Ensemble, Parham Behzad (electronics)"
+    }
   }
 ]
