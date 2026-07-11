@@ -255,6 +255,18 @@ export async function getAllEventsRaw(): Promise<ContentResponse<Event[]>> {
   }
 }
 
+export async function getAllTextsRaw(): Promise<ContentResponse<Text[]>> {
+  try {
+    const texts = await loadJsonContent('texts.json', textsArraySchema);
+    return { data: texts, metadata: { total: texts.length } };
+  } catch (error) {
+    return {
+      data: [],
+      error: error instanceof Error ? error.message : 'Unknown error'
+    };
+  }
+}
+
 /**
  * WRITE UTILITIES
  */

@@ -69,7 +69,14 @@ export default function GlassNav() {
         <button
           onClick={() => setOpen((v) => !v)}
           className="glass-detail-link select-none text-sm font-normal tracking-wide"
-          style={{ background: 'transparent', border: 'none', borderBottom: '2px solid #ffffff', padding: 0, color: '#ffffff' }}
+          style={{
+            background: 'transparent',
+            border: 'none',
+            borderBottom: '2px solid #ffffff',
+            padding: 0,
+            color: '#ffffff',
+            WebkitTapHighlightColor: 'transparent',
+          }}
           aria-expanded={open}
           aria-label="Open navigation"
         >

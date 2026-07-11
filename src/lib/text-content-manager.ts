@@ -17,3 +17,24 @@ export async function getTextHtml(contentFile: string): Promise<string | null> {
   const processed = await remark().use(html).process(content);
   return processed.toString();
 }
+
+// raw markdown source, for the admin editor
+export async function getTextMarkdown(contentFile: string): Promise<string | null> {
+  const adapter = getStorageAdapter();
+  const file = await adapter.readFile(`${TEXTS_BASE_PATH}/${contentFile}`);
+  return file?.content ?? null;
+}
+
+export async function saveTextMarkdown(contentFile: string, markdown: string): Promise<void> {
+  const adapter = getStorageAdapter();
+  const existing = await adapter.readFile(`${TEXTS_BASE_PATH}/${contentFile}`);
+  await adapter.writeFile(`${TEXTS_BASE_PATH}/${contentFile}`, markdown, existing?.sha);
+}
+
+export async function deleteTextMarkdown(contentFile: string): Promise<void> {
+  const adapter = getStorageAdapter();
+  const existing = await adapter.readFile(`${TEXTS_BASE_PATH}/${contentFile}`);
+  if (existing) {
+    await adapter.deleteFile(`${TEXTS_BASE_PATH}/${contentFile}`, existing.sha);
+  }
+}
