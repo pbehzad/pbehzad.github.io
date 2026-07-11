@@ -67,14 +67,14 @@ export default async function CompositionPage({
 
       {/* Description */}
       {composition.description && (
-        <p className="mb-12 max-w-2xl text-sm opacity-60 leading-relaxed">
+        <p className="mb-12 text-sm opacity-60 leading-relaxed">
           {composition.description}
         </p>
       )}
 
       {/* Program notes */}
       {composition.program_notes && (
-        <div className="mb-12 max-w-2xl">
+        <div className="mb-12">
           <h2 className="text-xs uppercase tracking-wider opacity-40 mb-4">Program Notes</h2>
           <p className="text-sm opacity-60 leading-relaxed whitespace-pre-line">
             {composition.program_notes}
@@ -85,7 +85,7 @@ export default async function CompositionPage({
       {/* Rich HTML content */}
       {composition.html_content && (
         <div
-          className="prose prose-invert prose-sm max-w-2xl mb-12"
+          className="prose prose-invert prose-sm max-w-none mb-12"
           dangerouslySetInnerHTML={{ __html: composition.html_content }}
         />
       )}

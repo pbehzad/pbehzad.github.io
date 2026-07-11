@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 import AsciiSpace from './AsciiSpace';
+import GlassNav from './GlassNav';
 import GlassPanel from './GlassPanel';
 import GlassTunerPanel from './GlassTunerPanel';
 
@@ -21,11 +22,7 @@ export default function DetailShell({
       <AsciiSpace />
       <div className="pointer-events-none absolute inset-0 z-[1] bg-black/20" />
 
-      <div className="fixed top-6 right-6 md:top-12 md:right-12 z-50">
-        <Link href="/" className="glass-detail-link text-sm font-normal tracking-wide hover:opacity-70 transition-opacity">
-          parham behzad
-        </Link>
-      </div>
+      <GlassNav />
 
       <GlassPanel>
         <div className="glass-detail-scroll">

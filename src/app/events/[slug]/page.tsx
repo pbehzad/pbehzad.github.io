@@ -57,7 +57,7 @@ export default async function EventPage({
 
       {/* Description */}
       {event.description && (
-        <p className="mb-12 max-w-2xl text-sm opacity-60 leading-relaxed whitespace-pre-line">
+        <p className="mb-12 text-sm opacity-60 leading-relaxed whitespace-pre-line">
           {event.description}
         </p>
       )}
@@ -65,7 +65,7 @@ export default async function EventPage({
       {/* Rich HTML content */}
       {event.html_content && (
         <div
-          className="prose prose-invert prose-sm max-w-2xl mb-12"
+          className="prose prose-invert prose-sm max-w-none mb-12"
           dangerouslySetInnerHTML={{ __html: event.html_content }}
         />
       )}

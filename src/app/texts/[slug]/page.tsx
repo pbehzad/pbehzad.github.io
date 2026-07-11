@@ -51,7 +51,7 @@ export default async function TextPage({
 
       {/* Abstract */}
       {text.abstract && (
-        <p className="mb-12 max-w-2xl text-sm opacity-60 leading-relaxed italic">
+        <p className="mb-12 text-sm opacity-60 leading-relaxed italic">
           {text.abstract}
         </p>
       )}
@@ -59,7 +59,7 @@ export default async function TextPage({
       {/* Body */}
       {contentHtml && (
         <div
-          className="prose prose-invert prose-sm max-w-2xl mb-12"
+          className="prose prose-invert prose-sm max-w-none mb-12"
           dangerouslySetInnerHTML={{ __html: contentHtml }}
         />
       )}

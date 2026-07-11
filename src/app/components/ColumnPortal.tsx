@@ -469,17 +469,36 @@ export default function ColumnPortal({
   }, []);
 
   // pretext measures via canvas: metrics captured before Major Mono Display
-  // finishes loading are fallback-font metrics, and they were being cached
-  // forever — re-measure and refit the headers once the real font is in
+  // finishes loading are fallback-font metrics, which oversize the headers.
+  // fonts.load() alone is not enough on a cold cache — when the Google Fonts
+  // stylesheet itself hasn't arrived yet, no face is registered and the
+  // promise resolves empty without ever retrying. So keep checking until the
+  // face is really available, then re-measure once.
   useEffect(() => {
-    let cancelled = false;
-    document.fonts.load(`${HEADER_WEIGHT} ${HEADER_REF_SIZE}px ${HEADER_FONT_FAMILY}`).then(() => {
-      if (cancelled) return;
+    const font = `${HEADER_WEIGHT} ${HEADER_REF_SIZE}px ${HEADER_FONT_FAMILY}`;
+    let done = false;
+    let interval = 0;
+
+    const refit = () => {
+      if (done || !document.fonts.check(font)) return;
+      done = true;
+      document.fonts.removeEventListener('loadingdone', refit);
+      window.clearInterval(interval);
       headerPreparedCache.clear();
       if (widthsRef.current.length) reflowHeaders(widthsRef.current);
-    });
+    };
+
+    document.fonts.load(font).then(refit);
+    document.fonts.addEventListener('loadingdone', refit);
+    // backstop for the late-stylesheet case, where no font event fires here
+    interval = window.setInterval(refit, 250);
+    const giveUp = window.setTimeout(() => window.clearInterval(interval), 15000);
+
     return () => {
-      cancelled = true;
+      done = true;
+      document.fonts.removeEventListener('loadingdone', refit);
+      window.clearInterval(interval);
+      window.clearTimeout(giveUp);
     };
   }, [reflowHeaders]);
 
@@ -767,11 +786,9 @@ export default function ColumnPortal({
         })}
       </div>
 
-      {!hasInteracted && (
-        <div className="pointer-events-none absolute bottom-4 left-4 z-30 text-xs tracking-widest opacity-45">
-          drag a hairline to resize - click a label to open
-        </div>
-      )}
+      <div className="pointer-events-none absolute bottom-4 left-4 z-30 text-xs tracking-widest opacity-45">
+        &copy; {new Date().getFullYear()} parham behzad
+      </div>
 
       <GlassTunerPanel />
 
