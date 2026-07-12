@@ -249,7 +249,13 @@ export default function AsciiSpace() {
 
       display.width = Math.round(w * dpr);
       display.height = Math.round(h * dpr);
-      displayCtx.font = `${cellH.toFixed(2)}px 'Courier New', monospace`;
+      // Bold, not just a brighter fillStyle: at this cell size (~9-12px)
+      // Chrome's Skia text rasterizer lays down visibly less ink per glyph
+      // than Safari's CoreText, which faux-bolds small canvas text by
+      // default — so the same fillStyle color reads dimmer in Chrome. Bold
+      // strokes close that gap by fixing the actual ink coverage rather than
+      // chasing it with a brighter color that only helps one engine.
+      displayCtx.font = `bold ${cellH.toFixed(2)}px 'Courier New', monospace`;
       const advance = displayCtx.measureText(DENSE_CHAR).width || 1;
       // one fillText per row, horizontally scaled so the row spans the
       // viewport exactly — no per-glyph draw calls, no right-edge gap
@@ -281,11 +287,11 @@ export default function AsciiSpace() {
       displayCtx.setTransform(1, 0, 0, 1, 0, 0);
       displayCtx.clearRect(0, 0, display.width, display.height);
       displayCtx.setTransform(dpr * glyphScaleX, 0, 0, dpr, 0, 0);
-      displayCtx.font = `${cellH.toFixed(2)}px 'Courier New', monospace`;
+      displayCtx.font = `bold ${cellH.toFixed(2)}px 'Courier New', monospace`;
       // Dimming lives in the glyph color, NOT in CSS opacity on the wrapper:
       // opacity < 1 would isolate this layer from backdrop-filter sampling
-      // (#5a5a5a = #969696 at 60%).
-      displayCtx.fillStyle = '#5a5a5a';
+      // (#969696 = #e0e0e0 at 60%).
+      displayCtx.fillStyle = '#969696';
       for (let r = 0; r < shimmered.length; r++) {
         displayCtx.fillText(shimmered[r], 0, (r + 0.8) * cellH);
       }
