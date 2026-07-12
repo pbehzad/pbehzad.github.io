@@ -2,15 +2,24 @@
 
 import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
-import { AsciiEffect } from 'three/addons/effects/AsciiEffect.js';
 
 // A real lit 3D room rendered through three.js, then converted to characters
-// by AsciiEffect (samples the rendered pixels' luminance into a char ramp) —
-// actual perspective, actual Lambertian shading off the walls, actual
-// rotation, rather than a hand-rolled distance-to-plane approximation. A
-// point light co-located with the camera acts like a lantern the viewer
-// carries: whatever the camera turns to face reads brightest, and it fades
-// with real inverse-distance falloff instead of a synthetic fog constant.
+// by sampling the rendered pixels' luminance into a char ramp — actual
+// perspective, actual Lambertian shading off the walls, actual rotation,
+// rather than a hand-rolled distance-to-plane approximation. A point light
+// co-located with the camera acts like a lantern the viewer carries:
+// whatever the camera turns to face reads brightest, and it fades with real
+// inverse-distance falloff instead of a synthetic fog constant.
+//
+// The glyphs are painted to a <canvas>, NOT a DOM table (as three's
+// AsciiEffect does): rewriting a table of thousands of glyphs re-runs text
+// layout every frame, which WebKit takes >150ms on — Safari ran the site at
+// 5fps while Chrome did 60 (measured). Canvas painting costs a few ms in
+// every engine, and it makes the glass lens cheaper too: the SVG filter
+// rasterizes a bitmap instead of a live text layer. The sampling formulas
+// below (grid size, luminance weights, invert mapping, y-step of 2) mirror
+// AsciiEffect exactly so the look is unchanged.
+//
 // The classic long density ramp (~70 glyphs, light -> dense) rather than a
 // short ~10-char one: with the overexposed lighting below, a short ramp
 // means almost every lit cell clips to its single densest character, so
@@ -28,7 +37,7 @@ const ROOM = { width: 40, height: 18, depth: 44 };
 // World units per wall panel. Not shrunk to match TILE's old "human-scale"
 // framing from the smaller room — bigger panels project to more screen
 // pixels per seam at typical viewing distance, which is what actually lets
-// the seam survive AsciiEffect's downsample (see createPanelTexture).
+// the seam survive the character-cell downsample (see createPanelTexture).
 const TILE = 3.5;
 // A fixed human eye height rather than a fraction of room height: the room
 // grows around a viewer of constant size, instead of the viewer scaling up
@@ -60,17 +69,19 @@ const EDGE_CHARS = [
   '∆', '¥', '≈', 'ç', '√', '∫', '~', 'µ', '∞', '%', '&', '/', '(', ')', '=', '?', '§', '"',
 ];
 const EDGE_CHANCE = 0.32;
-// AsciiEffect writes literal space cells as this exact token. Targeting it
-// (rather than a band of low-index ramp characters, as before) is what
-// makes the swap track real seam geometry: the seam texture below is
-// painted with zero-albedo pure black, which — being multiplied by any
-// light, at any distance — always renders as exactly zero brightness, i.e.
-// this token, everywhere in the room. A non-zero seam color drifts upward
-// near the point light's hot spot and stops being distinguishable from
-// ordinary lit fill; pure black can't drift, so this token is exclusively
-// seam pixels, never incidental shadow on a wall.
-const EDGE_TOKEN = '&nbsp;';
-const EDGE_RE = /&nbsp;/g;
+// Zero-brightness cells map to the ramp's first character — a literal
+// space. Targeting spaces is what makes the swap track real seam geometry:
+// the seam texture below is painted with zero-albedo pure black, which —
+// being multiplied by any light, at any distance — always renders as
+// exactly zero brightness, i.e. a space, everywhere in the room. A non-zero
+// seam color drifts upward near the point light's hot spot and stops being
+// distinguishable from ordinary lit fill; pure black can't drift, so a
+// space is exclusively seam pixels, never incidental shadow on a wall.
+const EDGE_TOKEN = ' ';
+const EDGE_RE = / /g;
+// Every render repaints the whole glyph grid. The ambient scene doesn't
+// need 60fps — 20 is visually equivalent and a third of the cost.
+const FRAME_MS = 50;
 
 // Each wall panel gets a border stroke baked into its texture so flat faces
 // read as a grid of tiles under lighting, not a featureless gradient.
@@ -84,11 +95,10 @@ function createPanelTexture(): THREE.Texture {
   ctx.fillRect(0, 0, size, size);
   // True black (zero albedo), not a dark gray: see EDGE_TOKEN above for why
   // that's load-bearing rather than cosmetic. Wide relative to the tile
-  // (~12%, not a hairline): AsciiEffect downsamples the full render to a
-  // small internal canvas before it ever looks at brightness, and that step
-  // averages a several-screen-pixel window per character cell — a thin
-  // seam gets diluted by the surrounding white fill in that average and
-  // never actually reaches black. This has to survive that averaging.
+  // (~12%, not a hairline): the character-cell sampling averages a
+  // several-screen-pixel window per cell — a thin seam gets diluted by the
+  // surrounding white fill in that average and never actually reaches
+  // black. This has to survive that averaging.
   ctx.strokeStyle = '#000000';
   ctx.lineWidth = 15;
   ctx.strokeRect(0, 0, size, size);
@@ -127,21 +137,11 @@ function pseudoRandom(i: number, seed: number): number {
   return x - Math.floor(x);
 }
 
-// AsciiEffect rewrites its <td> as one big text blob (plus <br/> line
-// breaks) every render() call, so post-processing that string right after
-// render is the only hook available — there's no per-cell API. It's split
-// on the exact '<br/>' separator the library emits first, and every
-// substitution below runs only on the text *between* separators — never on
-// the full markup string — so no matter what glyphs end up in the pools,
-// there's no way to accidentally rewrite a tag delimiter and corrupt line
-// breaks (which is what silently collapsed the whole layout previously).
-function shimmer(root: HTMLElement, time: number) {
-  const td = root.querySelector('td');
-  if (!td) return;
+function shimmerRows(rows: string[], time: number): string[] {
   const seed = Math.floor(time / SHIMMER_INTERVAL_MS);
   let i = 0;
   let j = 0;
-  const rows = td.innerHTML.split('<br/>').map((row) => {
+  return rows.map((row) => {
     let out = row.replace(DENSE_RE, () => {
       const cell = i++;
       if (pseudoRandom(cell, seed) >= SHIMMER_CHANCE) return DENSE_CHAR;
@@ -160,7 +160,6 @@ function shimmer(root: HTMLElement, time: number) {
     });
     return out;
   });
-  td.innerHTML = rows.join('<br/>');
 }
 
 export default function AsciiSpace() {
@@ -170,15 +169,8 @@ export default function AsciiSpace() {
     const container = containerRef.current;
     if (!container) return;
 
-    // AsciiEffect rounds its glyph grid DOWN to whole cells, which leaves a
-    // dead strip (up to one cell) at the right/bottom of the viewport — so
-    // render slightly oversized and let the wrapper's overflow-hidden clip it
-    const OVERSCAN = 32;
-    const viewW = () => window.innerWidth + OVERSCAN;
-    const viewH = () => window.innerHeight + OVERSCAN;
-
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(FOV, viewW() / viewH(), 0.1, 200);
+    const camera = new THREE.PerspectiveCamera(FOV, window.innerWidth / window.innerHeight, 0.1, 200);
     const { width, height, depth } = ROOM;
     camera.position.set(0, -height / 2 + EYE_HEIGHT, 0);
 
@@ -201,16 +193,8 @@ export default function AsciiSpace() {
     scene.add(lantern);
 
     let renderer: THREE.WebGLRenderer;
-    let effect: AsciiEffect;
     try {
       renderer = new THREE.WebGLRenderer({ antialias: false });
-      // Finer than the library default (0.15): a coarser grid means each
-      // character averages a wider window of source pixels, which is the
-      // other half of diluting the seam away (see createPanelTexture).
-      // glyph size ≈ 2/resolution px — phones get finer type so the scene
-      // doesn't read as a handful of giant characters
-      const resolution = window.innerWidth <= 768 ? 0.3 : 0.22;
-      effect = new AsciiEffect(renderer, RAMP, { invert: true, resolution });
     } catch {
       geometry.dispose();
       materials.forEach((m) => {
@@ -220,36 +204,109 @@ export default function AsciiSpace() {
       baseTexture.dispose();
       return;
     }
-    // Dimming lives in the glyph color, NOT in CSS opacity on the wrapper:
-    // opacity < 1 would isolate this layer from backdrop-filter sampling, so
-    // the column glass panes could never blur it (#5a5a5a = #969696 at 60%).
-    effect.domElement.style.color = '#5a5a5a';
-    effect.domElement.style.backgroundColor = 'transparent';
-    effect.setSize(viewW(), viewH());
-    container.appendChild(effect.domElement);
+    renderer.setPixelRatio(1);
 
-    const handleResize = () => {
-      camera.aspect = viewW() / viewH();
+    // the visible glyph canvas + a small sampling canvas for pixel readback
+    const display = document.createElement('canvas');
+    display.style.position = 'absolute';
+    display.style.inset = '0';
+    display.style.width = '100%';
+    display.style.height = '100%';
+    container.appendChild(display);
+    const displayCtx = display.getContext('2d')!;
+    const sample = document.createElement('canvas');
+    const sampleCtx = sample.getContext('2d', { willReadFrequently: true })!;
+
+    // grid math mirrors AsciiEffect: cols = floor(w × resolution), sampled
+    // every 2nd row; cell height = 2/resolution. Phones get finer type so
+    // the scene doesn't read as a handful of giant characters.
+    let cols = 1;
+    let rows = 1;
+    let sampleH = 2;
+    let cellW = 1;
+    let cellH = 1;
+    let glyphScaleX = 1;
+    let dpr = 1;
+
+    const layout = () => {
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      const resolution = w <= 768 ? 0.3 : 0.22;
+      cols = Math.max(4, Math.floor(w * resolution));
+      sampleH = Math.max(4, Math.floor(h * resolution));
+      rows = Math.ceil(sampleH / 2);
+      cellW = w / cols;
+      cellH = h / rows;
+      dpr = Math.min(2, window.devicePixelRatio || 1);
+
+      // render the scene at grid height directly (2 sample rows per glyph
+      // row) — a fraction of a fullscreen render
+      renderer.setSize(cols, sampleH, false);
+      camera.aspect = w / h;
       camera.updateProjectionMatrix();
-      effect.setSize(viewW(), viewH());
-    };
-    window.addEventListener('resize', handleResize);
+      sample.width = cols;
+      sample.height = sampleH;
 
+      display.width = Math.round(w * dpr);
+      display.height = Math.round(h * dpr);
+      displayCtx.font = `${cellH.toFixed(2)}px 'Courier New', monospace`;
+      const advance = displayCtx.measureText(DENSE_CHAR).width || 1;
+      // one fillText per row, horizontally scaled so the row spans the
+      // viewport exactly — no per-glyph draw calls, no right-edge gap
+      glyphScaleX = cellW / advance;
+    };
+    layout();
+    window.addEventListener('resize', layout);
+
+    const maxIdx = RAMP.length - 1;
+    const paint = (time: number) => {
+      renderer.render(scene, camera);
+      sampleCtx.clearRect(0, 0, cols, sampleH);
+      sampleCtx.drawImage(renderer.domElement, 0, 0, cols, sampleH);
+      const pixels = sampleCtx.getImageData(0, 0, cols, sampleH).data;
+
+      const rowStrings: string[] = [];
+      for (let y = 0; y < sampleH; y += 2) {
+        let row = '';
+        for (let x = 0; x < cols; x++) {
+          const o = (y * cols + x) * 4;
+          const brightness = (0.3 * pixels[o] + 0.59 * pixels[o + 1] + 0.11 * pixels[o + 2]) / 255;
+          // invert mapping, as AsciiEffect with { invert: true }
+          row += RAMP[maxIdx - Math.round((1 - brightness) * maxIdx)];
+        }
+        rowStrings.push(row);
+      }
+      const shimmered = shimmerRows(rowStrings, time);
+
+      displayCtx.setTransform(1, 0, 0, 1, 0, 0);
+      displayCtx.clearRect(0, 0, display.width, display.height);
+      displayCtx.setTransform(dpr * glyphScaleX, 0, 0, dpr, 0, 0);
+      displayCtx.font = `${cellH.toFixed(2)}px 'Courier New', monospace`;
+      // Dimming lives in the glyph color, NOT in CSS opacity on the wrapper:
+      // opacity < 1 would isolate this layer from backdrop-filter sampling
+      // (#5a5a5a = #969696 at 60%).
+      displayCtx.fillStyle = '#5a5a5a';
+      for (let r = 0; r < shimmered.length; r++) {
+        displayCtx.fillText(shimmered[r], 0, (r + 0.8) * cellH);
+      }
+    };
+
+    let lastRender = 0;
     let rafId: number;
     const tick = (t: number) => {
-      camera.rotation.y = (t / 1000) * YAW_SPEED;
-      effect.render(scene, camera);
-      shimmer(effect.domElement, t);
+      if (t - lastRender >= FRAME_MS) {
+        lastRender = t;
+        camera.rotation.y = (t / 1000) * YAW_SPEED;
+        paint(t);
+      }
       rafId = requestAnimationFrame(tick);
     };
     rafId = requestAnimationFrame(tick);
 
     return () => {
-      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('resize', layout);
       cancelAnimationFrame(rafId);
-      if (container.contains(effect.domElement)) {
-        container.removeChild(effect.domElement);
-      }
+      container.removeChild(display);
       geometry.dispose();
       materials.forEach((m) => {
         m.map?.dispose();

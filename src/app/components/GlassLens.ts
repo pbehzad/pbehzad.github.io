@@ -20,6 +20,28 @@ export const EXTRA_HOST_CLASS = 'glass-extra-host';
 const SVG_NS = 'http://www.w3.org/2000/svg';
 const XLINK_NS = 'http://www.w3.org/1999/xlink';
 const REGEN_THRESHOLD = 12; // px of size drift before map regen
+const REMINT_MS = 120; // WebKit: min gap between filter re-mints
+
+// Safari snapshots an SVG filter when an element first references it and
+// ignores attribute changes afterwards (the Aave article's "Safari caches by
+// filter ID"). There: values must be final BEFORE the url(#…) reference is
+// assigned, later changes need a rebuild under a fresh ID, and per-frame
+// progress animation is off the table — glass is binary on/off.
+const WEBKIT_UA =
+  typeof navigator !== 'undefined' &&
+  /AppleWebKit/i.test(navigator.userAgent) &&
+  !/Chrome|Chromium|Edg|OPR|Android/i.test(navigator.userAgent);
+const WEBKIT_VERSION = (() => {
+  if (typeof navigator === 'undefined') return 0;
+  const match = navigator.userAgent.match(/Version\/(\d+)/);
+  return match ? Number(match[1]) : 0;
+})();
+const STATIC_FILTER_ENGINE = WEBKIT_UA;
+// Safari before 18 doesn't reliably render SVG filters referenced from CSS
+// at all (verified: works in the WebKit 18 engine, renders nothing on
+// Ventura-era Safari). Fall back to what WebKit does best — backdrop-filter
+// overlays: real blur/brightness, no refraction or chromatic fringe.
+const BACKDROP_FALLBACK = WEBKIT_UA && WEBKIT_VERSION > 0 && WEBKIT_VERSION < 18;
 
 // Live-tunable optics (see GlassTunerPanel). Map-shape values (edgeBand,
 // cornerRadius, curvature) trigger a displacement-map rebuild via
@@ -137,8 +159,9 @@ function buildDisplacementMap(
 // The regions are disjoint, and each filter passes untouched content through,
 // so chaining composes cleanly.
 type LensInstance = {
-  parts: FilterParts;
+  parts: FilterParts | null;
   extraParts: FilterParts | null;
+  overlay: HTMLDivElement | null;
   extraHost: HTMLElement | null;
   mapUri: string;
   mapW: number;
@@ -149,6 +172,8 @@ type LensInstance = {
   lastRect: Rect;
   lastProgress: number;
   freezesBreathing: boolean;
+  referenced: boolean;
+  remintTimer: number | null;
 };
 
 class GlassLensController {
@@ -238,10 +263,10 @@ class GlassLensController {
     return document.querySelector<HTMLElement>(HOST_SELECTOR);
   }
 
-  private applyGeometry(parts: FilterParts, x: number, y: number, w: number, h: number) {
+  private applyGeometry(parts: FilterParts, x: number, y: number, w: number, h: number): boolean {
     const pad = Math.ceil(glassTuning.blur * 3);
     const geomKey = `${x},${y},${w},${h},${pad}`;
-    if (geomKey === parts.geomKey) return;
+    if (geomKey === parts.geomKey) return false;
     parts.geomKey = geomKey;
     const geometry = (node: SVGElement, gx: number, gy: number, gw: number, gh: number) => {
       node.setAttribute('x', String(gx));
@@ -253,12 +278,13 @@ class GlassLensController {
     geometry(parts.mask, x, y, w, h); // exact clip of the glass region
     for (const bend of parts.bends) geometry(bend, x - pad, y - pad, w + pad * 2, h + pad * 2);
     geometry(parts.blur, x - pad, y - pad, w + pad * 2, h + pad * 2);
+    return true;
   }
 
-  private applyOptics(parts: FilterParts, progress: number) {
+  private applyOptics(parts: FilterParts, progress: number): boolean {
     const strength = progress * glassTuning.depth;
     const opticsKey = `${strength.toFixed(2)},${glassTuning.chroma},${glassTuning.blur},${glassTuning.brightness},${progress.toFixed(3)}`;
-    if (opticsKey === parts.opticsKey) return;
+    if (opticsKey === parts.opticsKey) return false;
     parts.opticsKey = opticsKey;
     parts.bends[0].setAttribute('scale', (strength * (1 - glassTuning.chroma)).toFixed(2));
     parts.bends[1].setAttribute('scale', strength.toFixed(2));
@@ -266,17 +292,22 @@ class GlassLensController {
     parts.blur.setAttribute('stdDeviation', (progress * glassTuning.blur).toFixed(2));
     parts.lit.setAttribute('values', this.litValues());
     parts.mask.setAttribute('flood-opacity', Math.min(1, Math.max(0, progress)).toFixed(3));
+    return true;
   }
 
   private syncHostFilter() {
     const host = this.host();
     if (!host) return;
-    const refs = [...this.lenses.values()].map((lens) => `url(#${lens.parts.filter.id})`);
+    const refs = [...this.lenses.values()]
+      .filter((lens) => lens.parts)
+      .map((lens) => `url(#${lens.parts!.filter.id})`);
     host.style.filter = refs.join(' ');
   }
 
   private ensureLens(lens: LensInstance, viewportRect: Rect) {
+    if (BACKDROP_FALLBACK) return;
     const needsRegen =
+      !lens.parts ||
       Math.abs(viewportRect.width - lens.mapW) > REGEN_THRESHOLD ||
       Math.abs(viewportRect.height - lens.mapH) > REGEN_THRESHOLD ||
       glassTuning.edgeBand !== lens.mapEdgeBand ||
@@ -285,7 +316,7 @@ class GlassLensController {
     if (!needsRegen) return;
 
     // fresh filter IDs on every map regeneration — Safari caches by ID
-    lens.parts.svg.remove();
+    lens.parts?.svg.remove();
     lens.extraParts?.svg.remove();
     this.generation += 1;
     lens.parts = this.buildFilter('');
@@ -295,16 +326,51 @@ class GlassLensController {
     lens.mapRadius = glassTuning.cornerRadius;
     lens.mapCurvature = glassTuning.curvature;
     lens.mapUri = buildDisplacementMap(lens.mapW, lens.mapH, lens.mapEdgeBand, lens.mapRadius, lens.mapCurvature);
-    setHref(lens.parts.map, lens.mapUri);
+    setHref(lens.parts!.map, lens.mapUri);
     if (lens.extraHost) {
       // twin filter for the column's own layer, same map in local coordinates
       lens.extraParts = this.buildFilter('-x');
       setHref(lens.extraParts.map, lens.mapUri);
-      lens.extraHost.style.filter = `url(#${lens.extraParts.filter.id})`;
     } else {
       lens.extraParts = null;
     }
+  }
+
+  // point the DOM at this lens's (possibly fresh) filter ids
+  private reference(lens: LensInstance) {
+    if (lens.extraHost && lens.extraParts) {
+      lens.extraHost.style.filter = `url(#${lens.extraParts.filter.id})`;
+    }
     this.syncHostFilter();
+    lens.referenced = true;
+  }
+
+  // WebKit ignores attribute changes on a filter that's already referenced —
+  // rebuild it under a fresh ID with the current values baked in, then
+  // re-reference (throttled: each re-mint re-rasterizes the whole lens)
+  private scheduleRemint(owner: object) {
+    if (BACKDROP_FALLBACK) return;
+    const lens = this.lenses.get(owner);
+    if (!lens || lens.remintTimer !== null) return;
+    lens.remintTimer = window.setTimeout(() => {
+      lens.remintTimer = null;
+      const live = this.lenses.get(owner);
+      if (!live) return;
+      live.parts?.svg.remove();
+      live.extraParts?.svg.remove();
+      this.generation += 1;
+      live.parts = this.buildFilter('');
+      setHref(live.parts.map, live.mapUri);
+      if (live.extraHost) {
+        live.extraParts = this.buildFilter('-x');
+        setHref(live.extraParts.map, live.mapUri);
+      } else {
+        live.extraParts = null;
+      }
+      live.referenced = false;
+      this.update(owner, live.lastRect, live.lastProgress);
+      this.reference(live);
+    }, REMINT_MS);
   }
 
   activate(
@@ -319,10 +385,10 @@ class GlassLensController {
 
     let lens = this.lenses.get(owner);
     if (!lens) {
-      this.generation += 1;
       lens = {
-        parts: this.buildFilter(''),
+        parts: null,
         extraParts: null,
+        overlay: null,
         extraHost,
         mapUri: '',
         mapW: -1,
@@ -333,6 +399,8 @@ class GlassLensController {
         lastRect: viewportRect,
         lastProgress: progress,
         freezesBreathing: options?.freezesBreathing ?? true,
+        referenced: false,
+        remintTimer: null,
       };
       this.lenses.set(owner, lens);
     }
@@ -342,10 +410,26 @@ class GlassLensController {
     // from here on the lens owns the layer's filter — disable the CSS
     // first-paint frost fallback so releasing actually clears the glass
     if (extraHost) extraHost.dataset.lensManaged = 'true';
+
+    if (BACKDROP_FALLBACK) {
+      if (!lens.overlay) {
+        const overlay = document.createElement('div');
+        // z-index 2: above the ASCII layer (z-0) and the veil (z-1), below
+        // the column/panel content (z-10)
+        overlay.style.cssText = 'position:fixed;z-index:2;pointer-events:none;display:none;';
+        document.body.appendChild(overlay);
+        lens.overlay = overlay;
+      }
+      this.update(owner, viewportRect, progress);
+      return true;
+    }
+
     this.ensureLens(lens, viewportRect);
-    if (extraHost && lens.extraParts) extraHost.style.filter = `url(#${lens.extraParts.filter.id})`;
-    this.syncHostFilter();
+    // attributes must be final BEFORE the DOM references the filter: WebKit
+    // snapshots at reference time and ignores later attribute writes
+    lens.referenced = false;
     this.update(owner, viewportRect, progress);
+    this.reference(lens);
     return true;
   }
 
@@ -357,25 +441,52 @@ class GlassLensController {
     lens.lastRect = viewportRect;
     lens.lastProgress = progress;
 
+    // WebKit can't animate a referenced filter, so glass is binary there
+    const applied = STATIC_FILTER_ENGINE ? (progress >= 0.5 ? 1 : 0) : progress;
+
+    if (BACKDROP_FALLBACK) {
+      const overlay = lens.overlay;
+      if (!overlay) return;
+      overlay.style.display = applied > 0 ? 'block' : 'none';
+      overlay.style.left = `${Math.round(viewportRect.x)}px`;
+      overlay.style.top = `${Math.round(viewportRect.y)}px`;
+      overlay.style.width = `${Math.round(viewportRect.width)}px`;
+      overlay.style.height = `${Math.round(viewportRect.height)}px`;
+      const fx = `blur(${glassTuning.blur}px) brightness(${glassTuning.brightness}) saturate(1.2)`;
+      overlay.style.backdropFilter = fx;
+      overlay.style.setProperty('-webkit-backdrop-filter', fx);
+      overlay.style.background = `rgba(255, 255, 255, ${glassTuning.tint})`;
+      if (lens.extraHost) {
+        // the portrait sits above the overlay's backdrop — frost it directly
+        lens.extraHost.style.filter =
+          applied > 0 ? `blur(${glassTuning.blur}px) brightness(${glassTuning.brightness})` : '';
+      }
+      return;
+    }
+
+    const parts = lens.parts;
+    if (!parts) return;
     const hostRect = host.getBoundingClientRect();
     // quantize to whole pixels: sub-pixel geometry churn makes the refracted
     // content shimmer, and any attribute write invalidates the whole filter
-    this.applyGeometry(
-      lens.parts,
+    let changed = this.applyGeometry(
+      parts,
       Math.round(viewportRect.x - hostRect.x),
       Math.round(viewportRect.y - hostRect.y),
       Math.round(viewportRect.width),
       Math.round(viewportRect.height)
     );
-    this.applyOptics(lens.parts, progress);
+    changed = this.applyOptics(parts, applied) || changed;
 
     if (lens.extraHost && lens.extraParts) {
       // the extra host IS the lensed layer, so the lens fills its own box;
       // the shared map stretches to fit (feImage preserveAspectRatio=none)
       const extraRect = lens.extraHost.getBoundingClientRect();
-      this.applyGeometry(lens.extraParts, 0, 0, Math.round(extraRect.width), Math.round(extraRect.height));
-      this.applyOptics(lens.extraParts, progress);
+      changed = this.applyGeometry(lens.extraParts, 0, 0, Math.round(extraRect.width), Math.round(extraRect.height)) || changed;
+      changed = this.applyOptics(lens.extraParts, applied) || changed;
     }
+
+    if (STATIC_FILTER_ENGINE && changed && lens.referenced) this.scheduleRemint(owner);
   }
 
   // true while any hover lens is up — the identity column's resting lens
@@ -387,19 +498,27 @@ class GlassLensController {
   // re-apply after tuning changes (map shape params need a rebuild)
   refresh() {
     for (const [owner, lens] of this.lenses) {
+      if (BACKDROP_FALLBACK) {
+        this.update(owner, lens.lastRect, lens.lastProgress);
+        continue;
+      }
       this.ensureLens(lens, lens.lastRect);
-      lens.parts.opticsKey = '';
+      if (lens.parts) lens.parts.opticsKey = '';
       if (lens.extraParts) lens.extraParts.opticsKey = '';
+      lens.referenced = false;
       this.update(owner, lens.lastRect, lens.lastProgress);
+      this.reference(lens);
     }
   }
 
   release(owner: object) {
     const lens = this.lenses.get(owner);
     if (!lens) return;
+    if (lens.remintTimer !== null) window.clearTimeout(lens.remintTimer);
     this.lenses.delete(owner);
-    lens.parts.svg.remove();
+    lens.parts?.svg.remove();
     lens.extraParts?.svg.remove();
+    lens.overlay?.remove();
     if (lens.extraHost) lens.extraHost.style.filter = '';
     this.syncHostFilter();
   }

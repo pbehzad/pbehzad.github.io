@@ -532,6 +532,7 @@ export default function ColumnPortal({
     // whole refraction field with it and the lensed content wobbles
     let amplitude = baseAmplitude;
     let resting = false;
+    let lastApply = 0;
     const tick = (t: number) => {
       // no breathing on mobile: widths drive the glass there, and the
       // constant reflow is wasted battery on a touch screen
@@ -539,7 +540,10 @@ export default function ColumnPortal({
       amplitude += ((still ? 0 : baseAmplitude) - amplitude) * 0.05;
       const base = widthsRef.current;
       const idle = amplitude < 0.05;
-      if (base.length && !(idle && resting)) {
+      // the sine drifts slowly — reflowing the whole page at 25fps is
+      // indistinguishable from 60 and much cheaper (Safari especially)
+      if (base.length && !(idle && resting) && t - lastApply >= 40) {
+        lastApply = t;
         resting = idle;
         // identity is excluded from the jitter: it rests with glass on, and a
         // moving column would drag its lens geometry every frame
