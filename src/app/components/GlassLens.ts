@@ -1,527 +1,539 @@
-// Aave-style refraction lens (https://aave.com/design/building-glass-for-the-web)
-// applied to the ASCII background layer. A single SVG filter carries the whole
-// optical stack — displacement-map refraction with a subtle chromatic split,
-// frost blur, and brightness lift — and is driven per frame through cheap
-// attribute updates only. The displacement map is regenerated rarely: on
-// activation and on real size/shape changes.
-//
-// The filter is applied to the layer's *painted content* (`filter: url(#…)`),
-// not via backdrop-filter, so it works cross-browser. Per the article, Safari
-// caches filters by ID, so the filter gets a fresh ID whenever the
-// displacement map is regenerated.
-//
-// A column can also mark one of its own layers with .glass-extra-host (the
-// identity column's portrait) — that layer gets a twin filter with the same
-// map in its local coordinates, so content painted above the ASCII goes
-// under the glass too.
+'use client';
 
-const HOST_SELECTOR = '.ascii-lens-host';
-export const EXTRA_HOST_CLASS = 'glass-extra-host';
-const SVG_NS = 'http://www.w3.org/2000/svg';
-const XLINK_NS = 'http://www.w3.org/1999/xlink';
-const REGEN_THRESHOLD = 12; // px of size drift before map regen
-const REMINT_MS = 120; // WebKit: min gap between filter re-mints
+import { LiquidGlassEngine, type LiquidGlassOptions } from 'liquid-glass-web-react';
 
-// Safari snapshots an SVG filter when an element first references it and
-// ignores attribute changes afterwards (the Aave article's "Safari caches by
-// filter ID"). There: values must be final BEFORE the url(#…) reference is
-// assigned, later changes need a rebuild under a fresh ID, and per-frame
-// progress animation is off the table — glass is binary on/off.
-const WEBKIT_UA =
-  typeof navigator !== 'undefined' &&
-  /AppleWebKit/i.test(navigator.userAgent) &&
-  !/Chrome|Chromium|Edg|OPR|Android/i.test(navigator.userAgent);
-const WEBKIT_VERSION = (() => {
-  if (typeof navigator === 'undefined') return 0;
-  const match = navigator.userAgent.match(/Version\/(\d+)/);
-  return match ? Number(match[1]) : 0;
-})();
-const STATIC_FILTER_ENGINE = WEBKIT_UA;
-// Safari before 18 doesn't reliably render SVG filters referenced from CSS
-// at all (verified: works in the WebKit 18 engine, renders nothing on
-// Ventura-era Safari). Fall back to what WebKit does best — backdrop-filter
-// overlays: real blur/brightness, no refraction or chromatic fringe.
-const BACKDROP_FALLBACK = WEBKIT_UA && WEBKIT_VERSION > 0 && WEBKIT_VERSION < 18;
+export type GlassVariant = 'clear' | 'regular' | 'navigation';
+export type GlassScope = 'main' | 'content';
 
-// Live-tunable optics (see GlassTunerPanel). Map-shape values (edgeBand,
-// cornerRadius, curvature) trigger a displacement-map rebuild via
-// glassLens.refresh().
-// Parham's picked values (2026-07-10) — retune via /?tune
-export const glassTuning = {
-  depth: 80, // displacement strength at full formation
-  edgeBand: 120, // px ring where refraction bends
-  cornerRadius: 60,
-  curvature: 1.8, // dome profile exponent — higher = flatter center, steeper edge
-  chroma: 0.3, // ±per-channel scale split
-  blur: 16,
-  brightness: 1.15,
-  tint: 0.05, // pane surface wash (consumed by PixelGlassLayer)
-  edgeHighlight: 0.7, // specular rim strength (consumed by PixelGlassLayer)
-  formMs: 620,
-  meltMs: 420,
+export type GlassTuning = {
+  strength: number;
+  chromaticAberration: number;
+  identityChroma: number;
+  blur: number;
+  depth: number;
+  curvature: number;
+  splay: number;
+  glow: number;
+  glowSpread: number;
+  glowExponent: number;
+  edgeHighlight: number;
+  edgeWidth: number;
+  edgeExponent: number;
+  specular: number;
+  specularAngle: number;
+  quality: number;
+  density: number;
+  tint: number;
+  shadow: number;
+  radius: number;
+  inset: number;
+  restOpacity: number;
+  formMs: number;
+  meltMs: number;
 };
 
-type Rect = { x: number; y: number; width: number; height: number };
-
-type FilterParts = {
-  svg: SVGSVGElement;
-  filter: SVGFilterElement;
-  map: SVGFEImageElement;
-  bends: SVGFEDisplacementMapElement[];
-  blur: SVGFEGaussianBlurElement;
-  lit: SVGFEColorMatrixElement;
-  mask: SVGFEFloodElement;
-  geomKey: string;
-  opticsKey: string;
+// Main-column frames are deliberately flush. Content panels retain rounded
+// chrome and have their own independent profile in the tuner.
+export const mainGlassTuning: GlassTuning = {
+  strength: 0.415,
+  chromaticAberration: 1,
+  identityChroma: 1,
+  blur: 6.5,
+  depth: 40,
+  curvature: 1,
+  splay: 1,
+  glow: 0.3,
+  glowSpread: 1,
+  glowExponent: 1.5,
+  edgeHighlight: 0.52,
+  edgeWidth: 4.5,
+  edgeExponent: 1.5,
+  specular: 1,
+  specularAngle: 42,
+  quality: 512,
+  density: 0.145,
+  tint: 0.215,
+  shadow: 0.28,
+  restOpacity: 1,
+  formMs: 600,
+  meltMs: 320,
+  radius: 0,
+  inset: 0,
 };
 
-function el<K extends keyof SVGElementTagNameMap>(tag: K, attrs: Record<string, string>): SVGElementTagNameMap[K] {
-  const node = document.createElementNS(SVG_NS, tag);
-  for (const [key, value] of Object.entries(attrs)) node.setAttribute(key, value);
-  return node;
+// The identity lens is independent from the shared main-column material.
+// These are the exact user-selected package settings for that one column.
+export const identityGlassTuning: GlassTuning = {
+  strength: 0.2,
+  chromaticAberration: 1,
+  identityChroma: 7,
+  blur: 4,
+  depth: 40,
+  curvature: 0,
+  splay: 0.4,
+  glow: 0.3,
+  glowSpread: 1,
+  glowExponent: 1.5,
+  edgeHighlight: 0.52,
+  edgeWidth: 3,
+  edgeExponent: 1.5,
+  specular: 1,
+  specularAngle: 42,
+  quality: 512,
+  density: 0.1,
+  tint: 0.055,
+  shadow: 0.28,
+  restOpacity: 1,
+  formMs: 280,
+  meltMs: 200,
+  radius: 0,
+  inset: 0,
+};
+
+export const contentGlassTuning: GlassTuning = {
+  strength: 0.375,
+  chromaticAberration: 6,
+  identityChroma: 1,
+  blur: 10.75,
+  depth: 10,
+  curvature: 1,
+  splay: 1,
+  glow: 0.3,
+  glowSpread: 1,
+  glowExponent: 1.5,
+  edgeHighlight: 0.52,
+  edgeWidth: 3,
+  edgeExponent: 1.5,
+  specular: 1,
+  specularAngle: 42,
+  quality: 512,
+  density: 0.3,
+  tint: 0.055,
+  shadow: 0.28,
+  restOpacity: 1,
+  formMs: 280,
+  meltMs: 200,
+  radius: 28,
+  inset: 0,
+};
+
+export type GlassTuningKey = keyof GlassTuning;
+
+const tunings: Record<GlassScope, GlassTuning> = {
+  main: mainGlassTuning,
+  content: contentGlassTuning,
+};
+
+const tuningListeners: Record<GlassScope, Set<() => void>> = {
+  main: new Set(),
+  content: new Set(),
+};
+const MAP_SHAPE_KEYS = new Set<GlassTuningKey>([
+  'radius',
+  'inset',
+  'depth',
+  'curvature',
+  'splay',
+  'glow',
+  'glowSpread',
+  'glowExponent',
+  'edgeHighlight',
+  'edgeWidth',
+  'edgeExponent',
+  'specularAngle',
+  'quality',
+]);
+
+export function getGlassTuning(scope: GlassScope): GlassTuning {
+  return tunings[scope];
 }
 
-function setHref(image: SVGFEImageElement, uri: string) {
-  image.setAttribute('href', uri);
-  image.setAttributeNS(XLINK_NS, 'xlink:href', uri);
+export function subscribeGlassTuning(scope: GlassScope, listener: () => void): () => void {
+  tuningListeners[scope].add(listener);
+  return () => tuningListeners[scope].delete(listener);
 }
 
-function roundedRectInsideDistance(x: number, y: number, w: number, h: number, r: number): number {
-  // signed distance from a point to the border of a rounded rect (positive inside)
-  const qx = Math.abs(x - w / 2) - (w / 2 - r);
-  const qy = Math.abs(y - h / 2) - (h / 2 - r);
-  const outside = Math.hypot(Math.max(qx, 0), Math.max(qy, 0));
-  const inside = Math.min(Math.max(qx, qy), 0);
-  return -(outside + inside - r);
-}
-
-// R/G channels encode the sampling direction. The vectors point INWARD with a
-// dome profile (flat center, steep edge): sampling toward the lens interior
-// magnifies, which is what makes it read as thick glass instead of a smear.
-// Only the top-left quadrant is computed; the rest is mirrored with the x/y
-// components negated (Aave's four-fold symmetry optimization).
-function buildDisplacementMap(
-  w: number,
-  h: number,
-  edgeBand: number,
-  cornerRadius: number,
-  curvature: number
-): string {
-  const canvas = document.createElement('canvas');
-  canvas.width = w;
-  canvas.height = h;
-  const ctx = canvas.getContext('2d')!;
-  const image = ctx.createImageData(w, h);
-  const data = image.data;
-  const halfW = Math.ceil(w / 2);
-  const halfH = Math.ceil(h / 2);
-  const eps = 1;
-
-  const put = (px: number, py: number, nx: number, ny: number, mag: number) => {
-    const i = (py * w + px) * 4;
-    data[i] = Math.round(128 + nx * 127 * mag);
-    data[i + 1] = Math.round(128 + ny * 127 * mag);
-    data[i + 2] = 128;
-    data[i + 3] = 255;
-  };
-
-  for (let y = 0; y < halfH; y++) {
-    for (let x = 0; x < halfW; x++) {
-      const d = roundedRectInsideDistance(x + 0.5, y + 0.5, w, h, cornerRadius);
-      const t = Math.min(1, Math.max(0, 1 - d / edgeBand));
-      const mag = Math.pow(t, curvature);
-      let nx = 0;
-      let ny = 0;
-      if (mag > 0.004) {
-        // inward normal = gradient of the inside-distance field, so edge
-        // pixels sample from just outside the lens — dome magnification
-        nx = d - roundedRectInsideDistance(x + 0.5 - eps, y + 0.5, w, h, cornerRadius);
-        ny = d - roundedRectInsideDistance(x + 0.5, y + 0.5 - eps, w, h, cornerRadius);
-        const len = Math.hypot(nx, ny) || 1;
-        nx /= len;
-        ny /= len;
-      }
-      const mx = w - 1 - x;
-      const my = h - 1 - y;
-      put(x, y, nx, ny, mag);
-      put(mx, y, -nx, ny, mag);
-      put(x, my, nx, -ny, mag);
-      put(mx, my, -nx, -ny, mag);
-    }
+export function setGlassTuning(scope: GlassScope, patch: Partial<GlassTuning>) {
+  const tuning = getGlassTuning(scope);
+  let changed = false;
+  let changedMapShape = false;
+  for (const key of Object.keys(patch) as GlassTuningKey[]) {
+    const value = patch[key];
+    if (value === undefined || tuning[key] === value) continue;
+    tuning[key] = value;
+    changed = true;
+    if (MAP_SHAPE_KEYS.has(key)) changedMapShape = true;
   }
-  ctx.putImageData(image, 0, 0);
-  return canvas.toDataURL('image/png');
+  if (!changed) return;
+
+  glassLens.refresh(scope, changedMapShape);
+  for (const listener of tuningListeners[scope]) listener();
 }
 
-// Several lenses can be live at once (the identity column rests with glass ON
-// while another column is hovered), so each activation owns a LensInstance and
-// the host element chains every active filter: `filter: url(#a) url(#b)`.
-// The regions are disjoint, and each filter passes untouched content through,
-// so chaining composes cleanly.
-type LensInstance = {
-  parts: FilterParts | null;
-  extraParts: FilterParts | null;
-  overlay: HTMLDivElement | null;
-  extraHost: HTMLElement | null;
-  mapUri: string;
-  mapW: number;
-  mapH: number;
-  mapEdgeBand: number;
-  mapRadius: number;
-  mapCurvature: number;
-  lastRect: Rect;
-  lastProgress: number;
+type MaterialOptions = {
+  variant?: GlassVariant;
+  freezesBreathing?: boolean;
+  interactionTarget?: HTMLElement | null;
+};
+
+type MaterialInstance = {
+  element: HTMLElement;
+  interactionTarget: HTMLElement;
+  variant: GlassVariant;
+  progress: number;
   freezesBreathing: boolean;
-  referenced: boolean;
-  remintTimer: number | null;
+  order: number;
+  pointerCleanup: (() => void) | null;
+  resizeObserver: ResizeObserver | null;
 };
 
-class GlassLensController {
-  private lenses = new Map<object, LensInstance>();
-  private generation = 0;
+type LensGeometry = {
+  width: number;
+  height: number;
+  radius: number;
+  x: number;
+  y: number;
+};
 
-  private buildFilter(suffix: string): FilterParts {
-    const id = `pixel-glass-lens${suffix}-${this.generation}`;
-    const filter = el('filter', {
-      id,
-      x: '-5%',
-      y: '-5%',
-      width: '110%',
-      height: '110%',
-      'color-interpolation-filters': 'sRGB',
-    });
+const clamp01 = (value: number) => Math.min(1, Math.max(0, value));
 
-    const map = el('feImage', { result: 'map', preserveAspectRatio: 'none' });
-    filter.appendChild(map);
+const VARIANT_SCALE: Record<
+  GlassVariant,
+  {
+    density: number;
+    tint: number;
+    shadow: number;
+  }
+> = {
+  clear: { density: 0.25, tint: 0.3, shadow: 0.65 },
+  regular: { density: 3, tint: 0.3, shadow: 1 },
+  navigation: { density: 3.4, tint: 0.3, shadow: 1.25 },
+};
 
-    // three bends at slightly different strengths = chromatic fringe;
-    // every pass keeps its alpha (screen-blending disjoint channels is
-    // additive; zeroed alpha would annihilate the color when premultiplied)
-    const channels: Array<[string, string]> = [
-      ['bentR', '1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0'],
-      ['bentG', '0 0 0 0 0  0 1 0 0 0  0 0 0 0 0  0 0 0 1 0'],
-      ['bentB', '0 0 0 0 0  0 0 0 0 0  0 0 1 0 0  0 0 0 1 0'],
-    ];
-    const bends: SVGFEDisplacementMapElement[] = [];
-    for (const [result] of channels) {
-      const bend = el('feDisplacementMap', {
-        in: 'SourceGraphic',
-        in2: 'map',
-        scale: '0',
-        xChannelSelector: 'R',
-        yChannelSelector: 'G',
-        result,
-      });
-      bends.push(bend);
-      filter.appendChild(bend);
+function scopeForVariant(variant: GlassVariant): GlassScope {
+  return variant === 'clear' ? 'main' : 'content';
+}
+
+class GlassMaterialController {
+  private materials = new Map<object, MaterialInstance>();
+  private engine: LiquidGlassEngine | null = null;
+  private engineHost: HTMLElement | null = null;
+  private defsHost: HTMLDivElement | null = null;
+  private activeGeometry: LensGeometry | null = null;
+  private activePosition: { x: number; y: number } | null = null;
+  private sequence = 0;
+  private syncFrame: number | null = null;
+
+  private applySurfaceTuning(material: MaterialInstance) {
+    const scale = VARIANT_SCALE[material.variant];
+    const tuning = getGlassTuning(scopeForVariant(material.variant));
+    const edge = tuning.edgeHighlight;
+    const style = material.element.style;
+
+    material.element.dataset.glassVariant = material.variant;
+    style.setProperty('--glass-density', Math.min(0.72, tuning.density * scale.density).toFixed(3));
+    style.setProperty('--glass-tint-alpha', Math.min(0.22, tuning.tint * scale.tint).toFixed(3));
+    style.setProperty('--glass-specular-alpha', (0.16 * edge).toFixed(3));
+    style.setProperty('--glass-edge-top-alpha', (0.34 * edge).toFixed(3));
+    style.setProperty('--glass-edge-side-alpha', (0.14 * edge).toFixed(3));
+    style.setProperty('--glass-edge-dim-alpha', (0.22 * edge).toFixed(3));
+    style.setProperty('--glass-shadow-alpha', Math.min(0.6, tuning.shadow * scale.shadow).toFixed(3));
+    style.setProperty('--glass-frame-inset', tuning.inset + 'px');
+    style.setProperty('--glass-frame-radius', tuning.radius + 'px');
+  }
+
+  private bindPointerLight(material: MaterialInstance): () => void {
+    if (
+      typeof window === 'undefined' ||
+      !window.matchMedia('(hover: hover) and (pointer: fine)').matches ||
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    ) {
+      return () => undefined;
     }
-    for (const [result, values] of channels) {
-      filter.appendChild(el('feColorMatrix', { in: result, type: 'matrix', values, result: `ch_${result}` }));
-    }
-    filter.appendChild(el('feBlend', { in: 'ch_bentR', in2: 'ch_bentG', mode: 'screen', result: 'cRG' }));
-    filter.appendChild(el('feBlend', { in: 'cRG', in2: 'ch_bentB', mode: 'screen', result: 'bent' }));
 
-    const blur = el('feGaussianBlur', { in: 'bent', stdDeviation: '0', result: 'frost' });
-    filter.appendChild(blur);
+    const target = material.interactionTarget;
+    let raf: number | null = null;
+    let pendingX = 24;
+    let pendingY = 10;
 
-    const lit = el('feColorMatrix', {
-      in: 'frost',
-      type: 'matrix',
-      values: this.litValues(),
-      result: 'lit',
-    });
-    filter.appendChild(lit);
-
-    // uniform crossfade mask: the glass region fades in as one material
-    const mask = el('feFlood', { 'flood-color': '#ffffff', 'flood-opacity': '0', result: 'mask' });
-    filter.appendChild(mask);
-
-    filter.appendChild(el('feComposite', { in: 'lit', in2: 'mask', operator: 'in', result: 'glass' }));
-    filter.appendChild(el('feComposite', { in: 'SourceGraphic', in2: 'mask', operator: 'out', result: 'clear' }));
-    const merge = el('feMerge', {});
-    merge.appendChild(el('feMergeNode', { in: 'clear' }));
-    merge.appendChild(el('feMergeNode', { in: 'glass' }));
-    filter.appendChild(merge);
-
-    const svg = el('svg', { width: '0', height: '0', 'aria-hidden': 'true' });
-    svg.style.position = 'absolute';
-    svg.style.overflow = 'hidden';
-    const defs = el('defs', {});
-    defs.appendChild(filter);
-    svg.appendChild(defs);
-    document.body.appendChild(svg);
-
-    return { svg, filter, map, bends, blur, lit, mask, geomKey: '', opticsKey: '' };
-  }
-
-  private litValues(): string {
-    const b = glassTuning.brightness;
-    return `${b} 0 0 0 0  0 ${b} 0 0 0  0 0 ${b} 0 0  0 0 0 1 0`;
-  }
-
-  private host(): HTMLElement | null {
-    return document.querySelector<HTMLElement>(HOST_SELECTOR);
-  }
-
-  private applyGeometry(parts: FilterParts, x: number, y: number, w: number, h: number): boolean {
-    const pad = Math.ceil(glassTuning.blur * 3);
-    const geomKey = `${x},${y},${w},${h},${pad}`;
-    if (geomKey === parts.geomKey) return false;
-    parts.geomKey = geomKey;
-    const geometry = (node: SVGElement, gx: number, gy: number, gw: number, gh: number) => {
-      node.setAttribute('x', String(gx));
-      node.setAttribute('y', String(gy));
-      node.setAttribute('width', String(gw));
-      node.setAttribute('height', String(gh));
+    const paint = () => {
+      raf = null;
+      material.element.style.setProperty('--glass-light-x', pendingX.toFixed(2) + '%');
+      material.element.style.setProperty('--glass-light-y', pendingY.toFixed(2) + '%');
     };
-    geometry(parts.map, x, y, w, h);
-    geometry(parts.mask, x, y, w, h); // exact clip of the glass region
-    for (const bend of parts.bends) geometry(bend, x - pad, y - pad, w + pad * 2, h + pad * 2);
-    geometry(parts.blur, x - pad, y - pad, w + pad * 2, h + pad * 2);
-    return true;
+
+    const queue = (x: number, y: number) => {
+      pendingX = x;
+      pendingY = y;
+      if (raf === null) raf = window.requestAnimationFrame(paint);
+    };
+
+    const onPointerMove = (event: PointerEvent) => {
+      if (event.pointerType === 'touch') return;
+      const rect = target.getBoundingClientRect();
+      if (rect.width <= 0 || rect.height <= 0) return;
+      queue(
+        clamp01((event.clientX - rect.left) / rect.width) * 100,
+        clamp01((event.clientY - rect.top) / rect.height) * 100
+      );
+    };
+    const onPointerLeave = () => {
+      material.element.dataset.glassPressed = 'false';
+      queue(24, 10);
+    };
+    const onPointerDown = (event: PointerEvent) => {
+      if (event.pointerType !== 'touch') material.element.dataset.glassPressed = 'true';
+    };
+    const onPointerUp = () => {
+      material.element.dataset.glassPressed = 'false';
+    };
+
+    target.addEventListener('pointermove', onPointerMove, { passive: true });
+    target.addEventListener('pointerleave', onPointerLeave);
+    target.addEventListener('pointerdown', onPointerDown, { passive: true });
+    target.addEventListener('pointerup', onPointerUp, { passive: true });
+    target.addEventListener('pointercancel', onPointerUp, { passive: true });
+
+    return () => {
+      if (raf !== null) window.cancelAnimationFrame(raf);
+      target.removeEventListener('pointermove', onPointerMove);
+      target.removeEventListener('pointerleave', onPointerLeave);
+      target.removeEventListener('pointerdown', onPointerDown);
+      target.removeEventListener('pointerup', onPointerUp);
+      target.removeEventListener('pointercancel', onPointerUp);
+    };
   }
 
-  private applyOptics(parts: FilterParts, progress: number): boolean {
-    const strength = progress * glassTuning.depth;
-    const opticsKey = `${strength.toFixed(2)},${glassTuning.chroma},${glassTuning.blur},${glassTuning.brightness},${progress.toFixed(3)}`;
-    if (opticsKey === parts.opticsKey) return false;
-    parts.opticsKey = opticsKey;
-    parts.bends[0].setAttribute('scale', (strength * (1 - glassTuning.chroma)).toFixed(2));
-    parts.bends[1].setAttribute('scale', strength.toFixed(2));
-    parts.bends[2].setAttribute('scale', (strength * (1 + glassTuning.chroma)).toFixed(2));
-    parts.blur.setAttribute('stdDeviation', (progress * glassTuning.blur).toFixed(2));
-    parts.lit.setAttribute('values', this.litValues());
-    parts.mask.setAttribute('flood-opacity', Math.min(1, Math.max(0, progress)).toFixed(3));
-    return true;
-  }
-
-  private syncHostFilter() {
-    const host = this.host();
-    if (!host) return;
-    const refs = [...this.lenses.values()]
-      .filter((lens) => lens.parts)
-      .map((lens) => `url(#${lens.parts!.filter.id})`);
-    host.style.filter = refs.join(' ');
-  }
-
-  private ensureLens(lens: LensInstance, viewportRect: Rect) {
-    if (BACKDROP_FALLBACK) return;
-    const needsRegen =
-      !lens.parts ||
-      Math.abs(viewportRect.width - lens.mapW) > REGEN_THRESHOLD ||
-      Math.abs(viewportRect.height - lens.mapH) > REGEN_THRESHOLD ||
-      glassTuning.edgeBand !== lens.mapEdgeBand ||
-      glassTuning.cornerRadius !== lens.mapRadius ||
-      glassTuning.curvature !== lens.mapCurvature;
-    if (!needsRegen) return;
-
-    // fresh filter IDs on every map regeneration — Safari caches by ID
-    lens.parts?.svg.remove();
-    lens.extraParts?.svg.remove();
-    this.generation += 1;
-    lens.parts = this.buildFilter('');
-    lens.mapW = Math.round(viewportRect.width);
-    lens.mapH = Math.round(viewportRect.height);
-    lens.mapEdgeBand = glassTuning.edgeBand;
-    lens.mapRadius = glassTuning.cornerRadius;
-    lens.mapCurvature = glassTuning.curvature;
-    lens.mapUri = buildDisplacementMap(lens.mapW, lens.mapH, lens.mapEdgeBand, lens.mapRadius, lens.mapCurvature);
-    setHref(lens.parts!.map, lens.mapUri);
-    if (lens.extraHost) {
-      // twin filter for the column's own layer, same map in local coordinates
-      lens.extraParts = this.buildFilter('-x');
-      setHref(lens.extraParts.map, lens.mapUri);
-    } else {
-      lens.extraParts = null;
+  private activeMaterial(): MaterialInstance | null {
+    let selected: MaterialInstance | null = null;
+    for (const material of this.materials.values()) {
+      if (material.progress <= 0.01) continue;
+      // A newly opened menu or hovered column should own the one shared
+      // background lens immediately, even while it is still fading in.
+      if (!selected || material.order > selected.order) selected = material;
     }
+    return selected;
   }
 
-  // point the DOM at this lens's (possibly fresh) filter ids
-  private reference(lens: LensInstance) {
-    if (lens.extraHost && lens.extraParts) {
-      lens.extraHost.style.filter = `url(#${lens.extraParts.filter.id})`;
-    }
-    this.syncHostFilter();
-    lens.referenced = true;
+  private sourceHost(): HTMLElement | null {
+    return document.querySelector<HTMLElement>('.ascii-space-host');
   }
 
-  // WebKit ignores attribute changes on a filter that's already referenced —
-  // rebuild it under a fresh ID with the current values baked in, then
-  // re-reference (throttled: each re-mint re-rasterizes the whole lens)
-  private scheduleRemint(owner: object) {
-    if (BACKDROP_FALLBACK) return;
-    const lens = this.lenses.get(owner);
-    if (!lens || lens.remintTimer !== null) return;
-    lens.remintTimer = window.setTimeout(() => {
-      lens.remintTimer = null;
-      const live = this.lenses.get(owner);
-      if (!live) return;
-      live.parts?.svg.remove();
-      live.extraParts?.svg.remove();
-      this.generation += 1;
-      live.parts = this.buildFilter('');
-      setHref(live.parts.map, live.mapUri);
-      if (live.extraHost) {
-        live.extraParts = this.buildFilter('-x');
-        setHref(live.extraParts.map, live.mapUri);
-      } else {
-        live.extraParts = null;
-      }
-      live.referenced = false;
-      this.update(owner, live.lastRect, live.lastProgress);
-      this.reference(live);
-    }, REMINT_MS);
+  private reducedTransparency(): boolean {
+    return window.matchMedia('(prefers-reduced-transparency: reduce)').matches;
   }
 
-  activate(
-    owner: object,
-    viewportRect: Rect,
-    progress = 0,
-    extraHost: HTMLElement | null = null,
-    options?: { freezesBreathing?: boolean }
-  ): boolean {
-    const host = this.host();
-    if (!host) return false;
+  private radiusFor(element: HTMLElement, width: number, height: number): number {
+    const value = window.getComputedStyle(element).borderTopLeftRadius;
+    if (value.includes('%')) return (Number.parseFloat(value) / 100) * Math.min(width, height);
+    return Number.parseFloat(value) || 0;
+  }
 
-    let lens = this.lenses.get(owner);
-    if (!lens) {
-      lens = {
-        parts: null,
-        extraParts: null,
-        overlay: null,
-        extraHost,
-        mapUri: '',
-        mapW: -1,
-        mapH: -1,
-        mapEdgeBand: -1,
-        mapRadius: -1,
-        mapCurvature: -1,
-        lastRect: viewportRect,
-        lastProgress: progress,
-        freezesBreathing: options?.freezesBreathing ?? true,
-        referenced: false,
-        remintTimer: null,
-      };
-      this.lenses.set(owner, lens);
-    }
-    lens.freezesBreathing = options?.freezesBreathing ?? lens.freezesBreathing;
-    if (lens.extraHost && lens.extraHost !== extraHost) lens.extraHost.style.filter = '';
-    lens.extraHost = extraHost;
-    // from here on the lens owns the layer's filter — disable the CSS
-    // first-paint frost fallback so releasing actually clears the glass
-    if (extraHost) extraHost.dataset.lensManaged = 'true';
-
-    if (BACKDROP_FALLBACK) {
-      if (!lens.overlay) {
-        const overlay = document.createElement('div');
-        // z-index 2: above the ASCII layer (z-0) and the veil (z-1), below
-        // the column/panel content (z-10)
-        overlay.style.cssText = 'position:fixed;z-index:2;pointer-events:none;display:none;';
-        document.body.appendChild(overlay);
-        lens.overlay = overlay;
-      }
-      this.update(owner, viewportRect, progress);
-      return true;
+  private geometryFor(material: MaterialInstance, source: HTMLElement): LensGeometry | null {
+    const materialRect = material.element.getBoundingClientRect();
+    const sourceRect = source.getBoundingClientRect();
+    if (
+      materialRect.width <= 0 ||
+      materialRect.height <= 0 ||
+      sourceRect.width <= 0 ||
+      sourceRect.height <= 0
+    ) {
+      return null;
     }
 
-    this.ensureLens(lens, viewportRect);
-    // attributes must be final BEFORE the DOM references the filter: WebKit
-    // snapshots at reference time and ignores later attribute writes
-    lens.referenced = false;
-    this.update(owner, viewportRect, progress);
-    this.reference(lens);
-    return true;
+    return {
+      width: materialRect.width,
+      height: materialRect.height,
+      radius: this.radiusFor(material.element, materialRect.width, materialRect.height),
+      x: clamp01((materialRect.left + materialRect.width / 2 - sourceRect.left) / sourceRect.width),
+      y: clamp01((materialRect.top + materialRect.height / 2 - sourceRect.top) / sourceRect.height),
+    };
   }
 
-  update(owner: object, viewportRect: Rect, progress: number) {
-    const lens = this.lenses.get(owner);
-    if (!lens) return;
-    const host = this.host();
-    if (!host) return;
-    lens.lastRect = viewportRect;
-    lens.lastProgress = progress;
+  private optionsFor(material: MaterialInstance, geometry: LensGeometry): Partial<LiquidGlassOptions> {
+    const progress = material.progress;
+    const tuning = getGlassTuning(scopeForVariant(material.variant));
+    return {
+      width: geometry.width,
+      height: geometry.height,
+      radius: geometry.radius,
+      strength: tuning.strength * progress,
+      chromaticAberration: tuning.chromaticAberration * progress,
+      blur: tuning.blur * progress,
+      depth: tuning.depth,
+      curvature: tuning.curvature,
+      splay: tuning.splay,
+      glow: tuning.glow,
+      glowSpread: tuning.glowSpread,
+      glowExponent: tuning.glowExponent,
+      edgeHighlight: tuning.edgeHighlight,
+      edgeWidth: tuning.edgeWidth,
+      edgeExponent: tuning.edgeExponent,
+      specular: tuning.specular * progress,
+      specularAngle: tuning.specularAngle,
+      quality: tuning.quality,
+    };
+  }
 
-    // WebKit can't animate a referenced filter, so glass is binary there
-    const applied = STATIC_FILTER_ENGINE ? (progress >= 0.5 ? 1 : 0) : progress;
+  private geometryChanged(next: LensGeometry): boolean {
+    const previous = this.activeGeometry;
+    if (!previous) return true;
+    // The map is only regenerated for a meaningful change of lens shape. The
+    // engine still receives position updates on every layout change.
+    return (
+      Math.abs(previous.width - next.width) > 8 ||
+      Math.abs(previous.height - next.height) > 8 ||
+      Math.abs(previous.radius - next.radius) > 1
+    );
+  }
 
-    if (BACKDROP_FALLBACK) {
-      const overlay = lens.overlay;
-      if (!overlay) return;
-      overlay.style.display = applied > 0 ? 'block' : 'none';
-      overlay.style.left = `${Math.round(viewportRect.x)}px`;
-      overlay.style.top = `${Math.round(viewportRect.y)}px`;
-      overlay.style.width = `${Math.round(viewportRect.width)}px`;
-      overlay.style.height = `${Math.round(viewportRect.height)}px`;
-      const fx = `blur(${glassTuning.blur}px) brightness(${glassTuning.brightness}) saturate(1.2)`;
-      overlay.style.backdropFilter = fx;
-      overlay.style.setProperty('-webkit-backdrop-filter', fx);
-      overlay.style.background = `rgba(255, 255, 255, ${glassTuning.tint})`;
-      if (lens.extraHost) {
-        // the portrait sits above the overlay's backdrop — frost it directly
-        lens.extraHost.style.filter =
-          applied > 0 ? `blur(${glassTuning.blur}px) brightness(${glassTuning.brightness})` : '';
-      }
+  private destroyEngine() {
+    this.engine?.destroy();
+    this.defsHost?.remove();
+    this.engine = null;
+    this.engineHost = null;
+    this.defsHost = null;
+    this.activeGeometry = null;
+    this.activePosition = null;
+  }
+
+  private sync(forceShape = false) {
+    if (this.reducedTransparency()) {
+      this.destroyEngine();
       return;
     }
 
-    const parts = lens.parts;
-    if (!parts) return;
-    const hostRect = host.getBoundingClientRect();
-    // quantize to whole pixels: sub-pixel geometry churn makes the refracted
-    // content shimmer, and any attribute write invalidates the whole filter
-    let changed = this.applyGeometry(
-      parts,
-      Math.round(viewportRect.x - hostRect.x),
-      Math.round(viewportRect.y - hostRect.y),
-      Math.round(viewportRect.width),
-      Math.round(viewportRect.height)
-    );
-    changed = this.applyOptics(parts, applied) || changed;
-
-    if (lens.extraHost && lens.extraParts) {
-      // the extra host IS the lensed layer, so the lens fills its own box;
-      // the shared map stretches to fit (feImage preserveAspectRatio=none)
-      const extraRect = lens.extraHost.getBoundingClientRect();
-      changed = this.applyGeometry(lens.extraParts, 0, 0, Math.round(extraRect.width), Math.round(extraRect.height)) || changed;
-      changed = this.applyOptics(lens.extraParts, applied) || changed;
+    const material = this.activeMaterial();
+    if (!material) {
+      this.destroyEngine();
+      return;
     }
 
-    if (STATIC_FILTER_ENGINE && changed && lens.referenced) this.scheduleRemint(owner);
-  }
+    const source = this.sourceHost();
+    if (!source) return;
+    const geometry = this.geometryFor(material, source);
+    if (!geometry) return;
 
-  // true while any hover lens is up — the identity column's resting lens
-  // opts out so it doesn't freeze the idle breathing forever
-  get active(): boolean {
-    return [...this.lenses.values()].some((lens) => lens.freezesBreathing);
-  }
-
-  // re-apply after tuning changes (map shape params need a rebuild)
-  refresh() {
-    for (const [owner, lens] of this.lenses) {
-      if (BACKDROP_FALLBACK) {
-        this.update(owner, lens.lastRect, lens.lastProgress);
-        continue;
+    const options = this.optionsFor(material, geometry);
+    if (!this.engine || this.engineHost !== source) {
+      this.destroyEngine();
+      const defsHost = document.createElement('div');
+      defsHost.setAttribute('aria-hidden', 'true');
+      defsHost.style.position = 'absolute';
+      defsHost.style.inset = '0';
+      defsHost.style.pointerEvents = 'none';
+      source.appendChild(defsHost);
+      this.defsHost = defsHost;
+      this.engineHost = source;
+      this.engine = new LiquidGlassEngine(
+        { container: source, filtered: source, defsHost, shadow: null },
+        options
+      );
+      this.activeGeometry = geometry;
+    } else {
+      // Fast options (strength, chroma, blur, specular) are safe to update
+      // per frame. The package regenerates its map only when a shape option
+      // actually changed.
+      if (forceShape || this.geometryChanged(geometry)) {
+        this.engine.setOptions(options);
+        this.activeGeometry = geometry;
+      } else {
+        this.engine.setOptions({
+          strength: options.strength,
+          chromaticAberration: options.chromaticAberration,
+          blur: options.blur,
+          specular: options.specular,
+        });
       }
-      this.ensureLens(lens, lens.lastRect);
-      if (lens.parts) lens.parts.opticsKey = '';
-      if (lens.extraParts) lens.extraParts.opticsKey = '';
-      lens.referenced = false;
-      this.update(owner, lens.lastRect, lens.lastProgress);
-      this.reference(lens);
     }
+
+    const positionChanged =
+      !this.activePosition ||
+      Math.abs(this.activePosition.x - geometry.x) > 0.0001 ||
+      Math.abs(this.activePosition.y - geometry.y) > 0.0001;
+    if (positionChanged) {
+      this.engine.setPosition(geometry.x, geometry.y);
+      this.activePosition = { x: geometry.x, y: geometry.y };
+    }
+  }
+
+  private scheduleSync() {
+    if (this.syncFrame !== null) return;
+    this.syncFrame = window.requestAnimationFrame(() => {
+      this.syncFrame = null;
+      this.sync();
+    });
+  }
+
+  private destroyMaterial(material: MaterialInstance) {
+    material.pointerCleanup?.();
+    material.resizeObserver?.disconnect();
+  }
+
+  activate(owner: object, element: HTMLElement, progress = 0, options: MaterialOptions = {}): boolean {
+    const interactionTarget = options.interactionTarget ?? element;
+    const variant = options.variant ?? 'clear';
+    let material = this.materials.get(owner);
+
+    if (!material || material.element !== element || material.interactionTarget !== interactionTarget) {
+      if (material) this.destroyMaterial(material);
+      material = {
+        element,
+        interactionTarget,
+        variant,
+        progress: clamp01(progress),
+        freezesBreathing: options.freezesBreathing ?? false,
+        order: ++this.sequence,
+        pointerCleanup: null,
+        resizeObserver: null,
+      };
+      material.pointerCleanup = this.bindPointerLight(material);
+      material.resizeObserver = new ResizeObserver(() => this.scheduleSync());
+      material.resizeObserver.observe(element);
+      this.materials.set(owner, material);
+    } else {
+      material.variant = variant;
+      material.freezesBreathing = options.freezesBreathing ?? material.freezesBreathing;
+      material.order = ++this.sequence;
+    }
+
+    this.applySurfaceTuning(material);
+    this.update(owner, progress);
+    return true;
+  }
+
+  update(owner: object, progress: number) {
+    const material = this.materials.get(owner);
+    if (!material) return;
+    material.progress = clamp01(progress);
+    material.element.style.setProperty('--glass-progress', material.progress.toFixed(3));
+    material.element.dataset.glassActive = material.progress > 0.01 ? 'true' : 'false';
+    this.sync();
+  }
+
+  // True only while an interaction-driven column material is visibly active.
+  // Resting identity/detail materials opt out, so they never stop breathing.
+  get active(): boolean {
+    return [...this.materials.values()].some(
+      (material) => material.freezesBreathing && material.progress > 0.01
+    );
+  }
+
+  refresh(scope: GlassScope, forceShape = true) {
+    for (const material of this.materials.values()) {
+      if (scopeForVariant(material.variant) === scope) this.applySurfaceTuning(material);
+    }
+    const active = this.activeMaterial();
+    if (active && scopeForVariant(active.variant) === scope) this.sync(forceShape);
   }
 
   release(owner: object) {
-    const lens = this.lenses.get(owner);
-    if (!lens) return;
-    if (lens.remintTimer !== null) window.clearTimeout(lens.remintTimer);
-    this.lenses.delete(owner);
-    lens.parts?.svg.remove();
-    lens.extraParts?.svg.remove();
-    lens.overlay?.remove();
-    if (lens.extraHost) lens.extraHost.style.filter = '';
-    this.syncHostFilter();
+    const material = this.materials.get(owner);
+    if (!material) return;
+    this.destroyMaterial(material);
+    this.materials.delete(owner);
+    this.sync();
   }
 }
 
-export const glassLens = new GlassLensController();
+export const glassLens = new GlassMaterialController();

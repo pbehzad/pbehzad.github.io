@@ -220,16 +220,109 @@ img {
   opacity: 0.82;
 }
 
-/* .column-surface must NOT get isolation/opacity/mask/filter — any of those
-   makes it a backdrop root, cutting the glass pane's backdrop-filter off from
-   the page background behind the column. */
+/* Surface chrome for the package-powered lens. Refraction itself is supplied
+   by liquid-glass-web-react on .ascii-space-host; this layer only adds the
+   restrained physical surface above it. */
+.glass-material {
+  --glass-progress: 1;
+  --glass-density: 0.025;
+  --glass-tint-alpha: 0.017;
+  --glass-specular-alpha: 0.067;
+  --glass-edge-top-alpha: 0.143;
+  --glass-edge-side-alpha: 0.059;
+  --glass-edge-dim-alpha: 0.092;
+  --glass-shadow-alpha: 0.182;
+  --glass-light-x: 24%;
+  --glass-light-y: 10%;
+  overflow: hidden;
+  opacity: var(--glass-progress);
+  background-color: rgb(7 9 13 / var(--glass-density));
+  background-image:
+    linear-gradient(
+      135deg,
+      rgb(255 255 255 / var(--glass-tint-alpha)) 0%,
+      rgb(255 255 255 / 0.018) 42%,
+      rgb(184 205 236 / 0.028) 100%
+    );
+}
 
-/* Above the column content (z-10): the glass surface (specular rim) must
-   draw over everything under the glass, including the identity portrait. */
+.glass-material::before,
+.glass-material::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+/* A local reflection follows fine-pointer input. It is intentionally a plain
+   alpha layer, not a blend mode, so it never creates another backdrop root. */
+.glass-material::before {
+  z-index: 0;
+  background: radial-gradient(
+    circle at var(--glass-light-x) var(--glass-light-y),
+    rgb(255 255 255 / var(--glass-specular-alpha)),
+    transparent 36%
+  );
+  opacity: 0.68;
+  transition: opacity 180ms ease-out;
+}
+
+.glass-material[data-glass-pressed="true"]::before {
+  opacity: 0.92;
+}
+
+.identity-portrait {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.identity-liquid-glass {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.identity-liquid-glass > div:first-child,
+.identity-liquid-glass-content {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+/* Ensures the whole column is a visible glass source, even above the photo. */
+.identity-liquid-glass-content {
+  background: rgb(4 6 9 / 0.08);
+}
+
+.identity-liquid-glass-media {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  overflow: hidden;
+}
+
+/* The library supplies true RGB refraction; keep this boundary neutral so we
+   do not fake chroma with a CSS rainbow. */
+.glass-material::after {
+  z-index: 2;
+  background: linear-gradient(315deg, rgb(151 183 226 / 0.035), transparent 36%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / var(--glass-edge-top-alpha)),
+    inset 1px 0 0 rgb(255 255 255 / var(--glass-edge-side-alpha)),
+    inset -1px 0 0 rgb(255 255 255 / 0.035),
+    inset 0 -1px 0 rgb(0 0 0 / var(--glass-edge-dim-alpha));
+}
+
+/* The pane sits between background media (z-0) and readable UI (z-10). */
 .column-glass-field {
   position: absolute;
   inset: 0;
-  z-index: 15;
+  z-index: 5;
   pointer-events: none;
   visibility: hidden;
 }
@@ -238,37 +331,17 @@ img {
   visibility: visible;
 }
 
-/* The identity portrait must never paint unglassed: this stylesheet frost
-   covers the first paint before React hydrates (roughly glassTuning's
-   blur/brightness). Once GlassLens takes over it stamps data-lens-managed
-   and drives the real lens via inline filter. */
-.glass-extra-host {
-  filter: blur(16px) brightness(1.15);
-}
-
-.glass-extra-host[data-lens-managed="true"] {
-  filter: none;
-}
-
-/* The blur/refraction lives in an SVG filter applied to .ascii-lens-host (see
-   GlassLens.ts) — NOT in backdrop-filter here: filtering the host makes it a
-   backdrop root, so a backdrop-filter on this pane would sample a void. The
-   pane is only the glass *surface*: a faint tint and hairline; opacity and
-   tint are driven from JS in step with the lens. */
 .column-glass-pane {
   position: absolute;
-  inset: 0;
-  opacity: 0;
-  background: rgba(255, 255, 255, 0.05);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.18),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.09);
+  inset: var(--glass-frame-inset, 0px);
+  --glass-progress: 0;
+  border-radius: var(--glass-frame-radius, 0px);
 }
 
 /* First-paint column layout, before hydration. Must mirror ColumnPortal's
    getRestingWidths: equal shares on desktop, identity-dominant on mobile
-   (MOBILE_IDENTITY_SHARE = 0.52), active column at ACTIVE_WIDTH_FACTOR =
-   1.35fr on slug URLs. JS overrides with inline px widths after mount. */
+   (MOBILE_IDENTITY_SHARE = 0.52), and a mobile URL-selected column at
+   MOBILE_ACTIVE_SHARE = 0.72. JS overrides with inline px widths after mount. */
 .column-portal-grid {
   grid-template-columns: repeat(6, 1fr);
 }
@@ -299,24 +372,49 @@ img {
   grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1.35fr;
 }
 
-/* Detail-page glass panel (compositions/events/texts). The surface must be
-   pure CSS so it's there on first paint; GlassPanel.tsx adds the live lens
-   refraction after hydration. Rim recipe mirrors the column pane at
-   edgeHighlight 0.7, tint mirrors glassTuning.tint. */
+@media (max-width: 768px) {
+  .column-portal-grid[data-active-col="1"] {
+    grid-template-columns: 5.6% 72% 5.6% 5.6% 5.6% 5.6%;
+  }
+
+  .column-portal-grid[data-active-col="2"] {
+    grid-template-columns: 5.6% 5.6% 72% 5.6% 5.6% 5.6%;
+  }
+
+  .column-portal-grid[data-active-col="3"] {
+    grid-template-columns: 5.6% 5.6% 5.6% 72% 5.6% 5.6%;
+  }
+
+  .column-portal-grid[data-active-col="4"] {
+    grid-template-columns: 5.6% 5.6% 5.6% 5.6% 72% 5.6%;
+  }
+
+  .column-portal-grid[data-active-col="5"] {
+    grid-template-columns: 5.6% 5.6% 5.6% 5.6% 5.6% 72%;
+  }
+}
+
+/* Text-heavy surfaces use a slightly denser regular material. Defaults live in
+   CSS for a complete first paint; the controller picks up live tuner values
+   after hydration. */
 .glass-detail-panel {
   position: absolute;
-  top: 72px;
-  bottom: 0;
-  left: 0;
-  width: 76vw;
+  top: 84px;
+  bottom: 12px;
+  left: 12px;
+  width: calc(76vw - 12px);
   z-index: 10;
-  background: rgba(255, 255, 255, 0.05);
-  box-shadow:
-    inset 0 1.5px 0 rgba(255, 255, 255, 0.385),
-    inset 1.5px 0 0 rgba(255, 255, 255, 0.196),
-    inset -1.5px 0 0 rgba(255, 255, 255, 0.098),
-    inset 0 -1.5px 0 rgba(0, 0, 0, 0.28),
-    inset 0 0 44px rgba(255, 255, 255, 0.035);
+  --glass-density: 0.3;
+  --glass-tint-alpha: 0.017;
+  --glass-progress: 1;
+  border-radius: var(--glass-frame-radius, 28px);
+  box-shadow: 0 24px 80px rgb(0 0 0 / var(--glass-shadow-alpha));
+}
+
+.glass-detail-panel > *,
+.glass-nav-panel > * {
+  position: relative;
+  z-index: 1;
 }
 
 /* chrome links on detail pages: neutralize the global brutalist hover flip
@@ -333,19 +431,59 @@ img {
   padding: 28px 48px 80px 28px;
 }
 
-/* Glass nav: dropdown under the name on desktop, fullscreen sheet on mobile.
-   Surface opacity is driven from JS in step with its lens. */
-.glass-nav-panel {
-  /* darker than the detail panel: the lens only frosts the ASCII layer, so
-     a veil is needed to occlude sharp page content painted underneath */
-  background: rgba(14, 14, 17, 0.72);
+/* Public scroll surfaces use a small translucent rail and a softly reflective
+   thumb. This remains plain compositing — no backdrop-filter is needed. */
+.glass-scrollbar,
+.glass-detail-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(210 228 250 / 0.5) rgb(6 9 14 / 0.32);
+  scrollbar-gutter: stable;
+}
+
+.glass-scrollbar::-webkit-scrollbar,
+.glass-detail-scroll::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.glass-scrollbar::-webkit-scrollbar-track,
+.glass-detail-scroll::-webkit-scrollbar-track {
+  background: linear-gradient(180deg, rgb(5 8 13 / 0.5), rgb(24 34 49 / 0.18));
+  border: 1px solid rgb(255 255 255 / 0.07);
+  border-radius: 999px;
+  box-shadow: inset 1px 0 0 rgb(255 255 255 / 0.035);
+}
+
+.glass-scrollbar::-webkit-scrollbar-thumb,
+.glass-detail-scroll::-webkit-scrollbar-thumb {
+  min-height: 36px;
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 0.5), rgb(162 194 231 / 0.24)),
+    rgb(118 148 184 / 0.42);
+  background-clip: padding-box;
   box-shadow:
-    inset 0 1.5px 0 rgba(255, 255, 255, 0.385),
-    inset 1.5px 0 0 rgba(255, 255, 255, 0.196),
-    inset -1.5px 0 0 rgba(255, 255, 255, 0.098),
-    inset 0 -1.5px 0 rgba(0, 0, 0, 0.28),
-    inset 0 0 44px rgba(255, 255, 255, 0.035);
-  opacity: 0;
+    inset 0 1px 0 rgb(255 255 255 / 0.26),
+    0 0 10px rgb(145 184 228 / 0.12);
+}
+
+.glass-scrollbar::-webkit-scrollbar-thumb:hover,
+.glass-detail-scroll::-webkit-scrollbar-thumb:hover {
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 0.68), rgb(181 213 247 / 0.34)),
+    rgb(133 169 210 / 0.56);
+  background-clip: padding-box;
+}
+
+/* Navigation is the densest variant: still translucent, but reliable behind
+   small type over arbitrary page content. */
+.glass-nav-panel {
+  --glass-density: 0.34;
+  --glass-tint-alpha: 0.017;
+  --glass-progress: 0;
+  border-radius: var(--glass-frame-radius, 20px);
+  box-shadow: 0 20px 55px rgb(0 0 0 / var(--glass-shadow-alpha));
 }
 
 .glass-nav-dropdown {
@@ -364,7 +502,10 @@ img {
   flex-direction: column;
   justify-content: center;
   padding: 48px 32px;
-  background: rgba(7, 7, 9, 0.88);
+  border-radius: 0;
+  background-color: rgb(7 8 12 / 0.58);
+  background-image: linear-gradient(135deg, rgb(255 255 255 / 0.065), transparent 48%);
+  box-shadow: none;
 }
 
 .glass-nav-panel nav {
@@ -403,13 +544,49 @@ img {
 
 @media (max-width: 768px) {
   .glass-detail-panel {
-    top: 56px;
+    top: 68px;
+    left: 12px;
+    bottom: 12px;
     width: auto;
     right: 12px;
+    border-radius: var(--glass-frame-radius, 22px);
   }
 
   .glass-detail-scroll {
     padding: 20px 20px 64px 16px;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .glass-material {
+    background: rgb(8 10 14 / 0.94);
+  }
+
+  .glass-material::before {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .glass-material::before {
+    transition: none;
+  }
+
+  .column-swipe-hint {
+    animation: none !important;
+  }
+}
+
+@media (forced-colors: active) {
+  .glass-material {
+    background: Canvas;
+    border: 1px solid CanvasText;
+    box-shadow: none;
+  }
+
+  .glass-material::before,
+  .glass-material::after {
+    display: none;
   }
 }
 
@@ -449,87 +626,48 @@ img {
 
 .column-glass-divider {
   position: relative;
-  width: 16px;
+  width: 12px;
   height: 100%;
   margin-inline: auto;
   overflow: hidden;
   border: 0;
   border-radius: 0;
-  opacity: 0.9;
-  background:
-    linear-gradient(
-      90deg,
-      transparent,
-      rgba(255, 255, 255, 0.03) 22%,
-      rgba(255, 255, 255, 0.05) 50%,
-      rgba(0, 0, 0, 0.06) 78%,
-      transparent
-    );
-  box-shadow:
-    inset 0 0 18px rgba(255, 255, 255, 0.045),
-    0 0 14px rgba(210, 225, 240, 0.08);
-  /* no backdrop-filter here: the identity column's resting lens keeps the
-     ASCII layer filtered at all times, which excludes it from any backdrop
-     sampling — a divider blur would cost GPU and see nothing */
+  opacity: 0.62;
+  background: linear-gradient(
+    90deg,
+    transparent 0,
+    transparent calc(50% - 0.5px),
+    rgba(255, 255, 255, 0.32) calc(50% - 0.5px),
+    rgba(255, 255, 255, 0.32) calc(50% + 0.5px),
+    transparent calc(50% + 0.5px),
+    transparent 100%
+  );
   transition:
-    width 140ms linear,
-    opacity 140ms linear,
-    background 140ms linear,
-    box-shadow 140ms linear;
+    opacity 160ms ease-out,
+    background 160ms ease-out;
 }
 
 .column-glass-divider::before {
   content: "";
   position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(
-      90deg,
-      transparent,
-      rgba(255, 255, 255, 0.075) 36%,
-      rgba(255, 255, 255, 0.025) 52%,
-      rgba(0, 0, 0, 0.055) 70%,
-      transparent
-    ),
-    linear-gradient(
-      180deg,
-      transparent,
-      rgba(255, 255, 255, 0.06) 22%,
-      transparent 48%,
-      rgba(255, 255, 255, 0.045) 76%,
-      transparent
-    );
-  transform: skewX(-5deg);
-  filter: blur(3px);
+  inset: 0 3px;
+  background: linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.055) 25%, transparent 62%);
   pointer-events: none;
 }
 
 .column-glass-divider::after {
-  content: "";
-  position: absolute;
-  inset: 0 -10px;
-  background:
-    radial-gradient(ellipse at 50% 18%, rgba(255, 255, 255, 0.13), transparent 42%),
-    radial-gradient(ellipse at 50% 84%, rgba(255, 255, 255, 0.08), transparent 48%);
-  opacity: 0.7;
-  filter: blur(8px);
-  pointer-events: none;
+  content: none;
 }
 
 .group:hover .column-glass-divider {
-  width: 20px;
   opacity: 1;
-  background:
-    linear-gradient(
-      90deg,
-      transparent,
-      rgba(255, 255, 255, 0.045) 22%,
-      rgba(255, 255, 255, 0.075) 50%,
-      rgba(0, 0, 0, 0.07) 78%,
-      transparent
-    );
-  box-shadow:
-    inset 0 0 22px rgba(255, 255, 255, 0.07),
-    0 0 18px rgba(210, 225, 240, 0.12),
-    0 0 34px rgba(255, 255, 255, 0.05);
+  background: linear-gradient(
+    90deg,
+    transparent 0,
+    transparent calc(50% - 0.5px),
+    rgba(255, 255, 255, 0.62) calc(50% - 0.5px),
+    rgba(255, 255, 255, 0.62) calc(50% + 0.5px),
+    transparent calc(50% + 0.5px),
+    transparent 100%
+  );
 }

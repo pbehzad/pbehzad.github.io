@@ -15,7 +15,7 @@ import * as THREE from 'three';
 // AsciiEffect does): rewriting a table of thousands of glyphs re-runs text
 // layout every frame, which WebKit takes >150ms on — Safari ran the site at
 // 5fps while Chrome did 60 (measured). Canvas painting costs a few ms in
-// every engine, and it makes the glass lens cheaper too: the SVG filter
+// every engine, and it makes the liquid-glass lens cheaper too: the SVG filter
 // rasterizes a bitmap instead of a live text layer. The sampling formulas
 // below (grid size, luminance weights, invert mapping, y-step of 2) mirror
 // AsciiEffect exactly so the look is unchanged.
@@ -194,7 +194,14 @@ export default function AsciiSpace() {
 
     let renderer: THREE.WebGLRenderer;
     try {
-      renderer = new THREE.WebGLRenderer({ antialias: false });
+      renderer = new THREE.WebGLRenderer({
+        antialias: false,
+        alpha: false,
+        depth: true,
+        stencil: false,
+        preserveDrawingBuffer: false,
+        powerPreference: 'high-performance',
+      });
     } catch {
       geometry.dispose();
       materials.forEach((m) => {
@@ -205,6 +212,10 @@ export default function AsciiSpace() {
       return;
     }
     renderer.setPixelRatio(1);
+    renderer.setClearColor(0x000000, 1);
+    const contextAttributes = renderer.getContext().getContextAttributes();
+    container.dataset.graphics =
+      contextAttributes?.powerPreference === 'high-performance' ? 'gpu-high-performance' : 'gpu';
 
     // the visible glyph canvas + a small sampling canvas for pixel readback
     const display = document.createElement('canvas');
@@ -212,6 +223,7 @@ export default function AsciiSpace() {
     display.style.inset = '0';
     display.style.width = '100%';
     display.style.height = '100%';
+    display.dataset.asciiDisplay = 'true';
     container.appendChild(display);
     const displayCtx = display.getContext('2d')!;
     const sample = document.createElement('canvas');
@@ -290,17 +302,23 @@ export default function AsciiSpace() {
       displayCtx.font = `bold ${cellH.toFixed(2)}px 'Courier New', monospace`;
       // Dimming lives in the glyph color, NOT in CSS opacity on the wrapper:
       // opacity < 1 would isolate this layer from backdrop-filter sampling
-      // (#969696 = #e0e0e0 at 60%).
-      displayCtx.fillStyle = '#969696';
+      // (#8e8e8e is a deliberately subtle reduction in glyph brightness).
+      displayCtx.fillStyle = '#8e8e8e';
       for (let r = 0; r < shimmered.length; r++) {
         displayCtx.fillText(shimmered[r], 0, (r + 0.8) * cellH);
       }
     };
 
+    let pageVisible = !document.hidden;
+    const onVisibilityChange = () => {
+      pageVisible = !document.hidden;
+    };
+    document.addEventListener('visibilitychange', onVisibilityChange);
+
     let lastRender = 0;
     let rafId: number;
     const tick = (t: number) => {
-      if (t - lastRender >= FRAME_MS) {
+      if (pageVisible && t - lastRender >= FRAME_MS) {
         lastRender = t;
         camera.rotation.y = (t / 1000) * YAW_SPEED;
         paint(t);
@@ -311,6 +329,7 @@ export default function AsciiSpace() {
 
     return () => {
       window.removeEventListener('resize', layout);
+      document.removeEventListener('visibilitychange', onVisibilityChange);
       cancelAnimationFrame(rafId);
       container.removeChild(display);
       geometry.dispose();
@@ -327,7 +346,7 @@ export default function AsciiSpace() {
     <div
       ref={containerRef}
       aria-hidden
-      className="ascii-lens-host pointer-events-none absolute inset-0 z-0 overflow-hidden"
+      className="ascii-space-host pointer-events-none absolute inset-0 z-0 overflow-hidden"
     />
   );
 }

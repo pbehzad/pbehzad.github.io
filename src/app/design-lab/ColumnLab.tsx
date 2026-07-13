@@ -4,6 +4,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import PixelGlassLayer from '../components/PixelGlassLayer';
 import AsciiSpace from '../components/AsciiSpace';
+import IdentityGlass from '../components/IdentityGlass';
+import LiquidPortrait from '../components/LiquidPortrait';
 import { COLUMN_ITEMS, CONTENT_FONT_FAMILY, HEADER_FONT_FAMILY } from './content';
 import {
   prepareWithSegments,
@@ -243,23 +245,27 @@ export default function ColumnLab() {
   );
 
   const startIdle = useCallback(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     const phases = COLUMNS.map((_, i) => i * 1.3);
     const amplitude = 10;
-    // Idle jitter never stops — it keeps reading widthsRef.current fresh every
-    // frame, which a drag or header click updates in real time, so the
-    // wobble stays layered on top of whatever the user is doing rather than
-    // fighting it or shutting off.
+    let lastApply = 0;
+    // This is a layout-heavy laboratory view, so keep the ambient wobble at
+    // 20fps. It looks continuous but avoids reflowing all columns on every
+    // display refresh.
     const tick = (t: number) => {
-      const base = widthsRef.current;
-      const raw = phases.map((p) => Math.sin(t / 1400 + p));
-      const mean = raw.reduce((a, b) => a + b, 0) / raw.length;
-      const jittered = base.map((w, i) => w + amplitude * (raw[i] - mean));
-      if (containerRef.current) {
-        containerRef.current.style.gridTemplateColumns = jittered.map((w) => `${w}px`).join(' ');
+      if (t - lastApply >= 50) {
+        lastApply = t;
+        const base = widthsRef.current;
+        const raw = phases.map((p) => Math.sin(t / 1400 + p));
+        const mean = raw.reduce((a, b) => a + b, 0) / raw.length;
+        const jittered = base.map((w, i) => w + amplitude * (raw[i] - mean));
+        if (containerRef.current) {
+          containerRef.current.style.gridTemplateColumns = jittered.map((w) => `${w}px`).join(' ');
+        }
+        positionDividers(jittered);
+        reflowContent(jittered);
+        reflowHeaders(jittered);
       }
-      positionDividers(jittered);
-      reflowContent(jittered);
-      reflowHeaders(jittered);
       rafIdRef.current = requestAnimationFrame(tick);
     };
     rafIdRef.current = requestAnimationFrame(tick);
@@ -397,32 +403,44 @@ export default function ColumnLab() {
       <div ref={containerRef} className="grid h-full w-full grid-cols-6">
         {COLUMNS.map((col, i) => (
           <div key={col.id} className="column-surface relative h-full overflow-hidden">
-            <PixelGlassLayer />
+            {col.id !== 'identity' && <PixelGlassLayer />}
             {col.id === 'identity' ? (
-              <div className="relative z-10 flex h-full flex-col">
-                <div className="shrink-0" style={{ paddingLeft: COLUMN_PAD_X, paddingRight: COLUMN_PAD_X, paddingTop: 24, paddingBottom: 24 }}>
-                  <h1
-                    className={isMobile ? 'text-2xl leading-[1.05]' : 'text-4xl leading-[1.05]'}
-                    style={{ fontWeight: 300, textTransform: 'none' }}
+              <>
+                <IdentityGlass
+                  media={
+                    <LiquidPortrait
+                      src="/ParhamBehzad.jpg"
+                      alt="Parham Behzad"
+                      sizes="320px"
+                    />
+                  }
+                />
+                <div className="relative z-10 flex h-full flex-col">
+                  <div
+                    data-identity-header
+                    className="relative z-10 shrink-0"
+                    style={{
+                      paddingLeft: COLUMN_PAD_X,
+                      paddingRight: COLUMN_PAD_X,
+                      paddingTop: 24,
+                      paddingBottom: 24,
+                    }}
                   >
-                    parham
-                    <br />
-                    behzad
-                  </h1>
-                  <p className="text-sm tracking-widest opacity-80" style={{ marginTop: 12, fontWeight: 300 }}>
-                    composer
-                  </p>
+                    <h1
+                      className={isMobile ? 'text-2xl leading-[1.05]' : 'text-4xl leading-[1.05]'}
+                      style={{ fontWeight: 300, textTransform: 'none' }}
+                    >
+                      parham
+                      <br />
+                      behzad
+                    </h1>
+                    <p className="text-sm tracking-widest opacity-80" style={{ marginTop: 12, fontWeight: 300 }}>
+                      composer
+                    </p>
+                  </div>
+                  <div className="min-h-0 flex-1" aria-hidden />
                 </div>
-                <div className="relative min-h-0 flex-1">
-                  <Image
-                    src="/ParhamBehzad.jpg"
-                    alt="Parham Behzad"
-                    fill
-                    sizes="320px"
-                    className="object-cover grayscale"
-                  />
-                </div>
-              </div>
+              </>
             ) : (
               <div className="relative z-10 flex h-full flex-col">
                 <button
@@ -491,7 +509,7 @@ export default function ColumnLab() {
                   </div>
                 ) : (
                   <div
-                    className="min-h-0 flex-1 overflow-y-auto"
+                    className="glass-scrollbar min-h-0 flex-1 overflow-y-auto"
                     style={{ paddingLeft: COLUMN_PAD_X, paddingRight: COLUMN_PAD_X, paddingBottom: 24 }}
                   >
                     <div style={{ display: 'flex', flexDirection: 'column' }}>

@@ -1,10 +1,10 @@
 'use client';
 
-import Image from 'next/image';
 import Link from 'next/link';
 import AsciiSpace from './AsciiSpace';
 import PixelGlassLayer from './PixelGlassLayer';
-import GlassTunerPanel from './GlassTunerPanel';
+import IdentityGlass from './IdentityGlass';
+import LiquidPortrait from './LiquidPortrait';
 import { glassLens } from './GlassLens';
 import {
   prepareWithSegments,
@@ -137,13 +137,17 @@ function getPathActiveIndex(path: string): number | null {
   return index > 0 ? index : null;
 }
 
-// the selected column (clicked, or matching the URL) gets a gentle emphasis —
-// slightly wider than the equal share — while the rest stay near normal
+// The selected column (clicked, or matching the URL) gets a gentle emphasis
+// on desktop while the rest stay near normal.
 const ACTIVE_WIDTH_FACTOR = 1.35;
 
 // mobile opens with the identity column dominant (glass on), others as slim
 // tabs the user swipes open
 const MOBILE_IDENTITY_SHARE = 0.52;
+
+// A URL-selected content column becomes a focused reading surface on mobile,
+// rather than receiving the mild desktop emphasis.
+const MOBILE_ACTIVE_SHARE = 0.72;
 
 function getRestingWidths(activeIndex: number | null, total: number, mins: number[]): number[] {
   if (activeIndex === null) {
@@ -155,6 +159,16 @@ function getRestingWidths(activeIndex: number | null, total: number, mins: numbe
       : COLUMNS.map((column) => column.initialShare);
     return normalizeWidths(
       shares.map((share) => share * total),
+      mins,
+      total
+    );
+  }
+
+  const mobile = typeof window !== 'undefined' && window.innerWidth <= MOBILE_BREAKPOINT;
+  if (mobile) {
+    const otherShare = (1 - MOBILE_ACTIVE_SHARE) / (COLUMNS.length - 1);
+    return normalizeWidths(
+      COLUMNS.map((_, index) => (index === activeIndex ? MOBILE_ACTIVE_SHARE : otherShare) * total),
       mins,
       total
     );
@@ -527,16 +541,17 @@ export default function ColumnPortal({
 
   const startIdle = useCallback(() => {
     const phases = COLUMNS.map((_, i) => i * 1.2);
-    const baseAmplitude = 5;
-    // the breathing freezes while glass is up: a jittering column drags the
-    // whole refraction field with it and the lensed content wobbles
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const baseAmplitude = reducedMotion ? 0 : 5;
+    // Freeze the idle width drift while someone is reading an engaged column,
+    // keeping its package lens shape stable and avoiding needless map work.
     let amplitude = baseAmplitude;
     let resting = false;
     let lastApply = 0;
     const tick = (t: number) => {
       // no breathing on mobile: widths drive the glass there, and the
       // constant reflow is wasted battery on a touch screen
-      const still = glassLens.active || window.innerWidth <= MOBILE_BREAKPOINT;
+      const still = reducedMotion || glassLens.active || window.innerWidth <= MOBILE_BREAKPOINT;
       amplitude += ((still ? 0 : baseAmplitude) - amplitude) * 0.05;
       const base = widthsRef.current;
       const idle = amplitude < 0.05;
@@ -545,8 +560,7 @@ export default function ColumnPortal({
       if (base.length && !(idle && resting) && t - lastApply >= 40) {
         lastApply = t;
         resting = idle;
-        // identity is excluded from the jitter: it rests with glass on, and a
-        // moving column would drag its lens geometry every frame
+        // Identity stays fixed while the other column boundaries breathe.
         const raw = phases.map((phase) => Math.sin(t / 1800 + phase));
         const mean = raw.slice(1).reduce((a, b) => a + b, 0) / (raw.length - 1);
         const jittered = base.map((width, i) => (i === 0 ? width : width + amplitude * (raw[i] - mean)));
@@ -661,52 +675,51 @@ export default function ColumnPortal({
               aria-labelledby={column.label ? `${column.id}-heading` : undefined}
               className="column-surface relative h-full overflow-hidden border-r border-white/10"
               style={{
-                background: isActive ? 'rgba(0,0,0,0.46)' : 'rgba(0,0,0,0.28)',
+                background: isActive ? 'rgba(4,6,9,0.18)' : 'rgba(4,6,9,0.08)',
               }}
             >
-              <PixelGlassLayer inverted={column.id === 'identity'} />
+              {column.id !== 'identity' && <PixelGlassLayer selected={isActive} />}
               {column.id === 'identity' ? (
-                <div className="relative z-10 flex h-full flex-col">
-                  <Link
-                    href="/"
-                    className="column-portal-identity-link shrink-0 text-white"
-                    style={{
-                      borderBottom: 'none',
-                      background: 'transparent',
-                      paddingLeft: COLUMN_PAD_X,
-                      paddingRight: COLUMN_PAD_X,
-                      paddingTop: 24,
-                      paddingBottom: 24,
-                    }}
-                  >
-                    <IdentityTitle
-                      className={isMobile ? 'text-2xl leading-[1.05]' : 'text-4xl leading-[1.05]'}
-                      style={{ fontWeight: 300, letterSpacing: 0, textTransform: 'none' }}
+                <>
+                  <IdentityGlass
+                    media={
+                      <LiquidPortrait
+                        src="/ParhamBehzad-display.jpg"
+                        alt="Parham Behzad"
+                        priority
+                        unoptimized
+                      />
+                    }
+                  />
+                  <div className="relative z-10 flex h-full flex-col">
+                    <Link
+                      href="/"
+                      data-identity-header
+                      className="column-portal-identity-link relative z-10 shrink-0 text-white"
+                      style={{
+                        borderBottom: 'none',
+                        background: 'transparent',
+                        paddingLeft: COLUMN_PAD_X,
+                        paddingRight: COLUMN_PAD_X,
+                        paddingTop: 24,
+                        paddingBottom: 24,
+                      }}
                     >
-                      parham
-                      <br />
-                      behzad
-                    </IdentityTitle>
-                    <p className="text-sm tracking-widest opacity-75" style={{ marginTop: 12, fontWeight: 300 }}>
-                      {data.profile?.title?.toLowerCase() || 'composer'}
-                    </p>
-                  </Link>
-                  <div className="glass-extra-host relative min-h-0 flex-1">
-                    {/* pre-sized + post-resize-sharpened derivative of the 4160px
-                        original (see ParhamBehzad.jpg), served byte-exact:
-                        Next's resizer applies no output sharpening, which made
-                        the downscaled portrait look soft */}
-                    <Image
-                      src="/ParhamBehzad-display.jpg"
-                      alt="Parham Behzad"
-                      fill
-                      priority
-                      unoptimized
-                      className="object-cover grayscale"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/25" />
+                      <IdentityTitle
+                        className={isMobile ? 'text-2xl leading-[1.05]' : 'text-4xl leading-[1.05]'}
+                        style={{ fontWeight: 300, letterSpacing: 0, textTransform: 'none' }}
+                      >
+                        parham
+                        <br />
+                        behzad
+                      </IdentityTitle>
+                      <p className="text-sm tracking-widest opacity-75" style={{ marginTop: 12, fontWeight: 300 }}>
+                        {data.profile?.title?.toLowerCase() || 'composer'}
+                      </p>
+                    </Link>
+                    <div className="min-h-0 flex-1" aria-hidden />
                   </div>
-                </div>
+                </>
               ) : (
                 <div className="relative z-10 flex h-full flex-col">
                   <SectionTitle
@@ -749,7 +762,7 @@ export default function ColumnPortal({
                   </SectionTitle>
 
                   <div
-                    className="min-h-0 flex-1 overflow-y-auto"
+                    className="glass-scrollbar min-h-0 flex-1 overflow-y-auto"
                     style={{
                       paddingLeft: COLUMN_PAD_X,
                       paddingRight: COLUMN_PAD_X,
@@ -793,8 +806,6 @@ export default function ColumnPortal({
       <div className="pointer-events-none absolute bottom-4 left-4 z-30 text-xs tracking-widest opacity-45">
         &copy; {new Date().getFullYear()} parham behzad
       </div>
-
-      <GlassTunerPanel />
 
       <div className="pointer-events-none absolute inset-0 z-20 h-full w-full">
         {COLUMNS.slice(0, -1).map((column, i) => (

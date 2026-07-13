@@ -1,9 +1,7 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 import AsciiSpace from './AsciiSpace';
-import GlassNav from './GlassNav';
 import GlassPanel from './GlassPanel';
-import GlassTunerPanel from './GlassTunerPanel';
 
 // Shared shell for detail pages (composition / event / text): the ASCII
 // space fills the viewport, a large glass panel sits flush-left, and the
@@ -22,7 +20,13 @@ export default function DetailShell({
       <AsciiSpace />
       <div className="pointer-events-none absolute inset-0 z-[1] bg-black/20" />
 
-      <GlassNav />
+      <Link
+        href="/"
+        aria-label="Return to Parham Behzad home"
+        className="glass-detail-link fixed top-6 right-6 z-20 text-sm font-normal tracking-wide transition-opacity hover:opacity-70 md:top-12 md:right-12"
+      >
+        parham behzad
+      </Link>
 
       <GlassPanel>
         <div className="glass-detail-scroll">
@@ -36,8 +40,6 @@ export default function DetailShell({
           {children}
         </div>
       </GlassPanel>
-
-      <GlassTunerPanel />
     </main>
   );
 }

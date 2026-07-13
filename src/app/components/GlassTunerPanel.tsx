@@ -1,61 +1,229 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { glassLens, glassTuning } from './GlassLens';
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
+import {
+  contentGlassTuning,
+  getGlassTuning,
+  mainGlassTuning,
+  setGlassTuning,
+  subscribeGlassTuning,
+  type GlassTuning,
+  type GlassTuningKey,
+  type GlassScope,
+} from './GlassLens';
 
-// Dev tuning panel for the glass lens (à la the Aave article's demo).
-// Hidden by default — open the site with ?tune to show it. Hover a column,
-// drag sliders, watch it change live; "copy" puts the current values on the
-// clipboard, then bake them into glassTuning's defaults.
+const DEFAULTS: Record<GlassScope, GlassTuning> = {
+  main: { ...mainGlassTuning },
+  content: { ...contentGlassTuning },
+};
+const SHAPE_KEYS = new Set<GlassTuningKey>([
+  'radius',
+  'inset',
+  'depth',
+  'curvature',
+  'splay',
+  'glow',
+  'glowSpread',
+  'glowExponent',
+  'edgeHighlight',
+  'edgeWidth',
+  'edgeExponent',
+  'specularAngle',
+  'quality',
+]);
+const SHAPE_DEBOUNCE_MS = 140;
 
-const DEFAULTS = { ...glassTuning };
+type RangeControl = {
+  key: GlassTuningKey;
+  label: string;
+  min: number;
+  max: number;
+  step: number;
+  unit?: string;
+};
 
-type TuningKey = keyof typeof glassTuning;
+type Control = RangeControl;
 
-const CONTROLS: Array<{ key: TuningKey; label: string; min: number; max: number; step: number; regen?: boolean }> = [
-  { key: 'depth', label: 'depth', min: 0, max: 160, step: 1 },
-  { key: 'edgeBand', label: 'edge width', min: 4, max: 240, step: 1, regen: true },
-  { key: 'cornerRadius', label: 'radius', min: 0, max: 160, step: 1, regen: true },
-  { key: 'curvature', label: 'curvature', min: 0.5, max: 4, step: 0.1, regen: true },
-  { key: 'chroma', label: 'chroma', min: 0, max: 0.6, step: 0.01 },
-  { key: 'blur', label: 'blur', min: 0, max: 32, step: 0.5 },
-  { key: 'brightness', label: 'brightness', min: 1, max: 2.2, step: 0.05 },
-  { key: 'tint', label: 'tint', min: 0, max: 0.2, step: 0.005 },
-  { key: 'edgeHighlight', label: 'edge light', min: 0, max: 1, step: 0.05 },
-  { key: 'formMs', label: 'form ms', min: 100, max: 1500, step: 20 },
-  { key: 'meltMs', label: 'melt ms', min: 100, max: 1000, step: 20 },
+type ControlGroup = {
+  title: string;
+  description: string;
+  controls: Control[];
+};
+
+const GROUPS: ControlGroup[] = [
+  {
+    title: 'Geometry',
+    description: 'Frame size and corners',
+    controls: [
+      { key: 'radius', label: 'corner radius', min: 0, max: 80, step: 1, unit: 'px' },
+      { key: 'inset', label: 'frame inset', min: 0, max: 40, step: 0.5, unit: 'px' },
+    ],
+  },
+  {
+    title: 'Lens',
+    description: 'Refraction and blur',
+    controls: [
+      { key: 'strength', label: 'strength', min: 0, max: 0.5, step: 0.005 },
+      { key: 'chromaticAberration', label: 'chroma', min: 0, max: 8, step: 0.02 },
+      { key: 'blur', label: 'blur', min: 0, max: 14, step: 0.25, unit: 'px' },
+      { key: 'depth', label: 'edge depth', min: 1, max: 40, step: 1, unit: 'px' },
+      { key: 'curvature', label: 'curvature', min: 0, max: 1, step: 0.05 },
+      { key: 'splay', label: 'splay', min: 0, max: 1, step: 0.05 },
+    ],
+  },
+  {
+    title: 'Specular',
+    description: 'Glow, rim, and light direction',
+    controls: [
+      { key: 'glow', label: 'glow', min: 0, max: 1, step: 0.05 },
+      { key: 'glowSpread', label: 'glow spread', min: 0.05, max: 1, step: 0.05 },
+      { key: 'glowExponent', label: 'glow falloff', min: 0.25, max: 4, step: 0.05 },
+      { key: 'edgeHighlight', label: 'edge light', min: 0, max: 1, step: 0.05 },
+      { key: 'edgeWidth', label: 'edge width', min: 1, max: 20, step: 0.5, unit: 'px' },
+      { key: 'edgeExponent', label: 'edge falloff', min: 0.25, max: 4, step: 0.05 },
+      { key: 'specular', label: 'specular', min: 0, max: 2, step: 0.05 },
+      { key: 'specularAngle', label: 'light angle', min: 0, max: 360, step: 1, unit: '°' },
+    ],
+  },
+  {
+    title: 'Surface',
+    description: 'Material chrome around the package lens',
+    controls: [
+      { key: 'density', label: 'density', min: 0, max: 0.3, step: 0.005 },
+      { key: 'tint', label: 'tint', min: 0, max: 0.22, step: 0.005 },
+      { key: 'shadow', label: 'surface shadow', min: 0, max: 0.7, step: 0.01 },
+    ],
+  },
+  {
+    title: 'Motion & quality',
+    description: 'Transitions and displacement-map resolution',
+    controls: [
+      { key: 'formMs', label: 'form duration', min: 80, max: 800, step: 20, unit: 'ms' },
+      { key: 'meltMs', label: 'melt duration', min: 80, max: 600, step: 20, unit: 'ms' },
+      { key: 'quality', label: 'map quality', min: 64, max: 2048, step: 1, unit: 'px' },
+    ],
+  },
 ];
 
-export default function GlassTunerPanel() {
-  const [values, setValues] = useState({ ...glassTuning });
+function groupsForScope(scope: GlassScope): ControlGroup[] {
+  if (scope === 'main') return GROUPS;
+  return GROUPS.map((group) => ({
+    ...group,
+    controls: group.controls.filter((control) => control.key !== 'inset'),
+  })).filter((group) => group.controls.length > 0);
+}
+
+type GlassTunerPanelProps = {
+  scope: GlassScope;
+};
+
+export default function GlassTunerPanel({ scope }: GlassTunerPanelProps) {
+  const [values, setValues] = useState<GlassTuning>({ ...getGlassTuning(scope) });
   const [open, setOpen] = useState(true);
-  const [copied, setCopied] = useState(false);
   const [enabled, setEnabled] = useState(false);
+  const [copyState, setCopyState] = useState<'idle' | 'copied' | 'select'>('idle');
+  const [codeOpen, setCodeOpen] = useState(false);
+  const codeRef = useRef<HTMLTextAreaElement>(null);
+  const valuesRef = useRef(values);
+  const pendingShapeCommits = useRef(new Map<GlassTuningKey, number>());
 
   useEffect(() => {
-    setEnabled(new URLSearchParams(window.location.search).has('tune'));
+    valuesRef.current = values;
+  }, [values]);
+
+  useEffect(() => {
+    const update = () => {
+      const next = { ...getGlassTuning(scope) };
+      valuesRef.current = next;
+      setValues(next);
+    };
+    update();
+    return subscribeGlassTuning(scope, update);
+  }, [scope]);
+
+  useEffect(
+    () => () => {
+      for (const timeout of pendingShapeCommits.current.values()) window.clearTimeout(timeout);
+      pendingShapeCommits.current.clear();
+    },
+    []
+  );
+
+  useEffect(() => {
+    const updateEnabled = () => {
+      const requested = new URLSearchParams(window.location.search).has('tune');
+      setEnabled(process.env.NODE_ENV !== 'production' || requested);
+    };
+    updateEnabled();
+    window.addEventListener('popstate', updateEnabled);
+    return () => window.removeEventListener('popstate', updateEnabled);
   }, []);
 
-  const set = (key: TuningKey, value: number, regen?: boolean) => {
-    glassTuning[key] = value;
-    setValues((v) => ({ ...v, [key]: value }));
-    if (regen) glassLens.refresh();
-  };
+  const copyText = useMemo(
+    () =>
+      [
+        '// liquid-glass-web-react settings',
+        'export const ' + (scope === 'main' ? 'mainGlassTuning' : 'contentGlassTuning') + ' = ' +
+          JSON.stringify(values, null, 2) + ' as const;',
+        '',
+      ].join('\n'),
+    [scope, values]
+  );
 
   const reset = () => {
-    for (const key of Object.keys(DEFAULTS) as TuningKey[]) glassTuning[key] = DEFAULTS[key];
-    setValues({ ...glassTuning });
-    glassLens.refresh();
+    for (const timeout of pendingShapeCommits.current.values()) window.clearTimeout(timeout);
+    pendingShapeCommits.current.clear();
+    setGlassTuning(scope, DEFAULTS[scope]);
+    setValues({ ...getGlassTuning(scope) });
+    setCopyState('idle');
+  };
+
+  const commitValue = (key: GlassTuningKey, value: number) => {
+    pendingShapeCommits.current.delete(key);
+    setGlassTuning(scope, { [key]: value } as Partial<GlassTuning>);
+  };
+
+  const setValue = (key: GlassTuningKey, rawValue: number) => {
+    if (!Number.isFinite(rawValue)) return;
+    const value = rawValue;
+
+    valuesRef.current = { ...valuesRef.current, [key]: value };
+    setValues(valuesRef.current);
+
+    if (!SHAPE_KEYS.has(key)) {
+      commitValue(key, value);
+      return;
+    }
+
+    const pending = pendingShapeCommits.current.get(key);
+    if (pending !== undefined) window.clearTimeout(pending);
+    pendingShapeCommits.current.set(
+      key,
+      window.setTimeout(() => commitValue(key, value), SHAPE_DEBOUNCE_MS)
+    );
+  };
+
+  const flushShapeValue = (key: GlassTuningKey) => {
+    if (!SHAPE_KEYS.has(key)) return;
+    const pending = pendingShapeCommits.current.get(key);
+    if (pending === undefined) return;
+    window.clearTimeout(pending);
+    commitValue(key, valuesRef.current[key]);
   };
 
   const copy = async () => {
     try {
-      await navigator.clipboard.writeText(JSON.stringify(glassTuning, null, 2));
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 1200);
+      await navigator.clipboard.writeText(copyText);
+      setCopyState('copied');
     } catch {
-      // clipboard unavailable — values are also visible in the panel
+      setCodeOpen(true);
+      window.requestAnimationFrame(() => {
+        codeRef.current?.focus();
+        codeRef.current?.select();
+      });
+      setCopyState('select');
     }
+    window.setTimeout(() => setCopyState('idle'), 1400);
   };
 
   if (!enabled) return null;
@@ -63,75 +231,219 @@ export default function GlassTunerPanel() {
   if (!open) {
     return (
       <button
+        type="button"
         onClick={() => setOpen(true)}
-        style={{ ...chromeStyle, padding: '6px 10px', cursor: 'pointer' }}
+        style={{ ...collapsedStyle, cursor: 'pointer' }}
         aria-label="Open glass tuner"
       >
-        glass ⚙
+        tune glass
       </button>
     );
   }
 
   return (
-    <div style={{ ...chromeStyle, width: 300, padding: '12px 14px' }} aria-label="Glass tuner">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-        <span style={{ letterSpacing: 2, opacity: 0.8 }}>glass tuner</span>
-        <span>
-          <button onClick={reset} style={buttonStyle}>
+    <aside style={panelStyle} aria-label={scope + ' page liquid glass tuner'}>
+      <div style={headerStyle}>
+        <div>
+          <div style={{ letterSpacing: 1.8, fontSize: 12 }}>{scope} page glass</div>
+          <div style={{ marginTop: 2, opacity: 0.55, fontSize: 10 }}>independent live controls</div>
+        </div>
+        <div style={{ display: 'flex', gap: 5 }}>
+          <button type="button" onClick={reset} style={buttonStyle}>
             reset
           </button>
-          <button onClick={copy} style={buttonStyle}>
-            {copied ? 'copied!' : 'copy'}
+          <button type="button" onClick={copy} style={buttonStyle}>
+            {copyState === 'copied' ? 'copied' : copyState === 'select' ? 'select code' : 'copy all'}
           </button>
-          <button onClick={() => setOpen(false)} style={buttonStyle} aria-label="Close">
-            ×
+          <button type="button" onClick={() => setOpen(false)} style={buttonStyle} aria-label="Minimize glass tuner">
+            −
           </button>
-        </span>
+        </div>
       </div>
-      {CONTROLS.map(({ key, label, min, max, step, regen }) => (
-        <label key={key} style={{ display: 'grid', gridTemplateColumns: '86px 1fr 48px', gap: 8, alignItems: 'center', marginBottom: 7 }}>
-          <span style={{ opacity: 0.7 }}>{label}</span>
-          <input
-            type="range"
-            min={min}
-            max={max}
-            step={step}
-            value={values[key]}
-            onChange={(e) => set(key, Number(e.target.value), regen)}
-            style={{ accentColor: '#ffffff', width: '100%' }}
-          />
-          <span style={{ textAlign: 'right', opacity: 0.9 }}>{values[key]}</span>
-        </label>
+
+      {groupsForScope(scope).map((group) => (
+        <section key={group.title} style={sectionStyle}>
+          <div style={groupHeadingStyle}>
+            <span>{group.title}</span>
+            <span style={{ opacity: 0.45, fontSize: 9 }}>{group.description}</span>
+          </div>
+          {group.controls.map((control) => {
+            const value = values[control.key];
+            const id = 'glass-tuning-' + scope + '-' + control.key;
+            return (
+              <div key={control.key} style={rowStyle}>
+                <label htmlFor={id} style={labelStyle}>
+                  {control.label}
+                </label>
+                <input
+                  id={id}
+                  type="range"
+                  min={control.min}
+                  max={control.max}
+                  step={control.step}
+                  value={value}
+                  onChange={(event) => setValue(control.key, Number(event.target.value))}
+                  onPointerUp={() => flushShapeValue(control.key)}
+                  onKeyUp={() => flushShapeValue(control.key)}
+                  style={rangeStyle}
+                />
+                <input
+                  type="number"
+                  step={control.step}
+                  value={value}
+                  onChange={(event) => {
+                    if (event.target.value === '') return;
+                    setValue(control.key, Number(event.target.value));
+                  }}
+                  onBlur={() => flushShapeValue(control.key)}
+                  aria-label={control.label + ' value'}
+                  style={numberStyle}
+                />
+              </div>
+            );
+          })}
+        </section>
       ))}
-      <div style={{ marginTop: 8, opacity: 0.5, fontSize: 10, lineHeight: 1.5 }}>
-        hover a column to see changes - edge/radius rebuild the lens map
+
+      <div style={noteStyle}>
+        Numeric fields accept any finite value; sliders are only a quick starting range. Frame inset and radius are
+        live; lens size and position still follow the active card.
       </div>
-    </div>
+
+      <details open={codeOpen} onToggle={(event) => setCodeOpen(event.currentTarget.open)} style={codeStyle}>
+        <summary style={{ cursor: 'pointer' }}>settings code</summary>
+        <textarea ref={codeRef} readOnly value={copyText} style={textareaStyle} aria-label="Copyable glass settings" />
+      </details>
+    </aside>
   );
 }
 
-const chromeStyle: React.CSSProperties = {
+const panelStyle: CSSProperties = {
   position: 'fixed',
   right: 12,
   bottom: 12,
-  zIndex: 50,
-  background: 'rgba(10, 10, 12, 0.92)',
+  zIndex: 100,
+  width: 'min(370px, calc(100vw - 24px))',
+  maxHeight: 'calc(100dvh - 24px)',
+  overflowY: 'auto',
+  padding: '12px 13px',
+  background: 'rgba(10, 10, 12, 0.94)',
   color: '#ffffff',
   border: '1px solid rgba(255, 255, 255, 0.18)',
+  borderRadius: 10,
+  fontSize: 11,
+  fontFamily: '"JetBrains Mono", monospace',
+  boxShadow: '0 12px 42px rgba(0, 0, 0, 0.55)',
+  backdropFilter: 'blur(14px)',
+};
+
+const collapsedStyle: CSSProperties = {
+  position: 'fixed',
+  right: 12,
+  bottom: 12,
+  zIndex: 100,
+  padding: '7px 10px',
+  background: 'rgba(10, 10, 12, 0.94)',
+  color: '#ffffff',
+  border: '1px solid rgba(255, 255, 255, 0.24)',
   borderRadius: 8,
   fontSize: 11,
   fontFamily: '"JetBrains Mono", monospace',
-  boxShadow: '0 8px 30px rgba(0, 0, 0, 0.5)',
+  boxShadow: '0 8px 28px rgba(0, 0, 0, 0.45)',
 };
 
-const buttonStyle: React.CSSProperties = {
-  background: 'transparent',
+const headerStyle: CSSProperties = {
+  display: 'flex',
+  alignItems: 'flex-start',
+  justifyContent: 'space-between',
+  gap: 8,
+  marginBottom: 12,
+};
+
+const sectionStyle: CSSProperties = {
+  marginTop: 10,
+  paddingTop: 9,
+  borderTop: '1px solid rgba(255, 255, 255, 0.11)',
+};
+
+const groupHeadingStyle: CSSProperties = {
+  display: 'flex',
+  justifyContent: 'space-between',
+  gap: 8,
+  marginBottom: 7,
+  color: 'rgba(255, 255, 255, 0.86)',
+  fontSize: 10,
+  letterSpacing: 0.7,
+  textTransform: 'uppercase',
+};
+
+const rowStyle: CSSProperties = {
+  display: 'grid',
+  gridTemplateColumns: '94px minmax(0, 1fr) 62px',
+  alignItems: 'center',
+  gap: 8,
+  minHeight: 27,
+};
+
+const labelStyle: CSSProperties = {
+  overflow: 'hidden',
+  color: 'rgba(255, 255, 255, 0.68)',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+};
+
+const rangeStyle: CSSProperties = {
+  width: '100%',
+  accentColor: '#ffffff',
+};
+
+const numberStyle: CSSProperties = {
+  width: '100%',
+  padding: '2px 4px',
   color: '#ffffff',
+  background: 'rgba(255, 255, 255, 0.08)',
+  border: '1px solid rgba(255, 255, 255, 0.16)',
+  borderRadius: 4,
+  font: 'inherit',
+  textAlign: 'right',
+};
+
+const buttonStyle: CSSProperties = {
+  padding: '3px 6px',
+  color: '#ffffff',
+  background: 'transparent',
   border: '1px solid rgba(255, 255, 255, 0.25)',
   borderRadius: 4,
-  padding: '2px 8px',
-  marginLeft: 6,
-  fontSize: 10,
   cursor: 'pointer',
-  fontFamily: 'inherit',
+  font: 'inherit',
+  fontSize: 10,
+};
+
+const noteStyle: CSSProperties = {
+  marginTop: 11,
+  paddingTop: 9,
+  borderTop: '1px solid rgba(255, 255, 255, 0.11)',
+  color: 'rgba(255, 255, 255, 0.48)',
+  fontSize: 10,
+  lineHeight: 1.45,
+};
+
+const codeStyle: CSSProperties = {
+  marginTop: 8,
+  color: 'rgba(255, 255, 255, 0.65)',
+  fontSize: 10,
+};
+
+const textareaStyle: CSSProperties = {
+  display: 'block',
+  width: '100%',
+  minHeight: 170,
+  marginTop: 7,
+  padding: 8,
+  resize: 'vertical',
+  color: '#d9e6ff',
+  background: 'rgba(0, 0, 0, 0.32)',
+  border: '1px solid rgba(255, 255, 255, 0.14)',
+  borderRadius: 5,
+  font: '10px/1.45 "JetBrains Mono", monospace',
 };

@@ -1,16 +1,20 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
-import { glassLens, glassTuning, EXTRA_HOST_CLASS } from './GlassLens';
+import { useEffect, useRef, type CSSProperties } from 'react';
+import { glassLens, mainGlassTuning } from './GlassLens';
 
-const easeOutQuad = (t: number) => 1 - (1 - t) * (1 - t);
+const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
 
-// Hover controller for one column's glass. The optics (refraction/blur) live
-// in GlassLens's SVG filter on the ASCII layer; the pane here is only the
-// glass surface — a faint tint and hairline that fade in with the lens.
-// `inverted` flips the interaction (identity column): glass rests ON and
-// melts while hovered.
-export default function PixelGlassLayer({ inverted = false }: { inverted?: boolean }) {
+type PixelGlassLayerProps = {
+  /** A route- or click-selected column keeps its lens formed at rest. */
+  selected?: boolean;
+};
+
+// Interaction controller for one column material. The package engine refracts
+// the shared scene through this pane's geometry, while the pane stays below
+// the column's readable foreground. This component only animates material
+// presence and keeps hover/focus/mobile-width semantics in one place.
+export default function PixelGlassLayer({ selected = false }: PixelGlassLayerProps) {
   const rootRef = useRef<HTMLDivElement | null>(null);
   const paneRef = useRef<HTMLDivElement | null>(null);
 
@@ -20,168 +24,141 @@ export default function PixelGlassLayer({ inverted = false }: { inverted?: boole
     if (!root || !pane) return;
 
     const surface = (root.closest('.column-surface') as HTMLElement | null) ?? root.parentElement;
-    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    // a column layer painted above the ASCII (the identity portrait) that
-    // should go under the glass too
-    const extraHost = surface?.querySelector<HTMLElement>(`.${EXTRA_HOST_CLASS}`) ?? null;
+    if (!surface) return;
 
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const mobileMode = window.matchMedia('(max-width: 768px)').matches;
+    const restingProgress = selected ? mainGlassTuning.restOpacity : 0;
     const token = {};
-    let progress = 0;
-    let target: 0 | 1 = 0;
-    let animFrom = 0;
+    let progress = restingProgress;
+    let target = restingProgress;
+    let animFrom = restingProgress;
     let animStart = 0;
     let animDuration = 1;
     let raf: number | null = null;
-    let hideTimer: number | null = null;
 
     const setVisible = (visible: boolean) => {
       root.dataset.visible = visible ? 'true' : 'false';
     };
 
-    const applySurface = () => {
-      pane.style.opacity = progress.toFixed(3);
-      pane.style.background = `rgba(255, 255, 255, ${glassTuning.tint})`;
-      // specular rim: lit from the top-left, thickness shadow at the bottom
-      const eh = glassTuning.edgeHighlight;
-      pane.style.boxShadow = [
-        `inset 0 1.5px 0 rgba(255, 255, 255, ${(0.55 * eh).toFixed(3)})`,
-        `inset 1.5px 0 0 rgba(255, 255, 255, ${(0.28 * eh).toFixed(3)})`,
-        `inset -1.5px 0 0 rgba(255, 255, 255, ${(0.14 * eh).toFixed(3)})`,
-        `inset 0 -1.5px 0 rgba(0, 0, 0, ${(0.4 * eh).toFixed(3)})`,
-        `inset 0 0 44px rgba(255, 255, 255, ${(0.05 * eh).toFixed(3)})`,
-      ].join(', ');
-    };
+    glassLens.activate(token, pane, progress, {
+      variant: 'clear',
+      freezesBreathing: false,
+      interactionTarget: surface,
+    });
+    setVisible(progress > 0.01);
 
     const frame = (now: number) => {
       const t = animDuration <= 0 ? 1 : Math.min(1, (now - animStart) / animDuration);
-      progress = t >= 1 ? target : animFrom + (target - animFrom) * easeOutQuad(t);
-      applySurface();
-      // keep the lens geometry glued to the breathing column while active
-      glassLens.update(token, root.getBoundingClientRect(), progress);
-      if (t >= 1 && target === 0) {
-        setVisible(false);
-        glassLens.release(token);
+      progress = t >= 1 ? target : animFrom + (target - animFrom) * easeOutCubic(t);
+      glassLens.update(token, progress);
+
+      if (t >= 1) {
+        if (target <= 0.01) setVisible(false);
         raf = null;
         return;
       }
       raf = requestAnimationFrame(frame);
     };
 
-    const retarget = (next: 0 | 1, instant = false) => {
-      if (hideTimer !== null) {
-        window.clearTimeout(hideTimer);
-        hideTimer = null;
-      }
+    const retarget = (next: number, freezesBreathing: boolean) => {
       target = next;
-      root.dataset.active = next === 1 ? 'true' : 'false';
-      if (next === 1) setVisible(true);
+      root.dataset.active = next > restingProgress + 0.01 ? 'true' : 'false';
+      if (next > 0.01) setVisible(true);
+      glassLens.activate(token, pane, progress, {
+        variant: 'clear',
+        freezesBreathing,
+        interactionTarget: surface,
+      });
 
       if (reducedMotion) {
         progress = next;
-        applySurface();
-        glassLens.update(token, root.getBoundingClientRect(), next);
-        if (next === 0) {
-          hideTimer = window.setTimeout(() => {
-            setVisible(false);
-            glassLens.release(token);
-          }, 260);
-        }
+        glassLens.update(token, progress);
+        if (next <= 0.01) setVisible(false);
         return;
       }
 
       animFrom = progress;
       animStart = performance.now();
-      // instant snaps on the next frame; the loop still runs afterward so the
-      // lens geometry keeps tracking the column
-      animDuration = instant
-        ? 0
-        : Math.max(1, (next === 1 ? glassTuning.formMs : glassTuning.meltMs) * Math.abs(target - animFrom));
+      const baseDuration = next > progress ? mainGlassTuning.formMs : mainGlassTuning.meltMs;
+      animDuration = Math.max(1, baseDuration * Math.abs(target - animFrom));
       if (raf === null) raf = requestAnimationFrame(frame);
     };
 
-    // the identity column is the exception: its glass appears immediately
-    const engage = (freezesBreathing: boolean) => {
-      glassLens.activate(token, root.getBoundingClientRect(), progress, extraHost, { freezesBreathing });
-      retarget(1, inverted);
-    };
-    const disengage = () => retarget(0);
-
-    const mobileMode = window.matchMedia('(max-width: 768px)').matches;
+    const engage = () => retarget(1, !selected);
+    const disengage = () => retarget(restingProgress, false);
     let cleanupMode: () => void;
 
-    if (mobileMode) {
-      // touch has no hover: the glass follows column width instead — it
-      // forms on whichever column the user swipes open (with hysteresis so
-      // it doesn't flutter at the threshold mid-drag)
-      const container = surface?.parentElement;
+    if (mobileMode && !selected) {
+      // Touch has no hover: material follows whichever column the user opens.
+      // The gap between thresholds prevents flutter during a width drag.
+      const container = surface.parentElement;
       let engaged = false;
       const evaluate = () => {
-        if (!surface || !container) return;
+        if (!container) return;
         const containerWidth = container.getBoundingClientRect().width;
         if (containerWidth <= 0) return;
         const ratio = surface.getBoundingClientRect().width / containerWidth;
         const next = engaged ? ratio > 0.28 : ratio > 0.32;
         if (next === engaged) return;
         engaged = next;
-        if (next) engage(false);
+        if (next) engage();
         else disengage();
       };
       const resizeObserver = new ResizeObserver(evaluate);
-      if (surface) resizeObserver.observe(surface);
+      resizeObserver.observe(surface);
       evaluate();
       cleanupMode = () => resizeObserver.disconnect();
-    } else {
-      // desktop: hover-driven; an inverted (resting) lens must not freeze
-      // the idle breathing
-      const onEnter = inverted ? disengage : () => engage(true);
-      const onLeave = inverted ? () => engage(false) : disengage;
-
-      const handlePointerEnter = () => onEnter();
-      const handlePointerLeave = () => onLeave();
-      const handleFocusIn = () => onEnter();
+    } else if (!mobileMode) {
+      const handlePointerEnter = () => engage();
+      const handlePointerLeave = () => disengage();
+      const handleFocusIn = () => engage();
       const handleFocusOut = () => {
         requestAnimationFrame(() => {
-          if (!surface?.contains(document.activeElement)) onLeave();
+          if (!surface.contains(document.activeElement)) disengage();
         });
       };
 
-      surface?.addEventListener('pointerenter', handlePointerEnter);
-      surface?.addEventListener('pointerleave', handlePointerLeave);
-      surface?.addEventListener('focusin', handleFocusIn);
-      surface?.addEventListener('focusout', handleFocusOut);
-
-      if (inverted) engage(false);
+      surface.addEventListener('pointerenter', handlePointerEnter);
+      surface.addEventListener('pointerleave', handlePointerLeave);
+      surface.addEventListener('focusin', handleFocusIn);
+      surface.addEventListener('focusout', handleFocusOut);
 
       cleanupMode = () => {
-        surface?.removeEventListener('pointerenter', handlePointerEnter);
-        surface?.removeEventListener('pointerleave', handlePointerLeave);
-        surface?.removeEventListener('focusin', handleFocusIn);
-        surface?.removeEventListener('focusout', handleFocusOut);
+        surface.removeEventListener('pointerenter', handlePointerEnter);
+        surface.removeEventListener('pointerleave', handlePointerLeave);
+        surface.removeEventListener('focusin', handleFocusIn);
+        surface.removeEventListener('focusout', handleFocusOut);
       };
+    } else {
+      // The selected route remains lensed on touch devices too.
+      cleanupMode = () => undefined;
     }
 
     return () => {
       cleanupMode();
       if (raf !== null) cancelAnimationFrame(raf);
-      if (hideTimer !== null) window.clearTimeout(hideTimer);
       glassLens.release(token);
     };
-  }, [inverted]);
+  }, [selected]);
 
-  // inverted columns server-render with the surface already on, so the rim
-  // and tint are there on first paint, before any JS runs
+  const restingStyle = selected
+    ? ({ '--glass-progress': mainGlassTuning.restOpacity } as CSSProperties)
+    : undefined;
+
   return (
     <div
       ref={rootRef}
       aria-hidden
       className="column-glass-field"
-      data-visible={inverted ? 'true' : 'false'}
-      data-active={inverted ? 'true' : 'false'}
+      data-visible={selected ? 'true' : 'false'}
+      data-active="false"
     >
       <div
         ref={paneRef}
-        className="column-glass-pane"
-        style={inverted ? { opacity: 1, background: `rgba(255, 255, 255, ${glassTuning.tint})` } : undefined}
+        className="glass-material column-glass-pane"
+        data-glass-variant="clear"
+        style={restingStyle}
       />
     </div>
   );
