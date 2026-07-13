@@ -139,7 +139,7 @@ function getPathActiveIndex(path: string): number | null {
 
 // The selected column (clicked, or matching the URL) gets a gentle emphasis
 // on desktop while the rest stay near normal.
-const ACTIVE_WIDTH_FACTOR = 1.35;
+const ACTIVE_WIDTH_FACTOR = 4;
 
 // mobile opens with the identity column dominant (glass on), others as slim
 // tabs the user swipes open

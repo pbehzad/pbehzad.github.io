@@ -353,23 +353,23 @@ img {
 }
 
 .column-portal-grid[data-active-col="1"] {
-  grid-template-columns: 1fr 1.35fr 1fr 1fr 1fr 1fr;
+  grid-template-columns: 1fr 4fr 1fr 1fr 1fr 1fr;
 }
 
 .column-portal-grid[data-active-col="2"] {
-  grid-template-columns: 1fr 1fr 1.35fr 1fr 1fr 1fr;
+  grid-template-columns: 1fr 1fr 4fr 1fr 1fr 1fr;
 }
 
 .column-portal-grid[data-active-col="3"] {
-  grid-template-columns: 1fr 1fr 1fr 1.35fr 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr 4fr 1fr 1fr;
 }
 
 .column-portal-grid[data-active-col="4"] {
-  grid-template-columns: 1fr 1fr 1fr 1fr 1.35fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr 1fr 4fr 1fr;
 }
 
 .column-portal-grid[data-active-col="5"] {
-  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1.35fr;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 4fr;
 }
 
 @media (max-width: 768px) {
