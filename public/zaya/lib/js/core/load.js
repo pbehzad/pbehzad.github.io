@@ -79,6 +79,10 @@ async function loadFlipbook(pdfUrl, rtlMode, page, pdfId) {
     var options = {
         height: "100%",
         duration: 700,
+        soundEnable: false,
+        enableDownload: false,
+        allControls: "altPrev,pageNumber,altNext,play,outline,thumbnail,zoomIn,zoomOut,fullScreen,share,search,more,pageMode,startPage,endPage",
+        moreControls: "pageMode,startPage,endPage",
         backgroundColor: "#2F2D2F",
         direction: rtlMode ? 2 : 1, // Use 2 for RTL and 1 for LTR
         zoomChange: function (isZoomed) {

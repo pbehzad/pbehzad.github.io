@@ -2,7 +2,7 @@
  * DFlip Preview Object Class
  */
 
-import { DIRECTION, PAGE_MODE, CONTROLSPOSITION, SOURCE_TYPE, SINGLE_PAGE_MODE, VERSION } from '../constants.js';
+import { DIRECTION, PAGE_MODE, CONTROLSPOSITION, SOURCE_TYPE, SINGLE_PAGE_MODE } from '../constants.js';
 import { log, limitAt, getBasePage, hasFullscreenEnabled, isRTLMode, distOrigin } from '../utils.js';
 import { TWEEN } from '../tween.js';
 
@@ -23,12 +23,6 @@ export class PreviewObject {
     window.addEventListener("resize", onResize, false);
 
     this.sounds = [];
-    for (let i = 0; i < 5; i++) {
-      const audio = document.createElement("audio");
-      audio.setAttribute("src", options.soundFile + "?ver=" + VERSION);
-      audio.setAttribute("type", "audio/mpeg");
-      this.sounds.push(audio);
-    }
     this.currentSoundIdx = 0;
 
     this.autoPlayFunction = () => {
@@ -331,18 +325,7 @@ export class PreviewObject {
   }
 
   playSound() {
-    try {
-      if (this.options && this.options.soundEnable == true) {
-        const sound = this.sounds[this.currentSoundIdx];
-        sound.currentTime = 0;
-        // Vary speed slightly for realism (between 0.9 and 1.1)
-        sound.playbackRate = 0.9 + Math.random() * 0.2;
-        // Vary volume slightly
-        sound.volume = 0.8 + Math.random() * 0.2;
-        sound.play();
-        this.currentSoundIdx = (this.currentSoundIdx + 1) % this.sounds.length;
-      }
-    } catch (e) {}
+    // Page-turn audio is intentionally disabled for the embedded portfolio reader.
   }
 
   setPageMode(isSingle) {

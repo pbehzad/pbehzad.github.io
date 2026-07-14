@@ -243,15 +243,6 @@ $(document).ready(function () {
     });
 
     // More Menu Actions
-    $(document).on("click", "#menuDownloadBtn", function () {
-        const fb = getFlipbook();
-        if (fb && fb.ui && fb.ui.download) {
-            fb.ui.download[0].click();
-        } else if (fb && fb.options && fb.options.source) {
-            window.open(fb.options.source, '_blank');
-        }
-    });
-
     $(document).on("click", "#menuPageModeBtn", function () {
         const fb = getFlipbook();
         if (fb) {
@@ -263,14 +254,6 @@ $(document).ready(function () {
 
     $(document).on("click", "#menuFirstPageBtn", function () { const fb = getFlipbook(); if (fb) fb.start(); });
     $(document).on("click", "#menuLastPageBtn", function () { const fb = getFlipbook(); if (fb) fb.end(); });
-
-    $(document).on("click", "#menuSoundBtn", function () {
-        const fb = getFlipbook();
-        if (fb && fb.ui && fb.ui.sound) {
-            fb.ui.sound.trigger("click");
-            syncUI();
-        }
-    });
 
     // Update UI State
     function syncUI() {
@@ -296,11 +279,6 @@ $(document).ready(function () {
             $("#menuPageModeBtn span").text(isSingle ? "Double Page Mode" : "Single Page Mode");
             $("#menuPageModeBtn i").attr('class', isSingle ? "fas fa-book-open" : "fas fa-file-alt");
 
-            // Sync Sound
-            const isSoundEnabled = (fb.options && fb.options.soundEnable);
-            $("#menuSoundBtn span").text(isSoundEnabled ? "Sound: On" : "Sound: Off");
-            $("#menuSoundBtn i").attr('class', isSoundEnabled ? "fas fa-volume-up" : "fas fa-volume-mute");
-            
             // Sync Sidebar States (Outline/Thumbnail)
             if (fb.ui) {
                 if (fb.ui.outline) {

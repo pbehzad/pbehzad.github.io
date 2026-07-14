@@ -436,13 +436,14 @@ export default function ColumnPortal({
     ];
 
     const texts = data.texts.map((text) => {
-      // In-app detail page when the text has a managed body; otherwise
-      // fall back to the external/PDF link
-      const external = !text.content_file ? text.external_url || text.pdf_url || undefined : undefined;
+      // PDFs stay inside the managed reader; only an entry with neither a
+      // managed body nor PDF falls back to its external publication URL.
+      const hasDetailPage = Boolean(text.content_file || text.pdf_url);
+      const external = !hasDetailPage ? text.external_url || undefined : undefined;
       return {
         title: text.title,
         meta: `${text.year} - ${text.type}`,
-        href: text.content_file ? `/texts/${text.slug}` : external,
+        href: hasDetailPage ? `/texts/${text.slug}` : external,
         external: !!external,
       };
     });

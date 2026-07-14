@@ -5,7 +5,6 @@ import { getTextBySlug } from '@/services/contentService';
 import { getTextHtml } from '@/lib/text-content-manager';
 import DetailShell from '@/app/components/DetailShell';
 import PdfFlipViewer from '@/app/components/PdfFlipViewer';
-import { getPublicMediaUrl } from '@/lib/media-storage';
 
 const getText = cache(async (slug: string) => (await getTextBySlug(slug)).data);
 
@@ -36,7 +35,6 @@ export default async function TextPage({
   }
 
   const contentHtml = text.content_file ? await getTextHtml(text.content_file) : null;
-  const publicPdfUrl = text.pdf_url ? getPublicMediaUrl(text.pdf_url) : null;
 
   return (
     <DetailShell backHref="/texts" backLabel="texts">
@@ -77,8 +75,8 @@ export default async function TextPage({
         <PdfFlipViewer pdfUrl={text.pdf_url} title={text.title} />
       )}
 
-      {/* External / PDF links */}
-      {(text.external_url || text.pdf_url) && (
+      {/* External publication link */}
+      {text.external_url && (
         <div className="border-t border-white/10 pt-8 mt-12 flex flex-col gap-2 text-sm">
           {text.external_url && (
             <a
@@ -88,16 +86,6 @@ export default async function TextPage({
               className="opacity-50 hover:opacity-100 transition-opacity"
             >
               Read online &rarr;
-            </a>
-          )}
-          {text.pdf_url && (
-            <a
-              href={publicPdfUrl || text.pdf_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="opacity-50 hover:opacity-100 transition-opacity"
-            >
-              Open PDF in new tab &rarr;
             </a>
           )}
         </div>

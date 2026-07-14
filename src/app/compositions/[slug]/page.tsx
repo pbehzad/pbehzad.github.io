@@ -37,7 +37,6 @@ export default async function CompositionPage({
   }
 
   const year = composition.year.substring(0, 4);
-  const publicScoreUrl = composition.score_url ? getPublicMediaUrl(composition.score_url) : null;
 
   return (
     <DetailShell backHref="/compositions" backLabel="compositions">
@@ -101,20 +100,10 @@ export default async function CompositionPage({
       )}
 
       {/* Media links */}
-      {(composition.score_url || composition.video_url || (composition.audio_urls && composition.audio_urls.length > 0)) && (
+      {(composition.video_url || (composition.audio_urls && composition.audio_urls.length > 0)) && (
         <div className="border-t border-white/10 pt-8 mt-12">
           <h2 className="text-xs uppercase tracking-wider opacity-40 mb-4">Media</h2>
           <div className="flex flex-col gap-2 text-sm">
-            {composition.score_url && (
-              <a
-                href={publicScoreUrl || composition.score_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="opacity-50 hover:opacity-100 transition-opacity"
-              >
-                Score
-              </a>
-            )}
             {composition.video_url && (
               <a
                 href={composition.video_url}

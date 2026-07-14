@@ -36,7 +36,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     // Only texts with managed bodies have in-app detail pages.
     const textRoutes: MetadataRoute.Sitemap = texts
-      .filter((t) => t.content_file)
+      .filter((t) => t.content_file || t.pdf_url)
       .map((t) => ({
         url: `${BASE_URL}/texts/${t.slug}`,
         lastModified: new Date(),
