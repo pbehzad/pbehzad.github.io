@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getCompositionBySlug } from '@/lib/content-manager';
 import DetailShell from '@/app/components/DetailShell';
+import PdfFlipViewer from '@/app/components/PdfFlipViewer';
 
 const getComposition = cache(getCompositionBySlug);
 
@@ -87,6 +88,13 @@ export default async function CompositionPage({
         <div
           className="prose prose-invert prose-sm max-w-none mb-12"
           dangerouslySetInnerHTML={{ __html: composition.html_content }}
+        />
+      )}
+
+      {composition.score_url && (
+        <PdfFlipViewer
+          pdfUrl={composition.score_url}
+          title={`${composition.title} score`}
         />
       )}
 

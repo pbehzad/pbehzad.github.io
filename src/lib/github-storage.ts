@@ -8,10 +8,13 @@ interface GitHubFile {
   sha: string;
 }
 
-interface GitHubListEntry {
+export interface GitHubListEntry {
   name: string;
   path: string;
   sha: string;
+  size: number;
+  downloadUrl?: string;
+  type: 'file' | 'dir';
 }
 
 function headers() {
@@ -55,6 +58,28 @@ export async function writeFile(
   return { sha: data.content.sha };
 }
 
+export async function writeBinaryFile(
+  path: string,
+  content: Buffer,
+  sha?: string,
+  message?: string
+): Promise<{ sha: string }> {
+  const body: Record<string, string> = {
+    message: message || `Upload ${path}`,
+    content: content.toString('base64'),
+  };
+  if (sha) body.sha = sha;
+
+  const res = await fetch(`${API_BASE}/${path}`, {
+    method: 'PUT',
+    headers: headers(),
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) throw new Error(`GitHub API upload error: ${res.status} ${res.statusText}`);
+  const data = await res.json();
+  return { sha: data.content.sha };
+}
+
 export async function deleteFile(
   path: string,
   sha: string,
@@ -79,9 +104,19 @@ export async function listDirectory(path: string): Promise<GitHubListEntry[]> {
   if (!res.ok) throw new Error(`GitHub API list error: ${res.status} ${res.statusText}`);
   const data = await res.json();
   if (!Array.isArray(data)) return [];
-  return data.map((entry: { name: string; path: string; sha: string }) => ({
+  return data.map((entry: {
+    name: string;
+    path: string;
+    sha: string;
+    size: number;
+    download_url?: string;
+    type: 'file' | 'dir';
+  }) => ({
     name: entry.name,
     path: entry.path,
     sha: entry.sha,
+    size: entry.size,
+    downloadUrl: entry.download_url,
+    type: entry.type,
   }));
 }

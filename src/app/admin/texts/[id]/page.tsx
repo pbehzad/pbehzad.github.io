@@ -6,6 +6,7 @@ import AdminInput from '../../components/AdminInput';
 import AdminTextarea from '../../components/AdminTextarea';
 import AdminSelect from '../../components/AdminSelect';
 import AdminForm from '../../components/AdminForm';
+import AdminFileField from '../../components/AdminFileField';
 
 export default function EditText() {
   const router = useRouter();
@@ -134,7 +135,7 @@ export default function EditText() {
         />
         <AdminInput label="Published in" value={publishedIn} onChange={setPublishedIn} />
         <AdminInput label="External URL" value={externalUrl} onChange={setExternalUrl} />
-        <AdminInput label="PDF URL" value={pdfUrl} onChange={setPdfUrl} />
+        <AdminFileField label="PDF" value={pdfUrl} onChange={setPdfUrl} kind="pdf" />
         <AdminTextarea label="Description" value={description} onChange={setDescription} rows={3} />
         <AdminTextarea label="Abstract" value={abstract} onChange={setAbstract} rows={4} />
         <AdminTextarea label="Content (Markdown)" value={markdown} onChange={setMarkdown} rows={18} />

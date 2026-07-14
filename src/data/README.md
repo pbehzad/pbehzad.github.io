@@ -219,7 +219,21 @@ Edit [content/home.json](content/home.json)
 
 ## Media Management
 
-Store media files in the `public/media/` directory:
+The admin file manager at `/admin/files` uses the same storage mode as the
+structured content:
+
+- `CONTENT_STORAGE=local` writes binary files to `content-data/media/` and
+  serves them through `/api/media/:filename` with PDF byte-range support.
+- `CONTENT_STORAGE=github` writes binary files to the `media/` directory of
+  `CONTENT_GITHUB_REPO` and stores its raw GitHub URL in content metadata.
+
+PDFs can be uploaded or selected directly from the PDF field on text forms and
+the Score PDF field on composition forms. Saving published content with one of
+those URLs automatically enables the inline flip viewer on its public detail
+page. The manager supports PDFs, images, and audio up to 50 MB and prevents a
+file from being deleted while content still references it.
+
+For repository-managed static media outside the admin system, use:
 
 ```
 public/

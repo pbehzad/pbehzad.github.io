@@ -1,0 +1,49 @@
+type PdfFlipViewerProps = {
+  pdfUrl: string;
+  title: string;
+  startPage?: number;
+};
+
+export default function PdfFlipViewer({
+  pdfUrl,
+  title,
+  startPage = 1,
+}: PdfFlipViewerProps) {
+  const query = new URLSearchParams({
+    pdf: pdfUrl,
+    page: String(Math.max(1, Math.floor(startPage))),
+  });
+
+  return (
+    <section className="my-12" aria-labelledby="pdf-viewer-heading">
+      <div className="mb-3 flex items-baseline justify-between gap-4">
+        <h2
+          id="pdf-viewer-heading"
+          className="text-xs uppercase tracking-[0.2em] opacity-45"
+        >
+          Reader
+        </h2>
+        <a
+          href={pdfUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="glass-detail-link text-[10px] uppercase tracking-[0.16em] opacity-45 hover:opacity-80"
+        >
+          Open PDF
+        </a>
+      </div>
+
+      <div className="overflow-hidden border border-white/15 bg-[#151515] shadow-[0_18px_60px_rgba(0,0,0,0.35)]">
+        <iframe
+          src={`/zaya/index.html?${query.toString()}`}
+          title={`${title} PDF reader`}
+          className="block h-[72svh] min-h-[32rem] w-full border-0"
+          allow="fullscreen"
+          allowFullScreen
+          loading="lazy"
+          referrerPolicy="strict-origin-when-cross-origin"
+        />
+      </div>
+    </section>
+  );
+}

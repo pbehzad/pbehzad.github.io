@@ -1,5 +1,10 @@
 import { z } from 'zod';
 
+const storedFileUrlSchema = z.union([
+  z.string().url(),
+  z.string().regex(/^\/(?!\/)/, 'Must be an absolute URL or a site-relative path'),
+]);
+
 export const compositionSchema = z.object({
   id: z.string().min(1),
   slug: z.string().min(1),
@@ -9,8 +14,8 @@ export const compositionSchema = z.object({
   duration: z.string().nullable().optional(),
   description: z.string().nullable().optional(),
   program_notes: z.string().nullable().optional(),
-  score_url: z.string().url().nullable().optional(),
-  audio_urls: z.array(z.string().url()).optional().default([]),
+  score_url: storedFileUrlSchema.nullable().optional(),
+  audio_urls: z.array(storedFileUrlSchema).optional().default([]),
   video_url: z.string().url().nullable().optional(),
   tags: z.array(z.string()).optional().default([]),
   featured: z.boolean().optional().default(false),

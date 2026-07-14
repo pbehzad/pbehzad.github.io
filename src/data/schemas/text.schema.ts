@@ -1,5 +1,10 @@
 import { z } from 'zod';
 
+const storedFileUrlSchema = z.union([
+  z.string().url(),
+  z.string().regex(/^\/(?!\/)/, 'Must be an absolute URL or a site-relative path'),
+]);
+
 export const textSchema = z.object({
   id: z.string().min(1),
   slug: z.string().min(1),
@@ -9,7 +14,7 @@ export const textSchema = z.object({
   description: z.string().nullable().optional(),
   abstract: z.string().nullable().optional(),
   content_file: z.string().nullable().optional(),
-  pdf_url: z.string().url().nullable().optional(),
+  pdf_url: storedFileUrlSchema.nullable().optional(),
   external_url: z.string().url().nullable().optional(),
   tags: z.array(z.string()).optional().default([]),
   featured: z.boolean().optional().default(false),

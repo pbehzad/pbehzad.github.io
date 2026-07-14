@@ -7,10 +7,21 @@ export interface StorageFile {
   sha?: string;
 }
 
+export interface StorageEntry {
+  name: string;
+  path: string;
+  sha?: string;
+  size: number;
+  downloadUrl?: string;
+  modifiedAt?: string;
+}
+
 export interface StorageAdapter {
   readFile(filePath: string): Promise<StorageFile | null>;
   writeFile(filePath: string, content: string, sha?: string): Promise<{ sha: string }>;
+  writeBinaryFile(filePath: string, content: Buffer, sha?: string): Promise<{ sha: string }>;
   deleteFile(filePath: string, sha?: string): Promise<void>;
+  listDirectory(filePath: string): Promise<StorageEntry[]>;
 }
 
 // Local filesystem adapter for development
@@ -34,12 +45,43 @@ const localAdapter: StorageAdapter = {
     return { sha: 'local' };
   },
 
+  async writeBinaryFile(filePath: string, content: Buffer): Promise<{ sha: string }> {
+    const fullPath = path.join(CONTENT_DIR, filePath);
+    await fs.mkdir(path.dirname(fullPath), { recursive: true });
+    await fs.writeFile(fullPath, content);
+    return { sha: 'local' };
+  },
+
   async deleteFile(filePath: string): Promise<void> {
     try {
       const fullPath = path.join(CONTENT_DIR, filePath);
       await fs.unlink(fullPath);
     } catch {
       // File doesn't exist, that's fine
+    }
+  },
+
+  async listDirectory(filePath: string): Promise<StorageEntry[]> {
+    const fullPath = path.join(CONTENT_DIR, filePath);
+    try {
+      const entries = await fs.readdir(fullPath, { withFileTypes: true });
+      return Promise.all(
+        entries
+          .filter((entry) => entry.isFile())
+          .map(async (entry) => {
+            const entryPath = path.posix.join(filePath, entry.name);
+            const stats = await fs.stat(path.join(fullPath, entry.name));
+            return {
+              name: entry.name,
+              path: entryPath,
+              sha: 'local',
+              size: stats.size,
+              modifiedAt: stats.mtime.toISOString(),
+            };
+          })
+      );
+    } catch {
+      return [];
     }
   },
 };
@@ -56,6 +98,10 @@ const githubAdapter: StorageAdapter = {
     return github.writeFile(filePath, content, sha);
   },
 
+  async writeBinaryFile(filePath: string, content: Buffer, sha?: string): Promise<{ sha: string }> {
+    return github.writeBinaryFile(filePath, content, sha);
+  },
+
   async deleteFile(filePath: string, sha?: string): Promise<void> {
     if (!sha) {
       // Need to fetch sha first
@@ -64,6 +110,19 @@ const githubAdapter: StorageAdapter = {
       sha = file.sha;
     }
     await github.deleteFile(filePath, sha);
+  },
+
+  async listDirectory(filePath: string): Promise<StorageEntry[]> {
+    const entries = await github.listDirectory(filePath);
+    return entries
+      .filter((entry) => entry.type === 'file')
+      .map((entry) => ({
+        name: entry.name,
+        path: entry.path,
+        sha: entry.sha,
+        size: entry.size,
+        downloadUrl: entry.downloadUrl,
+      }));
   },
 };
 

@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import { getTextBySlug } from '@/services/contentService';
 import { getTextHtml } from '@/lib/text-content-manager';
 import DetailShell from '@/app/components/DetailShell';
+import PdfFlipViewer from '@/app/components/PdfFlipViewer';
 
 const getText = cache(async (slug: string) => (await getTextBySlug(slug)).data);
 
@@ -64,6 +65,10 @@ export default async function TextPage({
         />
       )}
 
+      {text.pdf_url && (
+        <PdfFlipViewer pdfUrl={text.pdf_url} title={text.title} />
+      )}
+
       {/* External / PDF links */}
       {(text.external_url || text.pdf_url) && (
         <div className="border-t border-white/10 pt-8 mt-12 flex flex-col gap-2 text-sm">
@@ -84,7 +89,7 @@ export default async function TextPage({
               rel="noopener noreferrer"
               className="opacity-50 hover:opacity-100 transition-opacity"
             >
-              PDF &rarr;
+              Open PDF in new tab &rarr;
             </a>
           )}
         </div>

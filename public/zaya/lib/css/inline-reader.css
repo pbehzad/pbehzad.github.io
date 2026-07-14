@@ -1,0 +1,219 @@
+:root,
+.theme-default,
+.theme-dark,
+.theme-light,
+.theme-purple,
+.theme-green,
+.theme-red,
+.theme-orange,
+.theme-pink {
+  --bg-primary: #151515;
+  --bg-secondary: rgba(17, 17, 17, 0.96);
+  --bg-tertiary: rgba(255, 255, 255, 0.06);
+  --bg-accent: rgba(255, 255, 255, 0.08);
+  --bg-accent-hover: rgba(255, 255, 255, 0.14);
+  --bg-accent-active: rgba(255, 255, 255, 0.2);
+  --border-primary: rgba(255, 255, 255, 0.14);
+  --border-secondary: rgba(255, 255, 255, 0.09);
+  --border-accent: rgba(255, 255, 255, 0.24);
+  --text-primary: #f2f2f2;
+  --text-secondary: #a8a8a8;
+  --text-accent: #ffffff;
+  --shadow-primary: 0 18px 60px rgba(0, 0, 0, 0.42);
+  --shadow-accent: none;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  background: #151515;
+  color: #f2f2f2;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", sans-serif;
+}
+
+#toggleUnifiedPanelBtn,
+#unifiedPanel,
+#pdfSpecificQuotesModal {
+  display: none !important;
+}
+
+#flipbookContainer {
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at 50% 42%, #292929 0, #151515 68%);
+}
+
+#customControlBar {
+  position: fixed;
+  left: 50%;
+  bottom: 18px;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  width: max-content;
+  max-width: calc(100vw - 24px);
+  padding: 6px;
+  color: #f2f2f2;
+  background: rgba(14, 14, 14, 0.84);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 2px;
+  box-shadow: 0 12px 38px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(18px);
+  transform: translateX(-50%) !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.custom-ui-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  color: #bdbdbd;
+  background: transparent;
+  border: 0;
+  border-radius: 1px;
+  cursor: pointer;
+  transition: color 120ms linear, background 120ms linear;
+}
+
+.custom-ui-btn:hover,
+.custom-ui-btn.df-active {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: none;
+  transform: none;
+}
+
+.reader-grid-icon {
+  width: 13px;
+  height: 13px;
+  background:
+    linear-gradient(#bdbdbd 0 0) 0 0 / 5px 5px,
+    linear-gradient(#bdbdbd 0 0) 100% 0 / 5px 5px,
+    linear-gradient(#bdbdbd 0 0) 0 100% / 5px 5px,
+    linear-gradient(#bdbdbd 0 0) 100% 100% / 5px 5px;
+  background-repeat: no-repeat;
+}
+
+.page-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 7px;
+  color: #929292;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.page-input-custom {
+  width: 34px !important;
+  margin: 0 !important;
+  padding: 4px 2px !important;
+  color: #f2f2f2 !important;
+  background: transparent !important;
+  border: 0 !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.28) !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  font: inherit !important;
+}
+
+#customControlBar > .h-8,
+#customMoreMenu .h-px {
+  width: 1px;
+  height: 22px;
+  margin: 0 3px;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+#customMoreMenu {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 10px);
+  display: flex;
+  width: 210px;
+  padding: 6px;
+  flex-direction: column;
+  background: rgba(14, 14, 14, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 2px;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(6px);
+}
+
+#customMoreMenu.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.more-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 10px;
+  color: #bdbdbd;
+  background: transparent;
+  border: 0;
+  text-align: left;
+}
+
+.more-menu-item:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.more-menu-item i {
+  display: none;
+}
+
+.df-sidemenu {
+  top: 0 !important;
+  bottom: 0 !important;
+  height: 100% !important;
+  background: rgba(16, 16, 16, 0.97) !important;
+  border-left: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-radius: 0 !important;
+}
+
+@media (max-width: 640px) {
+  #customControlBar {
+    bottom: 10px;
+    gap: 1px;
+    max-width: calc(100vw - 16px);
+    padding: 4px;
+  }
+
+  .custom-ui-btn {
+    width: 34px;
+    height: 34px;
+  }
+
+  #customControlBar > .mobile-hide {
+    display: none !important;
+  }
+
+  .page-indicator {
+    padding: 0 3px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+  }
+}

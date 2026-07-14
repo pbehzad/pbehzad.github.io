@@ -7,6 +7,7 @@ import AdminTextarea from '../../components/AdminTextarea';
 import AdminSelect from '../../components/AdminSelect';
 import AdminForm from '../../components/AdminForm';
 import TiptapEditor from '../../components/TiptapEditor';
+import AdminFileField from '../../components/AdminFileField';
 
 export default function EditComposition() {
   const router = useRouter();
@@ -24,6 +25,7 @@ export default function EditComposition() {
   const [duration, setDuration] = useState('');
   const [description, setDescription] = useState('');
   const [programNotes, setProgramNotes] = useState('');
+  const [scoreUrl, setScoreUrl] = useState('');
   const [htmlContent, setHtmlContent] = useState('');
   const [status, setStatus] = useState('draft');
 
@@ -38,6 +40,7 @@ export default function EditComposition() {
           setDuration(item.duration || '');
           setDescription(item.description || '');
           setProgramNotes(item.program_notes || '');
+          setScoreUrl(item.score_url || '');
           setHtmlContent(item.html_content || '');
           setStatus(item.status);
         }
@@ -62,6 +65,7 @@ export default function EditComposition() {
           duration: duration || null,
           description: description || null,
           program_notes: programNotes || null,
+          score_url: scoreUrl || null,
           html_content: htmlContent || null,
           status,
         }),
@@ -122,6 +126,8 @@ export default function EditComposition() {
           <AdminTextarea label="Description" value={description} onChange={setDescription} rows={3} />
           <AdminTextarea label="Program Notes" value={programNotes} onChange={setProgramNotes} rows={3} />
         </div>
+
+        <AdminFileField label="Score PDF" value={scoreUrl} onChange={setScoreUrl} kind="pdf" />
 
         <AdminSelect
           label="Status"
