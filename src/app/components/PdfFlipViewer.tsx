@@ -9,8 +9,12 @@ export default function PdfFlipViewer({
   title,
   startPage = 1,
 }: PdfFlipViewerProps) {
+  const managedFilename = getManagedMediaFilename(pdfUrl);
+  const viewerPdfUrl = managedFilename
+    ? `/api/media/${encodeURIComponent(managedFilename)}`
+    : pdfUrl;
   const query = new URLSearchParams({
-    pdf: pdfUrl,
+    pdf: viewerPdfUrl,
     page: String(Math.max(1, Math.floor(startPage))),
   });
 
@@ -24,7 +28,7 @@ export default function PdfFlipViewer({
           Reader
         </h2>
         <a
-          href={pdfUrl}
+          href={viewerPdfUrl}
           target="_blank"
           rel="noopener noreferrer"
           className="glass-detail-link text-[10px] uppercase tracking-[0.16em] opacity-45 hover:opacity-80"
@@ -47,3 +51,4 @@ export default function PdfFlipViewer({
     </section>
   );
 }
+import { getManagedMediaFilename } from '@/lib/media-storage';

@@ -10,6 +10,12 @@ const nextConfig: NextConfig = {
         { key: 'Expires', value: '0' },
       ],
     },
+    {
+      source: '/api/media/:path*',
+      headers: [
+        { key: 'Cache-Control', value: 'public, max-age=3600, s-maxage=3600' },
+      ],
+    },
   ],
 };
 

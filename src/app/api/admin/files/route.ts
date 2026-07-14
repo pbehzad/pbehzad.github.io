@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getAllCompositionsRaw } from '@/lib/content-manager';
 import {
   deleteMediaFile,
+  getManagedMediaFilename,
   listMediaFiles,
   uploadMediaFile,
   type MediaFile,
@@ -22,7 +23,9 @@ async function buildReferenceMap(): Promise<Map<string, FileReference[]>> {
   ]);
   const referenceMap = new Map<string, FileReference[]>();
   const addReference = (url: string, reference: FileReference) => {
-    referenceMap.set(url, [...(referenceMap.get(url) || []), reference]);
+    const key = getManagedMediaFilename(url);
+    if (!key) return;
+    referenceMap.set(key, [...(referenceMap.get(key) || []), reference]);
   };
 
   for (const composition of compositions) {
@@ -69,7 +72,7 @@ export async function GET(request: NextRequest) {
     const referenceMap = await buildReferenceMap();
     const result = files.map((file: MediaFile) => ({
       ...file,
-      references: referenceMap.get(file.url) || [],
+      references: referenceMap.get(file.name) || [],
     }));
     return NextResponse.json(result);
   } catch (error) {
@@ -106,7 +109,8 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid file' }, { status: 400 });
     }
 
-    const references = (await buildReferenceMap()).get(url) || [];
+    const filename = getManagedMediaFilename(url) || path.split('/').pop();
+    const references = filename ? (await buildReferenceMap()).get(filename) || [] : [];
     if (references.length) {
       return NextResponse.json(
         { error: 'This file is still used by content', references },

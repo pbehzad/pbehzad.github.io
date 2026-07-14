@@ -50,6 +50,15 @@ function typeLabel(mimeType: string): string {
   return 'FILE';
 }
 
+function managedFilename(url: string): string {
+  try {
+    const pathname = new URL(url, window.location.origin).pathname;
+    return decodeURIComponent(pathname.split('/').pop() || '');
+  } catch {
+    return '';
+  }
+}
+
 export default function AdminFileLibrary({
   kind = 'all',
   selectedUrl,
@@ -179,7 +188,9 @@ export default function AdminFileLibrary({
       ) : (
         <div>
           {files.map((file) => {
-            const selected = selectedUrl === file.url;
+            const selected = selectedUrl === file.url || (
+              Boolean(selectedUrl) && managedFilename(selectedUrl || '') === file.name
+            );
             return (
               <div
                 key={file.path}

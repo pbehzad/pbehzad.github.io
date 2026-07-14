@@ -37,14 +37,31 @@ export function getMimeType(filename: string): string {
   return MIME_BY_EXTENSION[extension] || 'application/octet-stream';
 }
 
-function getPublicUrl(filename: string, downloadUrl?: string): string {
-  if (downloadUrl) return downloadUrl;
-  if ((process.env.CONTENT_STORAGE || 'local') === 'github') {
+function getPublicUrl(filename: string): string {
+  return `/api/media/${encodeURIComponent(filename)}`;
+}
+
+export function getManagedMediaFilename(url: string): string | null {
+  try {
+    const parsed = new URL(url, 'https://local.invalid');
+    const localMatch = /^\/api\/media\/([^/]+)$/.exec(parsed.pathname);
+    if (localMatch) return decodeURIComponent(localMatch[1]);
+
     const owner = process.env.CONTENT_GITHUB_OWNER;
     const repo = process.env.CONTENT_GITHUB_REPO;
-    return `https://raw.githubusercontent.com/${owner}/${repo}/main/${MEDIA_DIRECTORY}/${filename}`;
+    const trustedPrefix = owner && repo ? `/${owner}/${repo}/` : null;
+    if (
+      parsed.hostname === 'raw.githubusercontent.com' &&
+      trustedPrefix &&
+      parsed.pathname.startsWith(trustedPrefix)
+    ) {
+      const mediaIndex = parsed.pathname.indexOf('/media/');
+      if (mediaIndex >= 0) return decodeURIComponent(parsed.pathname.slice(mediaIndex + 7));
+    }
+  } catch {
+    return null;
   }
-  return `/api/media/${encodeURIComponent(filename)}`;
+  return null;
 }
 
 function safeFilename(originalFilename: string): string {
@@ -99,7 +116,7 @@ export async function listMediaFiles(): Promise<MediaFile[]> {
     .map((entry) => ({
       name: entry.name,
       path: entry.path,
-      url: getPublicUrl(entry.name, entry.downloadUrl),
+      url: getPublicUrl(entry.name),
       mimeType: getMimeType(entry.name),
       size: entry.size,
       sha: entry.sha,
