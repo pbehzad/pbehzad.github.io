@@ -1,5 +1,10 @@
 import { z } from 'zod';
 
+const storedFileUrlSchema = z.union([
+  z.string().url(),
+  z.string().regex(/^\/(?!\/)/, 'Must be an absolute URL or a site-relative path'),
+]);
+
 export const toolSchema = z.object({
   id: z.string().min(1),
   slug: z.string().min(1),
@@ -10,7 +15,7 @@ export const toolSchema = z.object({
   technologies: z.array(z.string()).optional().default([]),
   url: z.string().url().nullable().optional(),
   github_url: z.string().url().nullable().optional(),
-  image_url: z.string().url().nullable().optional(),
+  image_url: storedFileUrlSchema.nullable().optional(),
   featured: z.boolean().optional().default(false),
   status: z.enum(['draft', 'published', 'in-progress', 'archived']).default('published'),
   created_at: z.string().datetime(),

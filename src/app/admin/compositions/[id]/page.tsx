@@ -8,6 +8,9 @@ import AdminSelect from '../../components/AdminSelect';
 import AdminForm from '../../components/AdminForm';
 import TiptapEditor from '../../components/TiptapEditor';
 import AdminFileField from '../../components/AdminFileField';
+import AdminFileListField from '../../components/AdminFileListField';
+import AdminStringList from '../../components/AdminStringList';
+import AdminCheckbox from '../../components/AdminCheckbox';
 
 export default function EditComposition() {
   const router = useRouter();
@@ -20,12 +23,21 @@ export default function EditComposition() {
   const [success, setSuccess] = useState<string | null>(null);
 
   const [title, setTitle] = useState('');
+  const [slug, setSlug] = useState('');
   const [year, setYear] = useState('');
   const [instruments, setInstruments] = useState('');
   const [duration, setDuration] = useState('');
   const [description, setDescription] = useState('');
   const [programNotes, setProgramNotes] = useState('');
   const [scoreUrl, setScoreUrl] = useState('');
+  const [audioUrls, setAudioUrls] = useState<string[]>([]);
+  const [videoUrl, setVideoUrl] = useState('');
+  const [tags, setTags] = useState<string[]>([]);
+  const [featured, setFeatured] = useState(false);
+  const [premiereDate, setPremiereDate] = useState('');
+  const [premiereLocation, setPremiereLocation] = useState('');
+  const [premierePerformers, setPremierePerformers] = useState('');
+  const [relatedTexts, setRelatedTexts] = useState<string[]>([]);
   const [htmlContent, setHtmlContent] = useState('');
   const [status, setStatus] = useState('draft');
 
@@ -35,12 +47,21 @@ export default function EditComposition() {
       .then(item => {
         if (item && !item.error) {
           setTitle(item.title);
+          setSlug(item.slug || '');
           setYear(item.year);
           setInstruments(item.instruments);
           setDuration(item.duration || '');
           setDescription(item.description || '');
           setProgramNotes(item.program_notes || '');
           setScoreUrl(item.score_url || '');
+          setAudioUrls(item.audio_urls || []);
+          setVideoUrl(item.video_url || '');
+          setTags(item.tags || []);
+          setFeatured(Boolean(item.featured));
+          setPremiereDate(item.premiere?.date || '');
+          setPremiereLocation(item.premiere?.location || '');
+          setPremierePerformers(item.premiere?.performers || '');
+          setRelatedTexts(item.related_texts || []);
           setHtmlContent(item.html_content || '');
           setStatus(item.status);
         }
@@ -60,12 +81,23 @@ export default function EditComposition() {
         body: JSON.stringify({
           id,
           title,
+          slug,
           year,
           instruments,
           duration: duration || null,
           description: description || null,
           program_notes: programNotes || null,
           score_url: scoreUrl || null,
+          audio_urls: audioUrls,
+          video_url: videoUrl || null,
+          tags,
+          featured,
+          premiere: premiereDate || premiereLocation || premierePerformers ? {
+            date: premiereDate,
+            location: premiereLocation,
+            performers: premierePerformers,
+          } : null,
+          related_texts: relatedTexts,
           html_content: htmlContent || null,
           status,
         }),
@@ -122,12 +154,32 @@ export default function EditComposition() {
           <AdminInput label="Duration" value={duration} onChange={setDuration} placeholder="e.g. 12'" />
         </div>
 
+        <AdminInput label="Slug (URL)" value={slug} onChange={setSlug} placeholder="composition-url" />
+
         <div className="grid grid-cols-2 gap-4">
           <AdminTextarea label="Description" value={description} onChange={setDescription} rows={3} />
           <AdminTextarea label="Program Notes" value={programNotes} onChange={setProgramNotes} rows={3} />
         </div>
 
         <AdminFileField label="Score PDF" value={scoreUrl} onChange={setScoreUrl} kind="pdf" />
+        <AdminFileListField label="Audio files" values={audioUrls} onChange={setAudioUrls} kind="audio" />
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <AdminInput label="Video URL" value={videoUrl} onChange={setVideoUrl} placeholder="https://…" />
+          <AdminStringList label="Tags" values={tags} onChange={setTags} placeholder="Add tag" />
+        </div>
+
+        <div className="rounded-md p-4 flex flex-col gap-4" style={{ border: '1px solid #292929' }}>
+          <span className="text-xs uppercase tracking-wider" style={{ color: '#888' }}>Premiere</span>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <AdminInput label="Date" value={premiereDate} onChange={setPremiereDate} type="date" />
+            <AdminInput label="Location" value={premiereLocation} onChange={setPremiereLocation} />
+            <AdminInput label="Performers" value={premierePerformers} onChange={setPremierePerformers} />
+          </div>
+        </div>
+
+        <AdminStringList label="Related text IDs" values={relatedTexts} onChange={setRelatedTexts} placeholder="Add text ID" />
+        <AdminCheckbox label="Featured composition" checked={featured} onChange={setFeatured} description="Show this work in featured placements on the public site." />
 
         <AdminSelect
           label="Status"

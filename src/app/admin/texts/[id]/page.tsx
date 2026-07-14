@@ -7,6 +7,8 @@ import AdminTextarea from '../../components/AdminTextarea';
 import AdminSelect from '../../components/AdminSelect';
 import AdminForm from '../../components/AdminForm';
 import AdminFileField from '../../components/AdminFileField';
+import AdminStringList from '../../components/AdminStringList';
+import AdminCheckbox from '../../components/AdminCheckbox';
 
 export default function EditText() {
   const router = useRouter();
@@ -27,6 +29,9 @@ export default function EditText() {
   const [publishedIn, setPublishedIn] = useState('');
   const [externalUrl, setExternalUrl] = useState('');
   const [pdfUrl, setPdfUrl] = useState('');
+  const [tags, setTags] = useState<string[]>([]);
+  const [featured, setFeatured] = useState(false);
+  const [relatedCompositions, setRelatedCompositions] = useState<string[]>([]);
   const [markdown, setMarkdown] = useState('');
   const [status, setStatus] = useState('draft');
 
@@ -44,6 +49,9 @@ export default function EditText() {
           setPublishedIn(item.published_in || '');
           setExternalUrl(item.external_url || '');
           setPdfUrl(item.pdf_url || '');
+          setTags(item.tags || []);
+          setFeatured(Boolean(item.featured));
+          setRelatedCompositions(item.related_compositions || []);
           setMarkdown(md || '');
           setStatus(item.status);
         }
@@ -71,6 +79,9 @@ export default function EditText() {
           published_in: publishedIn || null,
           external_url: externalUrl || null,
           pdf_url: pdfUrl || null,
+          tags,
+          featured,
+          related_compositions: relatedCompositions,
           markdown,
           status,
         }),
@@ -136,6 +147,9 @@ export default function EditText() {
         <AdminInput label="Published in" value={publishedIn} onChange={setPublishedIn} />
         <AdminInput label="External URL" value={externalUrl} onChange={setExternalUrl} />
         <AdminFileField label="PDF" value={pdfUrl} onChange={setPdfUrl} kind="pdf" />
+        <AdminStringList label="Tags" values={tags} onChange={setTags} placeholder="Add tag" />
+        <AdminStringList label="Related composition IDs" values={relatedCompositions} onChange={setRelatedCompositions} placeholder="Add composition ID" />
+        <AdminCheckbox label="Featured text" checked={featured} onChange={setFeatured} description="Show this text in featured placements on the public site." />
         <AdminTextarea label="Description" value={description} onChange={setDescription} rows={3} />
         <AdminTextarea label="Abstract" value={abstract} onChange={setAbstract} rows={4} />
         <AdminTextarea label="Content (Markdown)" value={markdown} onChange={setMarkdown} rows={18} />

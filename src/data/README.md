@@ -24,6 +24,11 @@ src/data/
 
 ## How to Edit Content
 
+Use `/admin` for normal content work. The panel includes editors for the home
+page, compositions, events, texts, tools, profile, and contact details. The
+JSON examples below document the underlying storage format and are mainly
+useful for migrations or recovery.
+
 ### 1. Editing Compositions
 
 Edit [content/compositions.json](content/compositions.json)
@@ -225,13 +230,17 @@ structured content:
 - `CONTENT_STORAGE=local` writes binary files to `content-data/media/` and
   serves them through `/api/media/:filename` with PDF byte-range support.
 - `CONTENT_STORAGE=github` writes binary files to the `media/` directory of
-  `CONTENT_GITHUB_REPO` and stores its raw GitHub URL in content metadata.
+  `CONTENT_GITHUB_REPO`. Content stores a same-origin `/api/media/:filename`
+  URL, so files in a private content repository still work in the browser.
 
 PDFs can be uploaded or selected directly from the PDF field on text forms and
 the Score PDF field on composition forms. Saving published content with one of
 those URLs automatically enables the inline flip viewer on its public detail
-page. The manager supports PDFs, images, and audio up to 50 MB and prevents a
-file from being deleted while content still references it.
+page. The manager supports PDFs, images, and audio up to 50 MB. You can create
+nested folders, move files, rename their display names, search, and filter by
+type. Folders are organizational metadata: moving a file never changes its
+public URL or breaks existing content. A referenced file cannot be deleted
+until it is detached from its composition, text, or tool.
 
 For repository-managed static media outside the admin system, use:
 

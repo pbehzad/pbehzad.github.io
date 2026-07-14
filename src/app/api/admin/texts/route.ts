@@ -31,6 +31,10 @@ export async function POST(request: NextRequest) {
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/(^-|-$)/g, '');
     const contentFile = markdown ? `${slug}.md` : null;
+    if (!slug) return NextResponse.json({ error: 'A valid slug is required' }, { status: 400 });
+    if (existing.some((item) => item.id === slug || item.slug === slug)) {
+      return NextResponse.json({ error: 'This slug already exists' }, { status: 409 });
+    }
 
     const newItem: Text = {
       ...fields,
@@ -74,6 +78,13 @@ export async function PUT(request: NextRequest) {
     }
 
     const current = existing[index];
+    if (typeof fields.slug === 'string') {
+      fields.slug = fields.slug.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+      if (!fields.slug) return NextResponse.json({ error: 'A valid slug is required' }, { status: 400 });
+      if (existing.some((item, itemIndex) => itemIndex !== index && item.slug === fields.slug)) {
+        return NextResponse.json({ error: 'This slug already exists' }, { status: 409 });
+      }
+    }
     // markdown present → ensure a content file; empty string clears the body
     let contentFile = current.content_file ?? null;
     if (typeof markdown === 'string') {

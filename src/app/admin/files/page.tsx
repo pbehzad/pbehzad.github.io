@@ -12,7 +12,8 @@ export default function FilesAdminPage() {
         </h1>
         <p className="mt-2 max-w-2xl text-xs font-normal leading-relaxed" style={{ color: '#666' }}>
           Upload and manage PDFs, images, and audio in the same storage backend as your content.
-          Files in use must be detached from their text or composition before deletion.
+          Organize them into folders without changing their public URLs. Files in use must be
+          detached from their composition, text, or tool before deletion.
         </p>
       </div>
       <AdminFileLibrary showDelete />

@@ -4,6 +4,8 @@ import React, { useEffect, useState } from 'react';
 
 interface Stats {
   compositions: number;
+  texts: number;
+  tools: number;
   events: { total: number; upcoming: number; past: number };
 }
 
@@ -14,13 +16,17 @@ export default function AdminDashboard() {
     Promise.all([
       fetch('/api/admin/compositions').then(r => r.json()),
       fetch('/api/admin/events').then(r => r.json()),
-    ]).then(([compositions, events]) => {
+      fetch('/api/admin/texts').then(r => r.json()),
+      fetch('/api/admin/tools').then(r => r.json()),
+    ]).then(([compositions, events, texts, tools]) => {
       const now = new Date();
       const upcoming = events.filter((e: { date: string }) => new Date(e.date) >= now);
       const past = events.filter((e: { date: string }) => new Date(e.date) < now);
 
       setStats({
         compositions: compositions.length,
+        texts: texts.length,
+        tools: tools.length,
         events: { total: events.length, upcoming: upcoming.length, past: past.length },
       });
     });
@@ -33,11 +39,13 @@ export default function AdminDashboard() {
       </h1>
 
       {stats ? (
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4">
           {[
             { value: stats.compositions, label: 'Compositions' },
             { value: stats.events.upcoming, label: 'Upcoming Events' },
             { value: stats.events.past, label: 'Past Events' },
+            { value: stats.texts, label: 'Texts' },
+            { value: stats.tools, label: 'Tools' },
           ].map((stat) => (
             <div
               key={stat.label}

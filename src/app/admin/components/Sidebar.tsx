@@ -6,9 +6,11 @@ import { usePathname, useRouter } from 'next/navigation';
 
 const navItems = [
   { label: 'Dashboard', href: '/admin' },
+  { label: 'Home', href: '/admin/home' },
   { label: 'Compositions', href: '/admin/compositions' },
   { label: 'Events', href: '/admin/events' },
   { label: 'Texts', href: '/admin/texts' },
+  { label: 'Tools', href: '/admin/tools' },
   { label: 'Files', href: '/admin/files' },
   { label: 'Profile', href: '/admin/profile' },
   { label: 'Contact', href: '/admin/contact' },
@@ -25,17 +27,17 @@ export default function Sidebar() {
 
   return (
     <nav
-      className="w-56 shrink-0 h-screen sticky top-0 flex flex-col justify-between py-8 px-5"
+      className="w-full shrink-0 flex flex-col justify-between px-4 py-4 md:sticky md:top-0 md:h-screen md:w-56 md:px-5 md:py-8"
       style={{ background: '#0a0a0a', borderRight: '1px solid #222' }}
     >
       <div>
-        <div className="mb-8">
+        <div className="mb-4 md:mb-8">
           <span className="text-xs font-normal uppercase tracking-widest" style={{ color: '#555' }}>
             Admin
           </span>
         </div>
 
-        <div className="flex flex-col gap-0.5">
+        <div className="grid grid-cols-2 gap-0.5 sm:grid-cols-4 md:flex md:flex-col">
           {navItems.map((item) => {
             const isActive = pathname === item.href ||
               (item.href !== '/admin' && pathname.startsWith(item.href));
@@ -56,7 +58,7 @@ export default function Sidebar() {
           })}
         </div>
 
-        <div className="mt-8 pt-6" style={{ borderTop: '1px solid #1a1a1a' }}>
+        <div className="mt-4 pt-3 md:mt-8 md:pt-6" style={{ borderTop: '1px solid #1a1a1a' }}>
           <Link
             href="/"
             className="text-xs font-normal px-3 py-2 rounded block transition-colors"
@@ -69,7 +71,7 @@ export default function Sidebar() {
 
       <button
         onClick={handleLogout}
-        className="text-xs font-normal px-3 py-2 rounded text-left transition-colors"
+        className="mt-2 text-xs font-normal px-3 py-2 rounded text-left transition-colors md:mt-0"
         style={{ color: '#555' }}
       >
         Sign out

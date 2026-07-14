@@ -166,6 +166,15 @@ export async function getAllTools(): Promise<ContentResponse<Tool[]>> {
   }
 }
 
+export async function getAllToolsRaw(): Promise<ContentResponse<Tool[]>> {
+  try {
+    const tools = await loadJsonContent('tools.json', toolsArraySchema);
+    return { data: tools, metadata: { total: tools.length } };
+  } catch (error) {
+    return { data: [], error: error instanceof Error ? error.message : 'Unknown error' };
+  }
+}
+
 export async function getToolBySlug(slug: string): Promise<ContentResponse<Tool | null>> {
   try {
     const { data: tools } = await getAllTools();

@@ -70,7 +70,11 @@ export async function addComposition(
   const { data, sha } = await readCompositionsJson();
 
   const now = new Date().toISOString();
-  const slug = generateSlug(body.title as string);
+  const slug = generateSlug((body.slug as string) || (body.title as string));
+  if (!slug) throw new Error('A valid slug is required');
+  if (data.some((item) => item.slug === slug || item.id === slug)) {
+    throw new Error('A composition with this slug already exists');
+  }
 
   const newItem: Composition = {
     id: slug,
@@ -112,6 +116,15 @@ export async function updateComposition(
 
   const index = data.findIndex(c => c.id === id);
   if (index === -1) return null;
+
+  if (typeof body.slug === 'string') {
+    const slug = generateSlug(body.slug);
+    if (!slug) throw new Error('A valid slug is required');
+    if (data.some((item, itemIndex) => itemIndex !== index && item.slug === slug)) {
+      throw new Error('A composition with this slug already exists');
+    }
+    body.slug = slug;
+  }
 
   // Remove html_content from body so it doesn't go into JSON
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
