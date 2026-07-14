@@ -16,9 +16,9 @@ export default function ToolsAdmin() {
   };
   return (
     <div>
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-lg" style={{ color: '#e5e5e5' }}>Tools</h1>
-        <Link href="/admin/tools/new" className="rounded px-4 py-2 text-sm" style={{ background: '#fff', color: '#000' }}>+ New</Link>
+      <div className="mb-7 flex items-end justify-between gap-4">
+        <div><h1>Tools</h1><p className="mt-1.5 text-sm" style={{ color: '#77766f' }}>Software, experiments, utilities, and ongoing projects.</p></div>
+        <Link href="/admin/tools/new" className="admin-button admin-button-primary">+ New</Link>
       </div>
       {loading ? <div className="text-sm" style={{ color: '#555' }}>Loading…</div> : <AdminTable columns={[
         { key: 'name', label: 'Name' }, { key: 'year', label: 'Year' }, { key: 'category', label: 'Category' }, { key: 'status', label: 'Status' },

@@ -72,10 +72,8 @@ export default function ContactAdmin() {
   }
 
   return (
-    <div className="max-w-lg">
-      <h1 className="text-xs font-normal uppercase tracking-wider opacity-40 mb-8">
-        Contact
-      </h1>
+    <div className="max-w-3xl">
+      <div className="mb-7"><h1>Contact</h1><p className="mt-1.5 text-sm" style={{ color: '#77766f' }}>Public links, contact channels, and availability.</p></div>
 
       <AdminForm onSave={handleSave} saving={saving} error={error} success={success}>
         <AdminInput label="Email" value={email} onChange={setEmail} type="email" required />

@@ -230,17 +230,17 @@ export default function AdminFileLibrary({
   };
 
   return (
-    <div className="overflow-hidden rounded" style={{ border: '1px solid #292929', background: '#121212' }}>
-      <div className="flex flex-col gap-4 px-4 py-4" style={{ borderBottom: '1px solid #242424' }}>
+    <div className="admin-file-library overflow-hidden rounded-xl" style={{ border: '1px solid #dcdad2', background: '#fbfaf7', boxShadow: '0 8px 28px rgb(37 36 31 / 0.035)' }}>
+      <div className="flex flex-col gap-4 px-4 py-4" style={{ borderBottom: '1px solid #dcdad2' }}>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex min-w-0 items-center gap-2 text-xs font-normal">
-            <button type="button" onClick={() => setFolder('')} style={{ color: folder ? '#777' : '#fff' }}>
+            <button type="button" onClick={() => setFolder('')} style={{ color: folder ? '#77766f' : '#24231f' }}>
               Media
             </button>
             {breadcrumbs.map((crumb) => (
               <React.Fragment key={crumb.path}>
-                <span style={{ color: '#3f3f3f' }}>/</span>
-                <button type="button" onClick={() => setFolder(crumb.path)} className="truncate" style={{ color: crumb.path === folder ? '#fff' : '#777' }}>
+                <span style={{ color: '#c8c5bb' }}>/</span>
+                <button type="button" onClick={() => setFolder(crumb.path)} className="truncate" style={{ color: crumb.path === folder ? '#24231f' : '#77766f' }}>
                   {crumb.name}
                 </button>
               </React.Fragment>
@@ -250,8 +250,7 @@ export default function AdminFileLibrary({
             <button
               type="button"
               onClick={() => setEditDialog({ type: 'create-folder', value: '' })}
-              className="rounded px-3 py-2 text-xs font-normal"
-              style={{ color: '#aaa', border: '1px solid #333', background: 'transparent' }}
+              className="admin-button"
             >
               New folder
             </button>
@@ -259,8 +258,7 @@ export default function AdminFileLibrary({
               type="button"
               onClick={() => inputRef.current?.click()}
               disabled={uploading}
-              className="rounded px-3 py-2 text-xs font-normal disabled:opacity-40"
-              style={{ color: '#000', background: '#fff' }}
+              className="admin-button admin-button-primary disabled:opacity-40"
             >
               {uploading ? 'Uploading…' : 'Upload'}
             </button>
@@ -284,8 +282,8 @@ export default function AdminFileLibrary({
                 onClick={() => setActiveKind(option)}
                 className="rounded px-3 py-1.5 text-[10px] font-normal uppercase tracking-wider"
                 style={{
-                  color: activeKind === option ? '#fff' : '#666',
-                  background: activeKind === option ? '#242424' : 'transparent',
+                  color: activeKind === option ? '#fff' : '#77766f',
+                  background: activeKind === option ? '#292824' : 'transparent',
                 }}
               >
                 {option}
@@ -296,31 +294,30 @@ export default function AdminFileLibrary({
             value={search}
             onChange={(event) => setSearch(event.target.value)}
             placeholder="Search this folder"
-            className="w-full rounded px-3 py-2 text-xs font-normal md:w-64"
-            style={{ color: '#ddd', background: '#181818', border: '1px solid #292929' }}
+            className="admin-control w-full !min-h-0 !py-2 text-xs md:w-64"
           />
         </div>
       </div>
 
       {error && (
-        <div className="px-4 py-3 text-xs font-normal" style={{ color: '#f87171', borderBottom: '1px solid #2f1818' }}>
+        <div className="px-4 py-3 text-xs" style={{ color: '#963a32', borderBottom: '1px solid #e6c3bf', background: '#fff4f2' }}>
           {error}
         </div>
       )}
 
       {folders.length > 0 && (
-        <div className="grid grid-cols-1 gap-2 p-3 sm:grid-cols-2 lg:grid-cols-3" style={{ borderBottom: '1px solid #222' }}>
+        <div className="grid grid-cols-1 gap-2 p-3 sm:grid-cols-2 lg:grid-cols-3" style={{ borderBottom: '1px solid #dcdad2' }}>
           {folders.map((item) => (
-            <div key={item.path} className="flex items-center gap-2 rounded px-3 py-3" style={{ background: '#181818', border: '1px solid #252525' }}>
-              <button type="button" onClick={() => setFolder(item.path)} className="min-w-0 flex-1 truncate text-left text-sm font-normal" style={{ color: '#ccc' }}>
-                <span className="mr-2" style={{ color: '#666' }}>▰</span>{item.name}
+            <div key={item.path} className="flex items-center gap-2 rounded-lg px-3 py-3" style={{ background: '#fff', border: '1px solid #e2e0d9' }}>
+              <button type="button" onClick={() => setFolder(item.path)} className="min-w-0 flex-1 truncate text-left text-sm" style={{ color: '#393833' }}>
+                <span className="mr-2" style={{ color: '#9d9a91' }}>▰</span>{item.name}
               </button>
               {showDelete && (
                 <>
-                  <button type="button" onClick={() => setEditDialog({ type: 'rename-folder', value: item.name, folder: item })} className="text-[10px]" style={{ color: '#777' }}>
+                  <button type="button" onClick={() => setEditDialog({ type: 'rename-folder', value: item.name, folder: item })} className="text-[10px]" style={{ color: '#77766f' }}>
                     Rename
                   </button>
-                  <button type="button" disabled={busyPath === item.path} onClick={() => void handleDeleteFolder(item)} className="text-[10px] disabled:opacity-30" style={{ color: '#9f5555' }}>
+                  <button type="button" disabled={busyPath === item.path} onClick={() => void handleDeleteFolder(item)} className="text-[10px] disabled:opacity-30" style={{ color: '#a33d35' }}>
                     Delete
                   </button>
                 </>
@@ -331,9 +328,9 @@ export default function AdminFileLibrary({
       )}
 
       {loading ? (
-        <div className="px-4 py-10 text-center text-xs font-normal" style={{ color: '#555' }}>Loading files…</div>
+        <div className="px-4 py-10 text-center text-xs" style={{ color: '#77766f' }}>Loading files…</div>
       ) : visibleFiles.length === 0 ? (
-        <div className="px-4 py-10 text-center text-xs font-normal" style={{ color: '#555' }}>
+        <div className="px-4 py-10 text-center text-xs" style={{ color: '#77766f' }}>
           {folders.length ? 'No matching files in this folder.' : 'This folder is empty.'}
         </div>
       ) : (
@@ -341,16 +338,16 @@ export default function AdminFileLibrary({
           {visibleFiles.map((file) => {
             const selected = selectedUrl === file.url || (Boolean(selectedUrl) && managedFilename(selectedUrl || '') === file.name);
             return (
-              <div key={file.path} className="flex flex-col gap-3 px-4 py-3 md:flex-row md:items-center" style={{ borderBottom: '1px solid #1f1f1f', background: selected ? '#1b1b1b' : 'transparent' }}>
+              <div key={file.path} className="flex flex-col gap-3 px-4 py-3.5 md:flex-row md:items-center" style={{ borderBottom: '1px solid #e8e6df', background: selected ? '#efeee8' : 'transparent' }}>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
-                    <span className="shrink-0 text-[9px] font-normal tracking-wider" style={{ color: '#777' }}>{typeLabel(file.mimeType)}</span>
-                    <span className="truncate text-sm font-normal" style={{ color: '#ddd' }} title={file.displayName}>{file.displayName}</span>
+                    <span className="shrink-0 text-[9px] tracking-wider" style={{ color: '#77766f' }}>{typeLabel(file.mimeType)}</span>
+                    <span className="truncate text-sm font-medium" style={{ color: '#393833' }} title={file.displayName}>{file.displayName}</span>
                   </div>
-                  <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] font-normal" style={{ color: '#555' }}>
+                  <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px]" style={{ color: '#89877f' }}>
                     <span>{formatBytes(file.size)}</span>
                     {file.references.map((reference) => (
-                      <Link key={`${reference.type}-${reference.id}-${reference.field}`} href={`/admin/${reference.type === 'text' ? 'texts' : reference.type === 'tool' ? 'tools' : 'compositions'}/${reference.id}`} style={{ color: '#999', borderBottom: '1px solid #555' }}>
+                      <Link key={`${reference.type}-${reference.id}-${reference.field}`} href={`/admin/${reference.type === 'text' ? 'texts' : reference.type === 'tool' ? 'tools' : 'compositions'}/${reference.id}`} style={{ color: '#55544e', borderBottom: '1px solid #aaa79d' }}>
                         Used by {reference.title} ({reference.field})
                       </Link>
                     ))}
@@ -363,26 +360,25 @@ export default function AdminFileLibrary({
                       value={file.folder}
                       disabled={busyPath === file.path}
                       onChange={(event) => void handleMove(file, event.target.value)}
-                      className="rounded px-2 py-1.5 text-[10px] font-normal"
-                      style={{ color: '#999', background: '#181818', border: '1px solid #333' }}
+                      className="admin-control !min-h-0 !w-auto !px-2 !py-1.5 text-[10px]"
                       title="Move to folder"
                     >
                       <option value="">Media root</option>
                       {allFolders.map((target) => <option key={target.path} value={target.path}>{target.path}</option>)}
                     </select>
                   )}
-                  <a href={file.url} target="_blank" rel="noopener noreferrer" className="rounded px-3 py-1.5 text-xs font-normal" style={{ color: '#888', border: '1px solid #333' }}>Open</a>
-                  <button type="button" onClick={() => void navigator.clipboard.writeText(file.url)} className="rounded px-3 py-1.5 text-xs font-normal" style={{ color: '#888', border: '1px solid #333', background: 'transparent' }}>Copy URL</button>
+                  <a href={file.url} target="_blank" rel="noopener noreferrer" className="admin-button !min-h-0 !px-3 !py-1.5">Open</a>
+                  <button type="button" onClick={() => void navigator.clipboard.writeText(file.url)} className="admin-button !min-h-0 !px-3 !py-1.5">Copy URL</button>
                   {showDelete && (
-                    <button type="button" onClick={() => setEditDialog({ type: 'rename-file', value: file.displayName, file })} className="rounded px-3 py-1.5 text-xs font-normal" style={{ color: '#888', border: '1px solid #333', background: 'transparent' }}>Rename</button>
+                    <button type="button" onClick={() => setEditDialog({ type: 'rename-file', value: file.displayName, file })} className="admin-button !min-h-0 !px-3 !py-1.5">Rename</button>
                   )}
                   {onSelect && (
-                    <button type="button" onClick={() => onSelect(file)} className="rounded px-3 py-1.5 text-xs font-normal" style={{ color: selected ? '#aaa' : '#000', background: selected ? '#252525' : '#fff' }}>
+                    <button type="button" onClick={() => onSelect(file)} className={`admin-button !min-h-0 !px-3 !py-1.5 ${selected ? '' : 'admin-button-primary'}`}>
                       {selected ? 'Selected' : 'Use file'}
                     </button>
                   )}
                   {showDelete && (
-                    <button type="button" onClick={() => void handleDeleteFile(file)} disabled={file.references.length > 0 || busyPath === file.path} title={file.references.length ? 'Detach this file from content before deleting it' : 'Delete file'} className="rounded px-3 py-1.5 text-xs font-normal disabled:cursor-not-allowed disabled:opacity-30" style={{ color: '#f87171', border: '1px solid #4a2222', background: 'transparent' }}>Delete</button>
+                    <button type="button" onClick={() => void handleDeleteFile(file)} disabled={file.references.length > 0 || busyPath === file.path} title={file.references.length ? 'Detach this file from content before deleting it' : 'Delete file'} className="admin-button admin-button-danger !min-h-0 !px-3 !py-1.5 disabled:cursor-not-allowed disabled:opacity-30">Delete</button>
                   )}
                 </div>
               </div>
@@ -393,14 +389,14 @@ export default function AdminFileLibrary({
 
       {editDialog && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-5" style={{ background: 'rgba(0,0,0,0.72)' }}>
-          <div className="w-full max-w-sm rounded p-5" style={{ background: '#151515', border: '1px solid #333', boxShadow: '0 24px 80px rgba(0,0,0,0.55)' }}>
-            <div className="mb-4 text-xs font-normal uppercase tracking-wider" style={{ color: '#888' }}>
+          <div className="w-full max-w-sm rounded-xl p-5" style={{ background: '#fbfaf7', border: '1px solid #dcdad2', boxShadow: '0 24px 80px rgba(0,0,0,0.3)' }}>
+            <div className="admin-field-label mb-4">
               {editDialog.type === 'create-folder' ? 'New folder' : editDialog.type === 'rename-folder' ? 'Rename folder' : 'Rename file'}
             </div>
-            <input autoFocus value={editDialog.value} onChange={(event) => setEditDialog({ ...editDialog, value: event.target.value })} onKeyDown={(event) => { if (event.key === 'Enter') void handleDialogSave(); }} className="w-full rounded px-3 py-2 text-sm font-normal" style={{ color: '#fff', background: '#1d1d1d', border: '1px solid #383838' }} />
+            <input autoFocus value={editDialog.value} onChange={(event) => setEditDialog({ ...editDialog, value: event.target.value })} onKeyDown={(event) => { if (event.key === 'Enter') void handleDialogSave(); }} className="admin-control" />
             <div className="mt-5 flex justify-end gap-2">
-              <button type="button" onClick={() => setEditDialog(null)} className="rounded px-4 py-2 text-xs font-normal" style={{ color: '#888', border: '1px solid #333' }}>Cancel</button>
-              <button type="button" onClick={() => void handleDialogSave()} className="rounded px-4 py-2 text-xs font-normal" style={{ color: '#000', background: '#fff' }}>Save</button>
+              <button type="button" onClick={() => setEditDialog(null)} className="admin-button">Cancel</button>
+              <button type="button" onClick={() => void handleDialogSave()} className="admin-button admin-button-primary">Save</button>
             </div>
           </div>
         </div>

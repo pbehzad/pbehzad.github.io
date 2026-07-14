@@ -34,14 +34,11 @@ export default function CompositionsAdmin() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-lg font-normal" style={{ color: '#e5e5e5' }}>
-          Compositions
-        </h1>
+      <div className="flex items-end justify-between gap-4 mb-7">
+        <div><h1>Compositions</h1><p className="mt-1.5 text-sm" style={{ color: '#77766f' }}>Manage works, scores, recordings, and publication status.</p></div>
         <Link
           href="/admin/compositions/new"
-          className="text-sm font-normal px-4 py-2 rounded transition-colors"
-          style={{ background: '#ffffff', color: '#000000' }}
+          className="admin-button admin-button-primary"
         >
           + New
         </Link>
@@ -59,7 +56,7 @@ export default function CompositionsAdmin() {
               key: 'status',
               label: 'Status',
               render: (v) => (
-                <span style={{ color: v === 'published' ? '#4ade80' : '#888', fontSize: '12px' }}>
+                <span className={`admin-status ${v === 'published' ? 'admin-status-published' : ''}`}>
                   {String(v)}
                 </span>
               ),

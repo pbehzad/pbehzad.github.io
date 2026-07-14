@@ -14,27 +14,26 @@ interface AdminFormProps {
 
 export default function AdminForm({ children, onSave, onCancel, onDelete, saving, error, success }: AdminFormProps) {
   return (
-    <div className="flex flex-col gap-5">
+    <div className="admin-form">
       {children}
 
       {error && (
-        <div className="text-sm px-4 py-3 rounded" style={{ background: '#2a1010', color: '#f87171', border: '1px solid #5a1a1a' }}>
+        <div className="admin-notice admin-notice-error">
           {error}
         </div>
       )}
 
       {success && (
-        <div className="text-sm px-4 py-3 rounded" style={{ background: '#0f2a18', color: '#4ade80', border: '1px solid #1a5a2a' }}>
+        <div className="admin-notice admin-notice-success">
           {success}
         </div>
       )}
 
-      <div className="flex items-center gap-3 pt-5" style={{ borderTop: '1px solid #222' }}>
+      <div className="admin-form-actions flex items-center gap-2">
         <button
           onClick={onSave}
           disabled={saving}
-          className="text-sm font-normal px-5 py-2 rounded transition-opacity disabled:opacity-40"
-          style={{ background: '#ffffff', color: '#000000' }}
+          className="admin-button admin-button-primary disabled:opacity-40"
         >
           {saving ? 'Saving…' : 'Save'}
         </button>
@@ -42,8 +41,7 @@ export default function AdminForm({ children, onSave, onCancel, onDelete, saving
         {onCancel && (
           <button
             onClick={onCancel}
-            className="text-sm font-normal px-5 py-2 rounded transition-colors"
-            style={{ background: 'transparent', color: '#888', border: '1px solid #333' }}
+            className="admin-button"
           >
             Cancel
           </button>
@@ -52,8 +50,7 @@ export default function AdminForm({ children, onSave, onCancel, onDelete, saving
         {onDelete && (
           <button
             onClick={onDelete}
-            className="text-sm font-normal px-5 py-2 rounded transition-colors ml-auto"
-            style={{ background: 'transparent', color: '#f87171', border: '1px solid #5a1a1a' }}
+            className="admin-button admin-button-danger ml-auto"
           >
             Delete
           </button>

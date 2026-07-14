@@ -23,14 +23,13 @@ export default function AdminFileField({
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-center justify-between gap-3">
-        <label className="text-xs font-normal uppercase tracking-wider" style={{ color: '#888' }}>
+        <label className="admin-field-label">
           {label}
         </label>
         <button
           type="button"
           onClick={() => setLibraryOpen((open) => !open)}
-          className="text-[11px] font-normal"
-          style={{ color: '#aaa', borderBottom: '1px solid #555' }}
+          className="admin-button !min-h-0 !px-3 !py-1.5"
         >
           {libraryOpen ? 'Close library' : 'Choose or upload'}
         </button>
@@ -42,15 +41,13 @@ export default function AdminFileField({
           value={value}
           onChange={(event) => onChange(event.target.value)}
           placeholder={placeholder}
-          className="w-full rounded px-3 py-2 text-sm font-normal outline-none transition-colors"
-          style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', color: '#e5e5e5' }}
+          className="admin-control"
         />
         {value && (
           <button
             type="button"
             onClick={() => onChange('')}
-            className="shrink-0 rounded px-3 py-2 text-xs font-normal"
-            style={{ background: 'transparent', border: '1px solid #333', color: '#888' }}
+            className="admin-button shrink-0"
           >
             Clear
           </button>

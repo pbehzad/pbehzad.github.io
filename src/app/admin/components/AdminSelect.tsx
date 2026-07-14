@@ -11,24 +11,17 @@ interface AdminSelectProps {
 
 export default function AdminSelect({ label, value, onChange, options }: AdminSelectProps) {
   return (
-    <div className="flex flex-col gap-1.5">
-      <label className="text-xs font-normal uppercase tracking-wider" style={{ color: '#888' }}>
+    <div className="admin-field">
+      <label className="admin-field-label">
         {label}
       </label>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="text-sm font-normal px-3 py-2 rounded outline-none transition-colors w-full"
-        style={{
-          background: '#1a1a1a',
-          border: '1px solid #2a2a2a',
-          color: '#e5e5e5',
-        }}
-        onFocus={(e) => { e.target.style.borderColor = '#555'; }}
-        onBlur={(e) => { e.target.style.borderColor = '#2a2a2a'; }}
+        className="admin-control"
       >
         {options.map((opt) => (
-          <option key={opt.value} value={opt.value} style={{ background: '#1a1a1a' }}>
+          <option key={opt.value} value={opt.value}>
             {opt.label}
           </option>
         ))}

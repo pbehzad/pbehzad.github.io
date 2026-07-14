@@ -28,13 +28,13 @@ export default function AdminStringList({
 
   return (
     <div className="flex flex-col gap-2">
-      <label className="text-xs uppercase tracking-wider" style={{ color: '#888' }}>{label}</label>
+      <label className="admin-field-label">{label}</label>
       {values.length > 0 && (
         <div className="flex flex-wrap gap-2">
           {values.map((value) => (
-            <span key={value} className="flex items-center gap-2 rounded px-2.5 py-1 text-xs" style={{ background: '#1b1b1b', color: '#ccc' }}>
+            <span key={value} className="flex items-center gap-2 rounded-full border px-2.5 py-1 text-xs" style={{ background: '#f5f4ef', borderColor: '#dcdad2', color: '#4b4a44' }}>
               {value}
-              <button type="button" onClick={() => onChange(values.filter((item) => item !== value))} aria-label={`Remove ${value}`} style={{ color: '#777' }}>×</button>
+              <button type="button" onClick={() => onChange(values.filter((item) => item !== value))} aria-label={`Remove ${value}`} style={{ color: '#8b8980' }}>×</button>
             </span>
           ))}
         </div>
@@ -50,10 +50,9 @@ export default function AdminStringList({
             }
           }}
           placeholder={placeholder}
-          className="min-w-0 flex-1 rounded px-3 py-2 text-sm outline-none"
-          style={{ background: '#111', border: '1px solid #292929', color: '#eee' }}
+          className="admin-control min-w-0 flex-1"
         />
-        <button type="button" onClick={add} className="rounded px-4 py-2 text-xs" style={{ background: '#242424', color: '#ddd' }}>{addLabel}</button>
+        <button type="button" onClick={add} className="admin-button">{addLabel}</button>
       </div>
     </div>
   );

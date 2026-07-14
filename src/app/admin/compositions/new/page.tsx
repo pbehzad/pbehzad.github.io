@@ -121,8 +121,8 @@ export default function NewComposition() {
           <AdminStringList label="Tags" values={tags} onChange={setTags} placeholder="Add tag" />
         </div>
 
-        <div className="rounded-md p-4 flex flex-col gap-4" style={{ border: '1px solid #292929' }}>
-          <span className="text-xs uppercase tracking-wider" style={{ color: '#888' }}>Premiere</span>
+        <div className="rounded-lg p-4 flex flex-col gap-4" style={{ border: '1px solid #dcdad2', background: '#f7f6f2' }}>
+          <span className="admin-field-label">Premiere</span>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <AdminInput label="Date" value={premiereDate} onChange={setPremiereDate} type="date" />
             <AdminInput label="Location" value={premiereLocation} onChange={setPremiereLocation} />
@@ -145,7 +145,7 @@ export default function NewComposition() {
 
         {/* Full-width HTML editor */}
         <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-normal uppercase tracking-wider" style={{ color: '#888' }}>
+          <label className="admin-field-label">
             Content
           </label>
           <TiptapEditor

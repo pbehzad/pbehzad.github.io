@@ -129,7 +129,7 @@ export default function ProfileAdmin() {
         />
 
         <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-normal uppercase tracking-wider" style={{ color: '#888' }}>
+          <label className="admin-field-label">
             Content
           </label>
           <TiptapEditor

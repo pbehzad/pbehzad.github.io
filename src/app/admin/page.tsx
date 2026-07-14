@@ -34,9 +34,10 @@ export default function AdminDashboard() {
 
   return (
     <div>
-      <h1 className="text-lg font-normal mb-8" style={{ color: '#e5e5e5' }}>
-        Dashboard
-      </h1>
+      <div className="mb-8">
+        <h1>Overview</h1>
+        <p className="mt-1.5 text-sm" style={{ color: '#77766f' }}>A quick view of the content currently managed by the site.</p>
+      </div>
 
       {stats ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4">
@@ -49,11 +50,11 @@ export default function AdminDashboard() {
           ].map((stat) => (
             <div
               key={stat.label}
-              className="p-5 rounded"
-              style={{ background: '#151515', border: '1px solid #222' }}
+              className="rounded-xl border p-5"
+              style={{ background: '#fbfaf7', borderColor: '#dcdad2', boxShadow: '0 8px 28px rgb(37 36 31 / 0.035)' }}
             >
-              <div className="text-3xl font-normal mb-1" style={{ color: '#fff' }}>{stat.value}</div>
-              <div className="text-xs font-normal uppercase tracking-wider" style={{ color: '#555' }}>{stat.label}</div>
+              <div className="mb-5 text-3xl font-medium tracking-tight" style={{ color: '#1d1d1a' }}>{stat.value}</div>
+              <div className="text-xs font-medium" style={{ color: '#77766f' }}>{stat.label}</div>
             </div>
           ))}
         </div>

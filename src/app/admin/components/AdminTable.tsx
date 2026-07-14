@@ -17,74 +17,41 @@ interface AdminTableProps {
 }
 
 export default function AdminTable({ columns, data, editHref, onDelete }: AdminTableProps) {
-  if (data.length === 0) {
-    return (
-      <div className="text-sm py-12 text-center rounded" style={{ color: '#555', background: '#151515' }}>
-        No items yet.
-      </div>
-    );
-  }
+  if (data.length === 0) return <div className="admin-empty">No content here yet.</div>;
 
   return (
-    <div className="rounded overflow-hidden" style={{ border: '1px solid #222' }}>
-      {/* Header */}
-      <div
-        className="flex items-center gap-4 px-4 py-3"
-        style={{ background: '#151515', borderBottom: '1px solid #222' }}
-      >
-        {columns.map((col) => (
-          <div key={col.key} className="text-xs font-normal uppercase tracking-wider flex-1" style={{ color: '#555' }}>
-            {col.label}
-          </div>
-        ))}
-        <div className="w-24" />
-      </div>
-
-      {/* Rows */}
-      {data.map((item, i) => (
-        <div
-          key={i}
-          className="flex items-center gap-4 px-4 py-3 transition-colors"
-          style={{
-            borderBottom: i < data.length - 1 ? '1px solid #1a1a1a' : 'none',
-            background: 'transparent',
-          }}
-          onMouseEnter={(e) => { (e.currentTarget as HTMLDivElement).style.background = '#151515'; }}
-          onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.background = 'transparent'; }}
-        >
-          {columns.map((col) => (
-            <div key={col.key} className="text-sm font-normal flex-1 truncate" style={{ color: '#ccc' }}>
-              {col.render ? col.render(item[col.key], item) : String(item[col.key] ?? '')}
-            </div>
+    <div className="admin-table-wrap">
+      <table className="admin-table">
+        <thead>
+          <tr>
+            {columns.map((column) => <th key={column.key}>{column.label}</th>)}
+            <th aria-label="Actions" />
+          </tr>
+        </thead>
+        <tbody>
+          {data.map((item, index) => (
+            <tr key={String(item.id ?? index)}>
+              {columns.map((column, columnIndex) => (
+                <td key={column.key}>
+                  {columnIndex === 0 ? (
+                    <Link href={editHref(item)} className="font-medium" style={{ color: '#24231f' }}>
+                      {column.render ? column.render(item[column.key], item) : String(item[column.key] ?? '')}
+                    </Link>
+                  ) : column.render ? column.render(item[column.key], item) : String(item[column.key] ?? '')}
+                </td>
+              ))}
+              <td>
+                <div className="flex items-center justify-end gap-1.5 whitespace-nowrap">
+                  <Link href={editHref(item)} className="admin-button !min-h-0 !px-3 !py-1.5">Edit</Link>
+                  {onDelete && (
+                    <button type="button" onClick={() => onDelete(item)} className="admin-button admin-button-danger !min-h-0 !px-3 !py-1.5">Delete</button>
+                  )}
+                </div>
+              </td>
+            </tr>
           ))}
-          <div className="w-24 flex items-center gap-3 justify-end">
-            <Link
-              href={editHref(item)}
-              className="text-xs font-normal px-3 py-1 rounded transition-colors"
-              style={{ background: '#1e1e1e', color: '#ccc', border: '1px solid #333' }}
-            >
-              Edit
-            </Link>
-            {onDelete && (
-              <button
-                onClick={() => onDelete(item)}
-                className="text-xs font-normal px-3 py-1 rounded transition-colors"
-                style={{ background: 'transparent', color: '#888', border: '1px solid #333' }}
-                onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLButtonElement).style.color = '#f87171';
-                  (e.currentTarget as HTMLButtonElement).style.borderColor = '#5a1a1a';
-                }}
-                onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLButtonElement).style.color = '#888';
-                  (e.currentTarget as HTMLButtonElement).style.borderColor = '#333';
-                }}
-              >
-                Del
-              </button>
-            )}
-          </div>
-        </div>
-      ))}
+        </tbody>
+      </table>
     </div>
   );
 }

@@ -4,16 +4,31 @@ import React from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 
-const navItems = [
-  { label: 'Dashboard', href: '/admin' },
-  { label: 'Home', href: '/admin/home' },
-  { label: 'Compositions', href: '/admin/compositions' },
-  { label: 'Events', href: '/admin/events' },
-  { label: 'Texts', href: '/admin/texts' },
-  { label: 'Tools', href: '/admin/tools' },
-  { label: 'Files', href: '/admin/files' },
-  { label: 'Profile', href: '/admin/profile' },
-  { label: 'Contact', href: '/admin/contact' },
+const navGroups = [
+  {
+    label: 'Workspace',
+    items: [
+      { label: 'Overview', href: '/admin' },
+      { label: 'Home page', href: '/admin/home' },
+    ],
+  },
+  {
+    label: 'Content',
+    items: [
+      { label: 'Compositions', href: '/admin/compositions' },
+      { label: 'Events', href: '/admin/events' },
+      { label: 'Texts', href: '/admin/texts' },
+      { label: 'Tools', href: '/admin/tools' },
+      { label: 'File library', href: '/admin/files' },
+    ],
+  },
+  {
+    label: 'Site',
+    items: [
+      { label: 'Profile', href: '/admin/profile' },
+      { label: 'Contact', href: '/admin/contact' },
+    ],
+  },
 ];
 
 export default function Sidebar() {
@@ -27,52 +42,50 @@ export default function Sidebar() {
 
   return (
     <nav
-      className="w-full shrink-0 flex flex-col justify-between px-4 py-4 md:sticky md:top-0 md:h-screen md:w-56 md:px-5 md:py-8"
-      style={{ background: '#0a0a0a', borderRight: '1px solid #222' }}
+      className="admin-sidebar w-full shrink-0 flex flex-col justify-between px-4 py-4 md:sticky md:top-0 md:h-screen md:w-60 md:px-4 md:py-5"
+      style={{ borderRight: '1px solid' }}
     >
       <div>
-        <div className="mb-4 md:mb-8">
-          <span className="text-xs font-normal uppercase tracking-widest" style={{ color: '#555' }}>
-            Admin
+        <div className="mb-5 flex items-center gap-3 px-2 md:mb-8">
+          <span className="admin-brand-mark">PB</span>
+          <span className="flex flex-col">
+            <span className="text-sm font-medium tracking-tight">Parham Behzad</span>
+            <span className="text-[11px]" style={{ color: '#73736d' }}>Site administration</span>
           </span>
         </div>
 
-        <div className="grid grid-cols-2 gap-0.5 sm:grid-cols-4 md:flex md:flex-col">
-          {navItems.map((item) => {
-            const isActive = pathname === item.href ||
-              (item.href !== '/admin' && pathname.startsWith(item.href));
-
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="text-sm font-normal px-3 py-2 rounded transition-colors"
-                style={{
-                  color: isActive ? '#ffffff' : '#888',
-                  background: isActive ? '#1e1e1e' : 'transparent',
-                }}
-              >
-                {item.label}
-              </Link>
-            );
-          })}
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-3 md:flex md:flex-col md:gap-6">
+          {navGroups.map((group) => (
+            <div key={group.label}>
+              <div className="admin-section-label mb-2 px-2">{group.label}</div>
+              <div className="grid grid-cols-2 gap-0.5 sm:flex sm:flex-col">
+                {group.items.map((item) => {
+                  const isActive = pathname === item.href ||
+                    (item.href !== '/admin' && pathname.startsWith(item.href));
+                  return (
+                    <Link key={item.href} href={item.href} data-active={isActive} className="admin-nav-link px-2.5 py-2">
+                      {item.label}
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
         </div>
 
-        <div className="mt-4 pt-3 md:mt-8 md:pt-6" style={{ borderTop: '1px solid #1a1a1a' }}>
+        <div className="mt-5 pt-4 md:mt-8" style={{ borderTop: '1px solid #2b2b27' }}>
           <Link
             href="/"
-            className="text-xs font-normal px-3 py-2 rounded block transition-colors"
-            style={{ color: '#555' }}
+            className="admin-nav-link block px-2.5 py-2"
           >
-            ← View site
+            View live site ↗
           </Link>
         </div>
       </div>
 
       <button
         onClick={handleLogout}
-        className="mt-2 text-xs font-normal px-3 py-2 rounded text-left transition-colors md:mt-0"
-        style={{ color: '#555' }}
+        className="admin-nav-link mt-3 rounded px-2.5 py-2 text-left md:mt-0"
       >
         Sign out
       </button>
