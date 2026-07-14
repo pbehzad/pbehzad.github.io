@@ -9,6 +9,7 @@ import AdminForm from '../../components/AdminForm';
 import AdminFileField from '../../components/AdminFileField';
 import AdminStringList from '../../components/AdminStringList';
 import AdminCheckbox from '../../components/AdminCheckbox';
+import TiptapEditor from '../../components/TiptapEditor';
 
 export default function NewText() {
   const router = useRouter();
@@ -28,7 +29,7 @@ export default function NewText() {
   const [tags, setTags] = useState<string[]>([]);
   const [featured, setFeatured] = useState(false);
   const [relatedCompositions, setRelatedCompositions] = useState<string[]>([]);
-  const [markdown, setMarkdown] = useState('');
+  const [htmlContent, setHtmlContent] = useState('');
   const [status, setStatus] = useState('draft');
 
   const toSlug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
@@ -54,7 +55,7 @@ export default function NewText() {
           tags,
           featured,
           related_compositions: relatedCompositions,
-          markdown: markdown || null,
+          html_content: htmlContent || null,
           status,
         }),
       });
@@ -106,7 +107,10 @@ export default function NewText() {
         <AdminCheckbox label="Featured text" checked={featured} onChange={setFeatured} description="Show this text in featured placements on the public site." />
         <AdminTextarea label="Description" value={description} onChange={setDescription} rows={3} />
         <AdminTextarea label="Abstract" value={abstract} onChange={setAbstract} rows={4} />
-        <AdminTextarea label="Content (Markdown)" value={markdown} onChange={setMarkdown} rows={18} />
+        <div className="admin-field">
+          <label className="admin-field-label">Content</label>
+          <TiptapEditor content={htmlContent} onChange={setHtmlContent} placeholder="Write the text body in HTML…" />
+        </div>
         <AdminSelect
           label="Status"
           value={status}

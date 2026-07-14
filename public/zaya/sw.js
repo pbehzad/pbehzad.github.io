@@ -3,7 +3,7 @@
  * Basic caching and fetch handling for offline support.
  */
 
-const CACHE_NAME = 'parham-zaya-assets-v2';
+const CACHE_NAME = 'parham-zaya-assets-v3';
 const ASSETS_TO_CACHE = [
   '/zaya/index.html',
   '/zaya/changelog.html',
@@ -45,6 +45,12 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   // Only handle GET requests
   if (event.request.method !== 'GET') return;
+
+  // PDFs are private-repository media served with byte ranges. Let PDF.js
+  // talk to the network directly so partial or authenticated responses are
+  // never stored in the application asset cache.
+  const requestUrl = new URL(event.request.url);
+  if (requestUrl.pathname.startsWith('/api/media/')) return;
 
   // Let browser-internal schemes (e.g., chrome-extension) pass through
   if (event.request.url.startsWith('chrome-extension:') || event.request.url.startsWith('file:')) return;

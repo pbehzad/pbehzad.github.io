@@ -27,6 +27,5 @@ export interface TextMetadata {
 
 export interface TextContent {
   metadata: Text;
-  content: string; // Rendered HTML from markdown
-  raw: string; // Raw markdown
+  content: string;
 }

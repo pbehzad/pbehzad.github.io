@@ -1,22 +1,22 @@
 # Content Management Guide
 
-This directory contains all the content data for your portfolio site. The hybrid approach uses JSON for structured data and Markdown for long-form content.
+This directory defines the schemas and types for the portfolio content. Structured metadata uses JSON and long-form composition, text, event, and About bodies use HTML.
 
 ## Directory Structure
 
 ```
 src/data/
-├── content/           # All content files (JSON + Markdown)
+├── content/           # Structured JSON and long-form HTML
 │   ├── compositions.json
 │   ├── texts.json
 │   ├── tools.json
 │   ├── profile.json
 │   ├── contact.json
 │   ├── home.json
-│   └── texts/        # Markdown files for essays/articles
-│       ├── post-heideggerian-aesthetics.md
-│       ├── circular-temporalities.md
-│       └── notation-as-interface.md
+│   └── texts/        # HTML files for essays/articles
+│       ├── post-heideggerian-aesthetics.html
+│       ├── circular-temporalities.html
+│       └── notation-as-interface.html
 ├── types/            # TypeScript type definitions
 ├── schemas/          # Zod validation schemas
 └── README.md         # This file
@@ -79,7 +79,7 @@ Edit [content/compositions.json](content/compositions.json)
   "type": "essay",
   "description": "Brief description",
   "abstract": "Academic abstract",
-  "content_file": "unique-slug.md",
+  "content_file": "unique-slug.html",
   "pdf_url": "/media/pdfs/essay.pdf",
   "external_url": "https://journal.com/article",
   "tags": ["philosophy", "aesthetics"],
@@ -92,27 +92,16 @@ Edit [content/compositions.json](content/compositions.json)
 }
 ```
 
-#### Content: Create/Edit Markdown file in [content/texts/](content/texts/)
+#### Content: Create/Edit HTML in the Text admin editor
 
-```markdown
----
-title: "Essay Title"
-year: 2023
-type: "essay"
-tags: ["philosophy", "aesthetics"]
----
-
-# Essay Title
-
-Your content here in **Markdown** format.
-
-## Section Heading
-
-- Bullet points
-- More items
-
-[Links work too](https://example.com)
+```html
+<h2>Section heading</h2>
+<p>Your long-form text goes here.</p>
+<p><a href="https://example.com">Links work too</a>.</p>
 ```
+
+Legacy `.md` text bodies remain readable. Opening and saving one in the admin
+converts its rendered body to an HTML file.
 
 **Text Types:**
 - `"essay"` - Long-form essays
@@ -166,7 +155,27 @@ Edit [content/profile.json](content/profile.json)
   "title": "TITLE 1",
   "subtitle": "TITLE 2",
   "tagline": "YOUR × TAGLINE × HERE",
-  "bio": "Your bio in ALL CAPS",
+  "bio": "Your short bio",
+  "about_sections": [
+    {
+      "id": "long-bio",
+      "title": "Long bio",
+      "html_content": "<p>Your longer biography.</p>",
+      "link_url": null,
+      "link_label": "",
+      "visible": true,
+      "initially_open": false
+    },
+    {
+      "id": "german-bio",
+      "title": "Deutsche Biografie",
+      "html_content": "<p>Ihre deutsche Biografie.</p>",
+      "link_url": null,
+      "link_label": "",
+      "visible": true,
+      "initially_open": false
+    }
+  ],
   "specializations": [
     "SPECIALIZATION 1",
     "SPECIALIZATION 2"
@@ -232,6 +241,11 @@ structured content:
 - `CONTENT_STORAGE=github` writes binary files to the `media/` directory of
   `CONTENT_GITHUB_REPO`. Content stores a same-origin `/api/media/:filename`
   URL, so files in a private content repository still work in the browser.
+
+For private GitHub storage, set `CONTENT_GITHUB_OWNER`, `CONTENT_GITHUB_REPO`,
+`CONTENT_GITHUB_BRANCH`, and either `CONTENT_GITHUB_TOKEN` or `GITHUB_TOKEN`.
+Authenticating the `gh` CLI alone does not automatically provide the token to
+the Next.js process.
 
 PDFs can be uploaded or selected directly from the PDF field on text forms and
 the Score PDF field on composition forms. Saving published content with one of

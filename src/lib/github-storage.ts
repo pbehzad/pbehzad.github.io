@@ -1,6 +1,7 @@
 const OWNER = process.env.CONTENT_GITHUB_OWNER || '';
 const REPO = process.env.CONTENT_GITHUB_REPO || '';
-const TOKEN = process.env.GITHUB_TOKEN || '';
+const TOKEN = process.env.CONTENT_GITHUB_TOKEN || process.env.GITHUB_TOKEN || '';
+const BRANCH = process.env.CONTENT_GITHUB_BRANCH || 'main';
 const API_BASE = `https://api.github.com/repos/${OWNER}/${REPO}/contents`;
 
 interface GitHubFile {
@@ -26,7 +27,9 @@ function headers() {
 }
 
 export async function readFile(path: string): Promise<GitHubFile | null> {
-  const res = await fetch(`${API_BASE}/${path}`, { headers: headers(), cache: 'no-store' });
+  const url = new URL(`${API_BASE}/${path}`);
+  url.searchParams.set('ref', BRANCH);
+  const res = await fetch(url, { headers: headers(), cache: 'no-store' });
   if (res.status === 404) return null;
   if (!res.ok) throw new Error(`GitHub API error: ${res.status} ${res.statusText}`);
   const data = await res.json();
@@ -45,6 +48,7 @@ export async function writeFile(
   const body: Record<string, string> = {
     message: message || `Update ${path}`,
     content: Buffer.from(content).toString('base64'),
+    branch: BRANCH,
   };
   if (sha) body.sha = sha;
 
@@ -67,6 +71,7 @@ export async function writeBinaryFile(
   const body: Record<string, string> = {
     message: message || `Upload ${path}`,
     content: content.toString('base64'),
+    branch: BRANCH,
   };
   if (sha) body.sha = sha;
 
@@ -91,6 +96,7 @@ export async function deleteFile(
     body: JSON.stringify({
       message: message || `Delete ${path}`,
       sha,
+      branch: BRANCH,
     }),
   });
   if (!res.ok && res.status !== 404) {
@@ -99,7 +105,9 @@ export async function deleteFile(
 }
 
 export async function listDirectory(path: string): Promise<GitHubListEntry[]> {
-  const res = await fetch(`${API_BASE}/${path}`, { headers: headers(), cache: 'no-store' });
+  const url = new URL(`${API_BASE}/${path}`);
+  url.searchParams.set('ref', BRANCH);
+  const res = await fetch(url, { headers: headers(), cache: 'no-store' });
   if (res.status === 404) return [];
   if (!res.ok) throw new Error(`GitHub API list error: ${res.status} ${res.statusText}`);
   const data = await res.json();

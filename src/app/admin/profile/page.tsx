@@ -4,9 +4,10 @@ import React, { useEffect, useState } from 'react';
 import AdminTextarea from '../components/AdminTextarea';
 import AdminInput from '../components/AdminInput';
 import AdminForm from '../components/AdminForm';
-import TiptapEditor from '../components/TiptapEditor';
 import AdminStringList from '../components/AdminStringList';
 import AdminObjectList from '../components/AdminObjectList';
+import AdminAboutSections from '../components/AdminAboutSections';
+import type { AboutSection } from '@/data/types/profile.types';
 
 type SkillRow = { category: string; items: string };
 type EducationRow = { degree: string; institution: string; year: string };
@@ -23,7 +24,7 @@ export default function ProfileAdmin() {
   const [subtitle, setSubtitle] = useState('');
   const [tagline, setTagline] = useState('');
   const [bio, setBio] = useState('');
-  const [htmlContent, setHtmlContent] = useState('');
+  const [aboutSections, setAboutSections] = useState<AboutSection[]>([]);
   const [specializations, setSpecializations] = useState<string[]>([]);
   const [skills, setSkills] = useState<SkillRow[]>([]);
   const [education, setEducation] = useState<EducationRow[]>([]);
@@ -38,7 +39,14 @@ export default function ProfileAdmin() {
         setSubtitle(data.subtitle || '');
         setTagline(data.tagline || '');
         setBio(data.bio || '');
-        setHtmlContent(data.html_content || '');
+        const sections = data.about_sections || [];
+        setAboutSections(sections.length ? sections : data.html_content ? [{
+          id: 'legacy-long-bio',
+          title: 'Long bio',
+          html_content: data.html_content,
+          visible: true,
+          initially_open: false,
+        }] : []);
         setSpecializations(data.specializations || []);
         setSkills((data.skills || []).map((item: { category: string; items: string[] }) => ({ category: item.category, items: item.items.join(', ') })));
         setEducation(data.education || []);
@@ -62,7 +70,8 @@ export default function ProfileAdmin() {
           subtitle,
           tagline,
           bio,
-          html_content: htmlContent || null,
+          html_content: null,
+          about_sections: aboutSections,
           specializations,
           skills: skills.map((item) => ({ category: item.category, items: item.items.split(',').map((value) => value.trim()).filter(Boolean) })),
           education,
@@ -101,7 +110,8 @@ export default function ProfileAdmin() {
           <AdminInput label="Subtitle" value={subtitle} onChange={setSubtitle} />
           <AdminInput label="Tagline" value={tagline} onChange={setTagline} />
         </div>
-        <AdminTextarea label="Bio" value={bio} onChange={setBio} rows={6} />
+        <AdminTextarea label="Short bio" value={bio} onChange={setBio} rows={6} placeholder="The concise introduction shown first in About." />
+        <AdminAboutSections sections={aboutSections} onChange={setAboutSections} />
         <AdminStringList label="Specializations" values={specializations} onChange={setSpecializations} placeholder="Add specialization" />
         <AdminObjectList<SkillRow>
           label="Skills"
@@ -128,16 +138,6 @@ export default function ProfileAdmin() {
           addLabel="Add award"
         />
 
-        <div className="flex flex-col gap-1.5">
-          <label className="admin-field-label">
-            Content
-          </label>
-          <TiptapEditor
-            content={htmlContent}
-            onChange={setHtmlContent}
-            placeholder="Additional HTML content for the About page..."
-          />
-        </div>
       </AdminForm>
     </div>
   );

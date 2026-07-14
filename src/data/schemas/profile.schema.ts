@@ -1,5 +1,10 @@
 import { z } from 'zod';
 
+const storedFileUrlSchema = z.union([
+  z.string().url(),
+  z.string().regex(/^\/(?!\/)/, 'Must be an absolute URL or a site-relative path'),
+]);
+
 export const profileSchema = z.object({
   name: z.string().min(1),
   title: z.string().optional().default(''),
@@ -7,6 +12,15 @@ export const profileSchema = z.object({
   tagline: z.string().optional().default(''),
   bio: z.string().min(1),
   html_content: z.string().nullable().optional(),
+  about_sections: z.array(z.object({
+    id: z.string().min(1),
+    title: z.string().min(1),
+    html_content: z.string(),
+    link_url: storedFileUrlSchema.nullable().optional(),
+    link_label: z.string().optional(),
+    visible: z.boolean().default(true),
+    initially_open: z.boolean().optional().default(false),
+  })).optional().default([]),
   specializations: z.array(z.string()).optional().default([]),
   skills: z.array(z.object({
     category: z.string(),

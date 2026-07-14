@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAllTextsRaw, writeJsonContent } from '@/services/contentService';
-import { getTextMarkdown, saveTextMarkdown, deleteTextMarkdown } from '@/lib/text-content-manager';
+import { getTextHtml, saveTextHtml, deleteTextContent } from '@/lib/text-content-manager';
 import { textsArraySchema } from '@/data/schemas';
 import type { Text } from '@/data/types';
 
 // GET /api/admin/texts        → all texts (raw, drafts included)
-// GET /api/admin/texts?id=x   → one text + its markdown source
+// GET /api/admin/texts?id=x   → one text + its HTML body
 export async function GET(request: NextRequest) {
   const { data, error } = await getAllTextsRaw();
   if (error) return NextResponse.json({ error }, { status: 500 });
@@ -15,14 +15,14 @@ export async function GET(request: NextRequest) {
 
   const item = data.find((t) => t.id === id);
   if (!item) return NextResponse.json({ error: 'Not found' }, { status: 404 });
-  const markdown = item.content_file ? await getTextMarkdown(item.content_file) : null;
-  return NextResponse.json({ item, markdown });
+  const htmlContent = item.content_file ? await getTextHtml(item.content_file) : null;
+  return NextResponse.json({ item, html_content: htmlContent });
 }
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { markdown, ...fields } = body;
+    const { html_content: htmlContent, ...fields } = body;
     const { data: existing } = await getAllTextsRaw();
 
     const now = new Date().toISOString();
@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/(^-|-$)/g, '');
-    const contentFile = markdown ? `${slug}.md` : null;
+    const contentFile = typeof htmlContent === 'string' && htmlContent.trim() ? `${slug}.html` : null;
     if (!slug) return NextResponse.json({ error: 'A valid slug is required' }, { status: 400 });
     if (existing.some((item) => item.id === slug || item.slug === slug)) {
       return NextResponse.json({ error: 'This slug already exists' }, { status: 409 });
@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
     if (!result.success) {
       return NextResponse.json({ error: result.error }, { status: 400 });
     }
-    if (markdown && contentFile) await saveTextMarkdown(contentFile, markdown);
+    if (contentFile) await saveTextHtml(contentFile, htmlContent);
 
     return NextResponse.json(newItem, { status: 201 });
   } catch (error) {
@@ -69,7 +69,7 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json();
-    const { markdown, ...fields } = body;
+    const { html_content: htmlContent, ...fields } = body;
     const { data: existing } = await getAllTextsRaw();
 
     const index = existing.findIndex((t) => t.id === fields.id);
@@ -85,14 +85,17 @@ export async function PUT(request: NextRequest) {
         return NextResponse.json({ error: 'This slug already exists' }, { status: 409 });
       }
     }
-    // markdown present → ensure a content file; empty string clears the body
+    // HTML present → store an HTML body. Saving a legacy Markdown entry
+    // migrates it to HTML without losing the rendered content.
     let contentFile = current.content_file ?? null;
-    if (typeof markdown === 'string') {
-      if (markdown.trim()) {
-        contentFile = contentFile ?? `${current.slug}.md`;
-        await saveTextMarkdown(contentFile, markdown);
+    if (typeof htmlContent === 'string') {
+      if (htmlContent.trim()) {
+        const htmlFile = `${current.id}.html`;
+        await saveTextHtml(htmlFile, htmlContent);
+        if (contentFile && contentFile !== htmlFile) await deleteTextContent(contentFile);
+        contentFile = htmlFile;
       } else if (contentFile) {
-        await deleteTextMarkdown(contentFile);
+        await deleteTextContent(contentFile);
         contentFile = null;
       }
     }
@@ -134,7 +137,7 @@ export async function DELETE(request: NextRequest) {
     if (!result.success) {
       return NextResponse.json({ error: result.error }, { status: 400 });
     }
-    if (item.content_file) await deleteTextMarkdown(item.content_file);
+    if (item.content_file) await deleteTextContent(item.content_file);
 
     return NextResponse.json({ success: true });
   } catch (error) {

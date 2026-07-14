@@ -220,6 +220,56 @@ img {
   opacity: 0.82;
 }
 
+.column-about-disclosure summary {
+  cursor: pointer;
+  list-style: none;
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  line-height: 1.4;
+  text-transform: uppercase;
+  opacity: 0.72;
+}
+
+.column-about-disclosure summary::-webkit-details-marker {
+  display: none;
+}
+
+.column-about-disclosure summary::after {
+  content: "+";
+  float: right;
+  opacity: 0.6;
+}
+
+.column-about-disclosure[open] summary::after {
+  content: "−";
+}
+
+.column-about-content {
+  margin-top: 14px;
+  font-size: 13px;
+  font-weight: 300;
+  line-height: 1.65;
+  opacity: 0.76;
+}
+
+.column-about-content > * + * {
+  margin-top: 0.8em;
+}
+
+.column-about-content a {
+  border-bottom: 1px solid rgb(255 255 255 / 0.45);
+}
+
+.column-about-link {
+  display: inline-block;
+  margin-top: 14px;
+  border-bottom: 1px solid rgb(255 255 255 / 0.45) !important;
+  font-size: 12px;
+  font-weight: 300;
+  opacity: 0.72;
+}
+
 /* Surface chrome for the package-powered lens. Refraction itself is supplied
    by liquid-glass-web-react on .ascii-space-host; this layer only adds the
    restrained physical surface above it. */

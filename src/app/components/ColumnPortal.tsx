@@ -80,6 +80,11 @@ type ColumnItem = {
   external?: boolean;
   dim?: boolean;
   heading?: boolean;
+  preserveLineBreaks?: boolean;
+  htmlContent?: string;
+  initiallyOpen?: boolean;
+  linkUrl?: string | null;
+  linkLabel?: string;
 };
 
 type FlowTextHandle = { setWidth: (width: number) => void };
@@ -193,9 +198,9 @@ function ensureExternalHref(value: string): string {
 
 const FlowText = forwardRef<
   FlowTextHandle,
-  { text: string; fontSize?: number; lineHeight?: number; weight?: number; dim?: boolean }
+  { text: string; fontSize?: number; lineHeight?: number; weight?: number; dim?: boolean; preserveLineBreaks?: boolean }
 >(function FlowText(
-  { text, fontSize = TITLE_FONT_SIZE, lineHeight = TITLE_LINE_HEIGHT, weight = TITLE_WEIGHT, dim = false },
+  { text, fontSize = TITLE_FONT_SIZE, lineHeight = TITLE_LINE_HEIGHT, weight = TITLE_WEIGHT, dim = false, preserveLineBreaks = false },
   ref
 ) {
   const fallbackRef = useRef<HTMLSpanElement | null>(null);
@@ -210,8 +215,12 @@ const FlowText = forwardRef<
       setWidth(width: number) {
         const linesEl = linesRef.current;
         if (!linesEl || width <= 0) return;
-        if (!preparedRef.current || preparedRef.current.font !== font) {
-          preparedRef.current = { font, data: prepareWithSegments(text, font) };
+        const preparedKey = `${font}|${preserveLineBreaks ? 'pre-wrap' : 'normal'}`;
+        if (!preparedRef.current || preparedRef.current.font !== preparedKey) {
+          preparedRef.current = {
+            font: preparedKey,
+            data: prepareWithSegments(text, font, preserveLineBreaks ? { whiteSpace: 'pre-wrap' } : undefined),
+          };
         }
         const { lines } = layoutWithLines(preparedRef.current.data, width, lineHeight);
         const key = lines.map((line) => line.text).join('\n');
@@ -228,7 +237,7 @@ const FlowText = forwardRef<
         if (fallbackRef.current) fallbackRef.current.style.display = 'none';
       },
     }),
-    [text, font, lineHeight]
+    [text, font, lineHeight, preserveLineBreaks]
   );
 
   return (
@@ -241,7 +250,7 @@ const FlowText = forwardRef<
         textShadow: '0 0 10px rgba(0,0,0,0.95), 0 1px 0 rgba(0,0,0,0.8)',
       }}
     >
-      <span ref={fallbackRef} style={{ overflowWrap: 'anywhere' }}>
+      <span ref={fallbackRef} style={{ overflowWrap: 'anywhere', whiteSpace: preserveLineBreaks ? 'pre-wrap' : 'normal' }}>
         {text}
       </span>
       <span ref={linesRef} style={{ display: 'none', whiteSpace: 'pre' }} />
@@ -269,6 +278,20 @@ function ColumnRow({
   metaFontSize: number;
   metaLineHeight: number;
 }) {
+  if (item.htmlContent !== undefined) {
+    return (
+      <details open={item.initiallyOpen || undefined} className="column-about-disclosure">
+        <summary>{item.title}</summary>
+        {item.htmlContent && <div className="column-about-content" dangerouslySetInnerHTML={{ __html: item.htmlContent }} />}
+        {item.linkUrl && (
+          <a className="column-about-link" href={item.linkUrl} target="_blank" rel="noopener noreferrer">
+            {item.linkLabel || 'Open'} →
+          </a>
+        )}
+      </details>
+    );
+  }
+
   if (item.heading) {
     return (
       <div
@@ -293,6 +316,7 @@ function ColumnRow({
         fontSize={titleFontSize}
         lineHeight={titleLineHeight}
         dim={item.dim}
+        preserveLineBreaks={item.preserveLineBreaks}
       />
       {item.meta && (
         <span style={{ display: 'block', marginTop: 4 }}>
@@ -320,8 +344,15 @@ function ColumnRow({
   if (!item.href) return <div style={style}>{content}</div>;
 
   if (item.external) {
+    const opensNewTab = !item.href.toLowerCase().startsWith('mailto:');
     return (
-      <a href={item.href} target="_blank" rel="noopener noreferrer" className="column-portal-row-link" style={style}>
+      <a
+        href={item.href}
+        target={opensNewTab ? '_blank' : undefined}
+        rel={opensNewTab ? 'noopener noreferrer' : undefined}
+        className="column-portal-row-link"
+        style={style}
+      >
         {content}
       </a>
     );
@@ -405,7 +436,7 @@ export default function ColumnPortal({
     ];
 
     const texts = data.texts.map((text) => {
-      // in-app detail page when the text has markdown content; otherwise
+      // In-app detail page when the text has a managed body; otherwise
       // fall back to the external/PDF link
       const external = !text.content_file ? text.external_url || text.pdf_url || undefined : undefined;
       return {
@@ -416,17 +447,30 @@ export default function ColumnPortal({
       };
     });
 
-    const about = [
-      data.profile?.bio ? { title: data.profile.bio } : null,
-      data.profile?.tagline ? { title: data.profile.tagline, dim: true } : null,
-      data.profile?.specializations?.length
-        ? { title: data.profile.specializations.join(' / '), dim: true }
-        : null,
-    ].filter(Boolean) as ColumnItem[];
+    const visibleAboutSections = data.profile?.about_sections?.filter((section) => section.visible) || [];
+    const about: ColumnItem[] = [];
+    if (data.profile?.bio) {
+      about.push({ title: data.profile.bio, preserveLineBreaks: true });
+    }
+    for (const section of visibleAboutSections) {
+      about.push({
+        title: section.title,
+        htmlContent: section.html_content,
+        initiallyOpen: section.initially_open,
+        linkUrl: section.link_url,
+        linkLabel: section.link_label,
+      });
+    }
+    if (!visibleAboutSections.length) {
+      if (data.profile?.tagline) about.push({ title: data.profile.tagline, dim: true });
+      if (data.profile?.specializations?.length) {
+        about.push({ title: data.profile.specializations.join(' / '), dim: true });
+      }
+    }
 
     const contact = [
       data.contact?.email
-        ? { title: data.contact.email, href: ensureExternalHref(data.contact.email), external: true }
+        ? { title: 'Email', href: ensureExternalHref(data.contact.email), external: true }
         : null,
       data.contact?.website
         ? { title: data.contact.website, href: ensureExternalHref(data.contact.website), external: true }

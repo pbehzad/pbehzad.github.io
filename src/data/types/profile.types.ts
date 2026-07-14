@@ -5,6 +5,7 @@ export interface Profile {
   tagline?: string;
   bio: string;
   html_content?: string | null;
+  about_sections?: AboutSection[];
   specializations?: string[];
   skills?: {
     category: string;
@@ -21,6 +22,16 @@ export interface Profile {
     organization?: string;
   }[];
   updated_at: string;
+}
+
+export interface AboutSection {
+  id: string;
+  title: string;
+  html_content: string;
+  link_url?: string | null;
+  link_label?: string;
+  visible: boolean;
+  initially_open?: boolean;
 }
 
 export interface ContactInfo {

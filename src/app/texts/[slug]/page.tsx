@@ -5,6 +5,7 @@ import { getTextBySlug } from '@/services/contentService';
 import { getTextHtml } from '@/lib/text-content-manager';
 import DetailShell from '@/app/components/DetailShell';
 import PdfFlipViewer from '@/app/components/PdfFlipViewer';
+import { getPublicMediaUrl } from '@/lib/media-storage';
 
 const getText = cache(async (slug: string) => (await getTextBySlug(slug)).data);
 
@@ -35,6 +36,7 @@ export default async function TextPage({
   }
 
   const contentHtml = text.content_file ? await getTextHtml(text.content_file) : null;
+  const publicPdfUrl = text.pdf_url ? getPublicMediaUrl(text.pdf_url) : null;
 
   return (
     <DetailShell backHref="/texts" backLabel="texts">
@@ -50,9 +52,15 @@ export default async function TextPage({
         </div>
       </header>
 
+      {text.description && (
+        <p className="mb-12 text-sm opacity-60 leading-relaxed whitespace-pre-line">
+          {text.description}
+        </p>
+      )}
+
       {/* Abstract */}
       {text.abstract && (
-        <p className="mb-12 text-sm opacity-60 leading-relaxed italic">
+        <p className="mb-12 text-sm opacity-60 leading-relaxed italic whitespace-pre-line">
           {text.abstract}
         </p>
       )}
@@ -84,7 +92,7 @@ export default async function TextPage({
           )}
           {text.pdf_url && (
             <a
-              href={text.pdf_url}
+              href={publicPdfUrl || text.pdf_url}
               target="_blank"
               rel="noopener noreferrer"
               className="opacity-50 hover:opacity-100 transition-opacity"

@@ -122,21 +122,40 @@ export function getManagedMediaFilename(url: string): string | null {
     const localMatch = /^\/api\/media\/([^/]+)$/.exec(parsed.pathname);
     if (localMatch) return decodeURIComponent(localMatch[1]);
 
-    const owner = process.env.CONTENT_GITHUB_OWNER;
-    const repo = process.env.CONTENT_GITHUB_REPO;
-    const trustedPrefix = owner && repo ? `/${owner}/${repo}/` : null;
-    if (
-      parsed.hostname === 'raw.githubusercontent.com' &&
-      trustedPrefix &&
-      parsed.pathname.startsWith(trustedPrefix)
-    ) {
-      const mediaIndex = parsed.pathname.indexOf('/media/');
-      if (mediaIndex >= 0) return decodeURIComponent(parsed.pathname.slice(mediaIndex + 7));
+    const owner = process.env.CONTENT_GITHUB_OWNER?.toLowerCase();
+    const repo = process.env.CONTENT_GITHUB_REPO?.toLowerCase();
+    if (!owner || !repo) return null;
+    const parts = parsed.pathname.split('/').filter(Boolean).map(decodeURIComponent);
+    const matchesRepo = parts[0]?.toLowerCase() === owner && parts[1]?.toLowerCase() === repo;
+
+    if (parsed.hostname === 'raw.githubusercontent.com' && matchesRepo) {
+      const mediaIndex = parts.findIndex((part, index) => index >= 2 && part === 'media');
+      if (mediaIndex >= 0 && parts.length === mediaIndex + 2) return parts[mediaIndex + 1];
     }
+
+    if (parsed.hostname === 'github.com' && matchesRepo && parts[2] === 'blob') {
+      const mediaIndex = parts.findIndex((part, index) => index >= 4 && part === 'media');
+      if (mediaIndex >= 0 && parts.length === mediaIndex + 2) return parts[mediaIndex + 1];
+    }
+
+    if (
+      parsed.hostname === 'api.github.com' &&
+      parts[0] === 'repos' &&
+      parts[1]?.toLowerCase() === owner &&
+      parts[2]?.toLowerCase() === repo &&
+      parts[3] === 'contents' &&
+      parts[4] === 'media' &&
+      parts.length === 6
+    ) return parts[5];
   } catch {
     return null;
   }
   return null;
+}
+
+export function getPublicMediaUrl(url: string): string {
+  const filename = getManagedMediaFilename(url);
+  return filename ? getPublicUrl(filename) : url;
 }
 
 function safeFilename(originalFilename: string): string {

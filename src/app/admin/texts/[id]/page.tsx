@@ -9,6 +9,7 @@ import AdminForm from '../../components/AdminForm';
 import AdminFileField from '../../components/AdminFileField';
 import AdminStringList from '../../components/AdminStringList';
 import AdminCheckbox from '../../components/AdminCheckbox';
+import TiptapEditor from '../../components/TiptapEditor';
 
 export default function EditText() {
   const router = useRouter();
@@ -32,13 +33,13 @@ export default function EditText() {
   const [tags, setTags] = useState<string[]>([]);
   const [featured, setFeatured] = useState(false);
   const [relatedCompositions, setRelatedCompositions] = useState<string[]>([]);
-  const [markdown, setMarkdown] = useState('');
+  const [htmlContent, setHtmlContent] = useState('');
   const [status, setStatus] = useState('draft');
 
   useEffect(() => {
     fetch(`/api/admin/texts?id=${encodeURIComponent(id)}`)
       .then(r => r.json())
-      .then(({ item, markdown: md }) => {
+      .then(({ item, html_content: content }) => {
         if (item) {
           setTitle(item.title);
           setSlug(item.slug || '');
@@ -52,7 +53,7 @@ export default function EditText() {
           setTags(item.tags || []);
           setFeatured(Boolean(item.featured));
           setRelatedCompositions(item.related_compositions || []);
-          setMarkdown(md || '');
+          setHtmlContent(content || '');
           setStatus(item.status);
         }
         setLoading(false);
@@ -82,7 +83,7 @@ export default function EditText() {
           tags,
           featured,
           related_compositions: relatedCompositions,
-          markdown,
+          html_content: htmlContent,
           status,
         }),
       });
@@ -152,7 +153,10 @@ export default function EditText() {
         <AdminCheckbox label="Featured text" checked={featured} onChange={setFeatured} description="Show this text in featured placements on the public site." />
         <AdminTextarea label="Description" value={description} onChange={setDescription} rows={3} />
         <AdminTextarea label="Abstract" value={abstract} onChange={setAbstract} rows={4} />
-        <AdminTextarea label="Content (Markdown)" value={markdown} onChange={setMarkdown} rows={18} />
+        <div className="admin-field">
+          <label className="admin-field-label">Content</label>
+          <TiptapEditor content={htmlContent} onChange={setHtmlContent} placeholder="Write the text body in HTML…" />
+        </div>
         <AdminSelect
           label="Status"
           value={status}

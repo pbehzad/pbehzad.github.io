@@ -34,7 +34,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.6,
     }));
 
-    // only texts with in-app content pages (external-only texts have no route)
+    // Only texts with managed bodies have in-app detail pages.
     const textRoutes: MetadataRoute.Sitemap = texts
       .filter((t) => t.content_file)
       .map((t) => ({

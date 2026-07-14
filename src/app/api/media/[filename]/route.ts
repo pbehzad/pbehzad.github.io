@@ -3,12 +3,10 @@ import * as fs from 'fs/promises';
 import * as path from 'path';
 import { getMimeType } from '@/lib/media-storage';
 
-const githubDownloadCache = new Map<string, { url: string; expiresAt: number }>();
-
 function commonHeaders(filename: string) {
   return {
     'Accept-Ranges': 'bytes',
-    'Cache-Control': 'public, max-age=3600',
+    'Cache-Control': 'private, no-store',
     'Content-Type': getMimeType(filename),
     'Content-Disposition': `inline; filename="${filename.replace(/["\\]/g, '')}"`,
   };
@@ -20,56 +18,33 @@ async function getGitHubMedia(
 ): Promise<NextResponse> {
   const owner = process.env.CONTENT_GITHUB_OWNER;
   const repo = process.env.CONTENT_GITHUB_REPO;
-  const token = process.env.GITHUB_TOKEN;
+  const token = process.env.CONTENT_GITHUB_TOKEN || process.env.GITHUB_TOKEN;
   const branch = process.env.CONTENT_GITHUB_BRANCH || 'main';
   if (!owner || !repo || !token) {
     return NextResponse.json({ error: 'Media storage is not configured' }, { status: 500 });
   }
 
-  const cachedDownload = githubDownloadCache.get(filename);
-  let downloadUrl = cachedDownload && cachedDownload.expiresAt > Date.now()
-    ? cachedDownload.url
-    : undefined;
-
-  if (!downloadUrl) {
-    const apiUrl = new URL(
+  const apiUrl = new URL(
     `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}` +
       `/contents/media/${encodeURIComponent(filename)}`,
-    );
-    apiUrl.searchParams.set('ref', branch);
-    const metadataResponse = await fetch(apiUrl, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: 'application/vnd.github+json',
-        'X-GitHub-Api-Version': '2022-11-28',
-      },
-      cache: 'no-store',
-    });
-    if (metadataResponse.status === 404) {
-      return NextResponse.json({ error: 'Not found' }, { status: 404 });
-    }
-    if (!metadataResponse.ok) {
-      return NextResponse.json({ error: 'Unable to read media storage' }, { status: 502 });
-    }
-
-    const metadata = await metadataResponse.json() as { download_url?: string };
-    downloadUrl = metadata.download_url;
-    if (!downloadUrl) {
-      return NextResponse.json({ error: 'Media download is unavailable' }, { status: 502 });
-    }
-    githubDownloadCache.set(filename, {
-      url: downloadUrl,
-      expiresAt: Date.now() + 3 * 60 * 1000,
-    });
-  }
+  );
+  apiUrl.searchParams.set('ref', branch);
 
   const range = request.headers.get('range');
-  const upstreamResponse = await fetch(downloadUrl, {
-    headers: range ? { Range: range } : undefined,
+  const upstreamResponse = await fetch(apiUrl, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: 'application/vnd.github.raw+json',
+      'X-GitHub-Api-Version': '2022-11-28',
+      ...(range ? { Range: range } : {}),
+    },
     cache: 'no-store',
   });
+  if (upstreamResponse.status === 404) {
+    return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  }
   if (!upstreamResponse.ok) {
-    return NextResponse.json({ error: 'Unable to download media' }, { status: 502 });
+    return NextResponse.json({ error: 'Unable to read media storage' }, { status: 502 });
   }
 
   const headers = new Headers(commonHeaders(filename));

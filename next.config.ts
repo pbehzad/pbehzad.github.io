@@ -13,7 +13,7 @@ const nextConfig: NextConfig = {
     {
       source: '/api/media/:path*',
       headers: [
-        { key: 'Cache-Control', value: 'public, max-age=3600, s-maxage=3600' },
+        { key: 'Cache-Control', value: 'private, no-store' },
       ],
     },
   ],

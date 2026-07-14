@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import { getCompositionBySlug } from '@/lib/content-manager';
 import DetailShell from '@/app/components/DetailShell';
 import PdfFlipViewer from '@/app/components/PdfFlipViewer';
+import { getPublicMediaUrl } from '@/lib/media-storage';
 
 const getComposition = cache(getCompositionBySlug);
 
@@ -36,6 +37,7 @@ export default async function CompositionPage({
   }
 
   const year = composition.year.substring(0, 4);
+  const publicScoreUrl = composition.score_url ? getPublicMediaUrl(composition.score_url) : null;
 
   return (
     <DetailShell backHref="/compositions" backLabel="compositions">
@@ -68,7 +70,7 @@ export default async function CompositionPage({
 
       {/* Description */}
       {composition.description && (
-        <p className="mb-12 text-sm opacity-60 leading-relaxed">
+        <p className="mb-12 text-sm opacity-60 leading-relaxed whitespace-pre-line">
           {composition.description}
         </p>
       )}
@@ -105,7 +107,7 @@ export default async function CompositionPage({
           <div className="flex flex-col gap-2 text-sm">
             {composition.score_url && (
               <a
-                href={composition.score_url}
+                href={publicScoreUrl || composition.score_url}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="opacity-50 hover:opacity-100 transition-opacity"
@@ -126,7 +128,7 @@ export default async function CompositionPage({
             {composition.audio_urls?.map((url, i) => (
               <a
                 key={i}
-                href={url}
+                href={getPublicMediaUrl(url)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="opacity-50 hover:opacity-100 transition-opacity"

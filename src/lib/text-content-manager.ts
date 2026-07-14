@@ -5,33 +5,27 @@ import { getStorageAdapter } from './storage-adapter';
 
 const TEXTS_BASE_PATH = 'content/texts';
 
-// Markdown for texts lives in the content repo (content/texts/*.md, per the
-// text's `content_file` field) and is read through the storage adapter —
-// NOT src/lib/markdown.ts, which points at the removed src/data/content dir.
+// Text bodies live in the content repo under content/texts. New and edited
+// entries are stored as HTML. Legacy Markdown is still rendered and is
+// transparently migrated to HTML the next time the entry is saved.
 export async function getTextHtml(contentFile: string): Promise<string | null> {
   const adapter = getStorageAdapter();
   const file = await adapter.readFile(`${TEXTS_BASE_PATH}/${contentFile}`);
   if (!file?.content) return null;
 
+  if (contentFile.toLowerCase().endsWith('.html')) return file.content;
+
   const { content } = matter(file.content);
-  const processed = await remark().use(html).process(content);
-  return processed.toString();
+  return (await remark().use(html).process(content)).toString();
 }
 
-// raw markdown source, for the admin editor
-export async function getTextMarkdown(contentFile: string): Promise<string | null> {
-  const adapter = getStorageAdapter();
-  const file = await adapter.readFile(`${TEXTS_BASE_PATH}/${contentFile}`);
-  return file?.content ?? null;
-}
-
-export async function saveTextMarkdown(contentFile: string, markdown: string): Promise<void> {
+export async function saveTextHtml(contentFile: string, htmlContent: string): Promise<void> {
   const adapter = getStorageAdapter();
   const existing = await adapter.readFile(`${TEXTS_BASE_PATH}/${contentFile}`);
-  await adapter.writeFile(`${TEXTS_BASE_PATH}/${contentFile}`, markdown, existing?.sha);
+  await adapter.writeFile(`${TEXTS_BASE_PATH}/${contentFile}`, htmlContent, existing?.sha);
 }
 
-export async function deleteTextMarkdown(contentFile: string): Promise<void> {
+export async function deleteTextContent(contentFile: string): Promise<void> {
   const adapter = getStorageAdapter();
   const existing = await adapter.readFile(`${TEXTS_BASE_PATH}/${contentFile}`);
   if (existing) {

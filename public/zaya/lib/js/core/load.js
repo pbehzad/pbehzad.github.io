@@ -61,27 +61,6 @@ setInterval(() => {
     }
 }, 15000);
 
-/**
- * Pre-flight check to see if a URL is reachable
- * @param {string} url - URL to check
- * @returns {Promise<boolean>}
- */
-async function isUrlReachable(url) {
-    if (!url) return false;
-    if (url.startsWith('blob:')) return true; // Blob URLs are local and expected to be valid during session
-
-    try {
-        // Use HEAD request to minimize data usage
-        const response = await fetch(url, { method: 'HEAD', mode: 'no-cors' });
-        // With no-cors, we can't see the status, but if fetch doesn't throw, it's a good sign.
-        // However, DFlip needs CORS for many PDFs. Let's try a regular fetch for metadata.
-        return true;
-    } catch (error) {
-        console.warn('URL pre-flight check failed:', url, error);
-        return false;
-    }
-}
-
 // Function to load the flipbook
 async function loadFlipbook(pdfUrl, rtlMode, page, pdfId) {
     if (isCurrentlyLoading) {
@@ -95,29 +74,6 @@ async function loadFlipbook(pdfUrl, rtlMode, page, pdfId) {
         console.error('Invalid PDF URL provided to loadFlipbook');
         handleLoadingError("Invalid PDF URL provided.");
         return;
-    }
-
-    // Pre-flight check for remote URLs (skip for default PDF to avoid CORS issues)
-    if (!pdfUrl.startsWith('blob:') && pdfUrl !== DEFAULT_PDF_URL) {
-        const isReachable = await isUrlReachable(pdfUrl);
-        if (!isReachable) {
-            console.log('PDF URL unreachable, falling back to default...');
-            isCurrentlyLoading = false; // Reset lock for fallback
-            
-            // Clear any loading overlays
-            $('#loadingOverlay').remove();
-            
-            Toastify({
-                text: "Target PDF unreachable. Loading default...",
-                duration: 3000,
-                gravity: "bottom",
-                position: "right",
-                backgroundColor: "#f59e0b"
-            }).showToast();
-
-            loadFlipbook(DEFAULT_PDF_URL, rtlMode, 1, 'Default PDF');
-            return;
-        }
     }
 
     var options = {

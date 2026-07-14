@@ -51,7 +51,7 @@ export default function TextsAdmin() {
               label: 'Body',
               render: (v) => (
                 <span className={`admin-status ${v ? 'admin-status-published' : ''}`}>
-                  {v ? 'markdown' : 'external'}
+                  {v ? 'HTML' : 'external'}
                 </span>
               ),
             },
