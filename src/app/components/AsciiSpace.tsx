@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 
 // A real lit 3D room rendered through three.js, then converted to characters
@@ -79,9 +79,23 @@ const EDGE_CHANCE = 0.32;
 // space is exclusively seam pixels, never incidental shadow on a wall.
 const EDGE_TOKEN = ' ';
 const EDGE_RE = / /g;
-// Every render repaints the whole glyph grid. The ambient scene doesn't
-// need 60fps — 20 is visually equivalent and a third of the cost.
+// Every render repaints the whole glyph grid. The full scene doesn't need
+// 60fps — 20 is visually equivalent and a third of the cost. Mobile ambient
+// mode has a deliberately slower cadence below.
 const FRAME_MS = 50;
+const MOBILE_QUERY = '(width < 961px)';
+const AMBIENT_FRAME_MS = 180;
+const AMBIENT_RESOLUTION = 0.14;
+const AMBIENT_YAW_SPEED = 0.012;
+// One shared ink value keeps the room at the same brightness on every
+// viewport. It sits midway between the former bright desktop and dim mobile
+// treatments; mobile optimization changes cadence and resolution, not tone.
+const GLYPH_COLOR = '#787b7e';
+
+type AsciiSpaceProps = {
+  mobileMode?: 'full' | 'ambient' | 'hidden';
+  fixedOnMobile?: boolean;
+};
 
 // Each wall panel gets a border stroke baked into its texture so flat faces
 // read as a grid of tiles under lighting, not a featureless gradient.
@@ -162,10 +176,30 @@ function shimmerRows(rows: string[], time: number): string[] {
   });
 }
 
-export default function AsciiSpace() {
+export default function AsciiSpace({
+  mobileMode = 'full',
+  fixedOnMobile = false,
+}: AsciiSpaceProps = {}) {
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const [mobileViewport, setMobileViewport] = useState<boolean | null>(null);
 
   useEffect(() => {
+    const query = window.matchMedia(MOBILE_QUERY);
+    const sync = () => setMobileViewport(query.matches);
+    sync();
+    query.addEventListener('change', sync);
+    return () => query.removeEventListener('change', sync);
+  }, []);
+
+  useEffect(() => {
+    if (mobileViewport === null) return;
+
+    const isMobile = mobileViewport;
+    if (mobileMode === 'hidden' && isMobile) return;
+    const isAmbientMobile = mobileMode === 'ambient' && isMobile;
+    const prefersStableAmbient =
+      isAmbientMobile && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
     const container = containerRef.current;
     if (!container) return;
 
@@ -200,7 +234,7 @@ export default function AsciiSpace() {
         depth: true,
         stencil: false,
         preserveDrawingBuffer: false,
-        powerPreference: 'high-performance',
+        powerPreference: isAmbientMobile ? 'low-power' : 'high-performance',
       });
     } catch {
       geometry.dispose();
@@ -214,8 +248,12 @@ export default function AsciiSpace() {
     renderer.setPixelRatio(1);
     renderer.setClearColor(0x000000, 1);
     const contextAttributes = renderer.getContext().getContextAttributes();
-    container.dataset.graphics =
-      contextAttributes?.powerPreference === 'high-performance' ? 'gpu-high-performance' : 'gpu';
+    container.dataset.graphics = isAmbientMobile
+      ? 'gpu-low-power'
+      : contextAttributes?.powerPreference === 'high-performance'
+        ? 'gpu-high-performance'
+        : 'gpu';
+    container.dataset.asciiMode = isAmbientMobile ? 'ambient' : 'full';
 
     // the visible glyph canvas + a small sampling canvas for pixel readback
     const display = document.createElement('canvas');
@@ -243,13 +281,13 @@ export default function AsciiSpace() {
     const layout = () => {
       const w = window.innerWidth;
       const h = window.innerHeight;
-      const resolution = w <= 768 ? 0.3 : 0.22;
+      const resolution = isAmbientMobile ? AMBIENT_RESOLUTION : w <= 768 ? 0.3 : 0.22;
       cols = Math.max(4, Math.floor(w * resolution));
       sampleH = Math.max(4, Math.floor(h * resolution));
       rows = Math.ceil(sampleH / 2);
       cellW = w / cols;
       cellH = h / rows;
-      dpr = Math.min(2, window.devicePixelRatio || 1);
+      dpr = isAmbientMobile ? 1 : Math.min(2, window.devicePixelRatio || 1);
 
       // render the scene at grid height directly (2 sample rows per glyph
       // row) — a fraction of a fullscreen render
@@ -274,7 +312,6 @@ export default function AsciiSpace() {
       glyphScaleX = cellW / advance;
     };
     layout();
-    window.addEventListener('resize', layout);
 
     const maxIdx = RAMP.length - 1;
     const paint = (time: number) => {
@@ -294,29 +331,37 @@ export default function AsciiSpace() {
         }
         rowStrings.push(row);
       }
-      const shimmered = shimmerRows(rowStrings, time);
+      // Ambient mobile pages keep the architectural seams but skip shimmer;
+      // scroll supplies enough movement, and a stable field is both calmer
+      // behind text and substantially cheaper to repaint.
+      const paintedRows = isAmbientMobile ? rowStrings : shimmerRows(rowStrings, time);
 
       displayCtx.setTransform(1, 0, 0, 1, 0, 0);
       displayCtx.clearRect(0, 0, display.width, display.height);
       displayCtx.setTransform(dpr * glyphScaleX, 0, 0, dpr, 0, 0);
       displayCtx.font = `bold ${cellH.toFixed(2)}px 'Courier New', monospace`;
-      // Dimming lives in the glyph color, NOT in CSS opacity on the wrapper:
-      // opacity < 1 would isolate this layer from backdrop-filter sampling
-      // (#8e8e8e is a deliberately subtle reduction in glyph brightness).
-      displayCtx.fillStyle = '#8e8e8e';
-      for (let r = 0; r < shimmered.length; r++) {
-        displayCtx.fillText(shimmered[r], 0, (r + 0.8) * cellH);
+      // Brightness lives in the glyph color, NOT in CSS opacity on the
+      // wrapper: opacity < 1 would isolate this layer from glass sampling.
+      displayCtx.fillStyle = GLYPH_COLOR;
+      for (let r = 0; r < paintedRows.length; r++) {
+        displayCtx.fillText(paintedRows[r], 0, (r + 0.8) * cellH);
       }
     };
+
+    const onResize = () => {
+      layout();
+      if (prefersStableAmbient) paint(0);
+    };
+    window.addEventListener('resize', onResize);
 
     let pageVisible = !document.hidden;
     const onVisibilityChange = () => {
       pageVisible = !document.hidden;
     };
-    document.addEventListener('visibilitychange', onVisibilityChange);
 
     let lastRender = 0;
-    let rafId: number;
+    let rafId: number | null = null;
+    let ambientTimerId: number | null = null;
     const tick = (t: number) => {
       if (pageVisible && t - lastRender >= FRAME_MS) {
         lastRender = t;
@@ -325,12 +370,33 @@ export default function AsciiSpace() {
       }
       rafId = requestAnimationFrame(tick);
     };
-    rafId = requestAnimationFrame(tick);
+    const paintAmbientFrame = () => {
+      if (!pageVisible) return;
+      const time = performance.now();
+      camera.rotation.y = (time / 1000) * AMBIENT_YAW_SPEED;
+      paint(time);
+    };
+
+    if (prefersStableAmbient) {
+      camera.rotation.y = 0;
+      paint(0);
+    } else {
+      document.addEventListener('visibilitychange', onVisibilityChange);
+      if (isAmbientMobile) {
+        paintAmbientFrame();
+        ambientTimerId = window.setInterval(paintAmbientFrame, AMBIENT_FRAME_MS);
+      } else {
+        rafId = requestAnimationFrame(tick);
+      }
+    }
 
     return () => {
-      window.removeEventListener('resize', layout);
-      document.removeEventListener('visibilitychange', onVisibilityChange);
-      cancelAnimationFrame(rafId);
+      window.removeEventListener('resize', onResize);
+      if (!prefersStableAmbient) {
+        document.removeEventListener('visibilitychange', onVisibilityChange);
+      }
+      if (rafId !== null) cancelAnimationFrame(rafId);
+      if (ambientTimerId !== null) window.clearInterval(ambientTimerId);
       container.removeChild(display);
       geometry.dispose();
       materials.forEach((m) => {
@@ -340,13 +406,17 @@ export default function AsciiSpace() {
       baseTexture.dispose();
       renderer.dispose();
     };
-  }, []);
+  }, [mobileMode, mobileViewport]);
 
   return (
     <div
       ref={containerRef}
       aria-hidden
-      className="ascii-space-host pointer-events-none absolute inset-0 z-0 overflow-hidden"
+      className={`ascii-space-host pointer-events-none absolute inset-0 z-0 overflow-hidden ${
+        mobileMode === 'hidden' ? 'max-[961px]:hidden' : ''
+      } ${
+        fixedOnMobile ? 'max-[961px]:!fixed' : ''
+      }`}
     />
   );
 }

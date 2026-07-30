@@ -19,7 +19,15 @@ export default function GlassPanel({ children, className }: { children: ReactNod
       interactionTarget: panel,
     });
 
+    const reposition = () => glassLens.reposition();
+    window.addEventListener('scroll', reposition, { passive: true });
+    window.visualViewport?.addEventListener('scroll', reposition, { passive: true });
+    window.visualViewport?.addEventListener('resize', reposition, { passive: true });
+
     return () => {
+      window.removeEventListener('scroll', reposition);
+      window.visualViewport?.removeEventListener('scroll', reposition);
+      window.visualViewport?.removeEventListener('resize', reposition);
       glassLens.release(token);
     };
   }, []);

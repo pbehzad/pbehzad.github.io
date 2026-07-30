@@ -19,12 +19,16 @@ const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
 
 type IdentityGlassProps = {
   media: ReactNode;
+  refractBackground?: boolean;
 };
 
 // This is intentionally a single, full-column package lens. The portrait and
 // the column background are inside the filtered surface, while the identity
 // title sits above it as a separate, sharp foreground layer.
-export default function IdentityGlass({ media }: IdentityGlassProps) {
+export default function IdentityGlass({
+  media,
+  refractBackground = true,
+}: IdentityGlassProps) {
   const glassRef = useRef<LiquidGlassHandle>(null);
   const syncAsciiLensRef = useRef<(nextProgress: number) => void>(() => undefined);
   const animationRef = useRef<number | null>(null);
@@ -66,6 +70,8 @@ export default function IdentityGlass({ media }: IdentityGlassProps) {
   }, []);
 
   useEffect(() => {
+    if (!refractBackground) return;
+
     const lens = glassRef.current?.element;
     if (!lens) return;
 
@@ -159,7 +165,7 @@ export default function IdentityGlass({ media }: IdentityGlassProps) {
       engine?.destroy();
       defsHost?.remove();
     };
-  }, []);
+  }, [refractBackground]);
 
   useEffect(() => {
     syncAsciiLensRef.current(progress);

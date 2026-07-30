@@ -1,4 +1,5 @@
-import ColumnPortal, { type ColumnPortalData as ColumnPortalDataShape } from './ColumnPortal';
+import ColumnPortal from './ColumnPortal';
+import type { ColumnPortalData as ColumnPortalDataShape } from './PortalTypes';
 import {
   getAllCompositions,
   getAllEvents,
@@ -41,6 +42,7 @@ export default async function ColumnPortalData({ initialPath = '/' }: { initialP
       })),
     } : null,
     contact,
+    renderedAt: new Date().toISOString(),
   };
 
   return <ColumnPortal data={data} initialPath={initialPath} />;

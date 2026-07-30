@@ -39,7 +39,7 @@ export default async function CompositionPage({
   const year = composition.year.substring(0, 4);
 
   return (
-    <DetailShell backHref="/compositions" backLabel="compositions">
+    <DetailShell backHref="/compositions" backLabel="works">
       {/* Header */}
       <header className="mt-8 mb-12">
         <h1 className="text-4xl md:text-6xl font-black uppercase tracking-wider">

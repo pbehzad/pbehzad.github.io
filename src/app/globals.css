@@ -396,6 +396,32 @@ img {
   grid-template-columns: repeat(6, 1fr);
 }
 
+/* ColumnPortal renders the lightweight mobile surface as its server snapshot.
+   Wide screens get a quiet identity placeholder until the desktop portal
+   hydrates, avoiding both a phone-layout flash and an empty black frame. */
+@media (min-width: 961px) {
+  .mobile-portal-bootstrap[data-hydrating="true"] {
+    display: grid;
+    min-height: 100vh;
+    min-height: 100svh;
+    place-items: center;
+    background: #000000;
+  }
+
+  .mobile-portal-bootstrap[data-hydrating="true"]::before {
+    color: rgb(255 255 255 / 0.72);
+    content: "parham behzad";
+    font-size: 12px;
+    font-weight: 300;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+
+  .mobile-portal-bootstrap[data-hydrating="true"] > * {
+    display: none;
+  }
+}
+
 @media (max-width: 768px) {
   .column-portal-grid {
     grid-template-columns: 52% 9.6% 9.6% 9.6% 9.6% 9.6%;

@@ -315,8 +315,12 @@ class GlassMaterialController {
     return selected;
   }
 
-  private sourceHost(): HTMLElement | null {
-    return document.querySelector<HTMLElement>('.ascii-space-host');
+  private sourceHost(material: MaterialInstance): HTMLElement | null {
+    const localRoot = material.element.closest('main');
+    return (
+      localRoot?.querySelector<HTMLElement>('.ascii-space-host') ??
+      document.querySelector<HTMLElement>('.ascii-space-host')
+    );
   }
 
   private reducedTransparency(): boolean {
@@ -341,12 +345,27 @@ class GlassMaterialController {
       return null;
     }
 
+    const visibleLeft = Math.max(materialRect.left, sourceRect.left);
+    const visibleRight = Math.min(materialRect.right, sourceRect.right);
+    const visibleTop = Math.max(materialRect.top, sourceRect.top);
+    const visibleBottom = Math.min(materialRect.bottom, sourceRect.bottom);
+    if (visibleRight <= visibleLeft || visibleBottom <= visibleTop) return null;
+
+    // A mobile detail pane can be taller than the fixed ASCII viewport. Lens
+    // geometry is capped to that viewport and follows the visible intersection
+    // while the document scrolls, avoiding an enormous off-screen map.
+    const width = Math.min(materialRect.width, sourceRect.width);
+    const height = Math.min(materialRect.height, sourceRect.height);
+    const fullyContained =
+      materialRect.width <= sourceRect.width &&
+      materialRect.height <= sourceRect.height;
+
     return {
-      width: materialRect.width,
-      height: materialRect.height,
-      radius: this.radiusFor(material.element, materialRect.width, materialRect.height),
-      x: clamp01((materialRect.left + materialRect.width / 2 - sourceRect.left) / sourceRect.width),
-      y: clamp01((materialRect.top + materialRect.height / 2 - sourceRect.top) / sourceRect.height),
+      width,
+      height,
+      radius: fullyContained ? this.radiusFor(material.element, width, height) : 0,
+      x: clamp01(((visibleLeft + visibleRight) / 2 - sourceRect.left) / sourceRect.width),
+      y: clamp01(((visibleTop + visibleBottom) / 2 - sourceRect.top) / sourceRect.height),
     };
   }
 
@@ -409,10 +428,13 @@ class GlassMaterialController {
       return;
     }
 
-    const source = this.sourceHost();
+    const source = this.sourceHost(material);
     if (!source) return;
     const geometry = this.geometryFor(material, source);
-    if (!geometry) return;
+    if (!geometry) {
+      this.destroyEngine();
+      return;
+    }
 
     const options = this.optionsFor(material, geometry);
     if (!this.engine || this.engineHost !== source) {
@@ -525,6 +547,10 @@ class GlassMaterialController {
     }
     const active = this.activeMaterial();
     if (active && scopeForVariant(active.variant) === scope) this.sync(forceShape);
+  }
+
+  reposition() {
+    this.scheduleSync();
   }
 
   release(owner: object) {
