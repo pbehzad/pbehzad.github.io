@@ -88,28 +88,10 @@ function textLink(text: Text): { href?: string; external: boolean } {
   return { href: text.external_url || undefined, external: Boolean(text.external_url) };
 }
 
-function IndexNumber({ value }: { value: number }) {
-  return (
-    <span className="index" aria-hidden="true">
-      {String(value + 1).padStart(2, '0')}
-    </span>
-  );
-}
-
-function SectionHeading({
-  eyebrow,
-  title,
-  description,
-}: {
-  eyebrow: string;
-  title: string;
-  description?: string;
-}) {
+function SectionHeading({ id, title }: { id: string; title: string }) {
   return (
     <header className="sectionHeading">
-      <p className="eyebrow">{eyebrow}</p>
-      <h1>{title}</h1>
-      {description && <p className="sectionIntro">{description}</p>}
+      <h1 id={id}>{title}</h1>
     </header>
   );
 }
@@ -117,28 +99,21 @@ function SectionHeading({
 function WorksView({ data }: { data: ColumnPortalData }) {
   return (
     <section className="section" aria-labelledby="mobile-works-heading">
-      <div id="mobile-works-heading">
-        <SectionHeading eyebrow="Catalogue" title="Works" description="Compositions, scores and listening." />
-      </div>
       {data.compositions.length ? (
-        <ol className="list">
-          {data.compositions.map((composition, index) => (
+        <ul className="list">
+          {data.compositions.map((composition) => (
             <li key={composition.id}>
               <Link className="row" href={`/compositions/${composition.slug}`}>
-                <IndexNumber value={index} />
                 <span className="rowBody">
                   <span className="rowTitle">{composition.title}</span>
                   <span className="rowMeta">
                     {[composition.instruments, yearFrom(composition.year)].filter(Boolean).join(' · ')}
                   </span>
                 </span>
-                <span className="rowArrow" aria-hidden="true">
-                  →
-                </span>
               </Link>
             </li>
           ))}
-        </ol>
+        </ul>
       ) : (
         <p className="empty">New work will appear here.</p>
       )}
@@ -146,13 +121,12 @@ function WorksView({ data }: { data: ColumnPortalData }) {
   );
 }
 
-function EventRows({ events, startIndex = 0 }: { events: Event[]; startIndex?: number }) {
+function EventRows({ events }: { events: Event[] }) {
   return (
-    <ol className="list">
-      {events.map((event, index) => (
+    <ul className="list">
+      {events.map((event) => (
         <li key={event.id}>
           <Link className="row" href={`/events/${event.slug}`}>
-            <IndexNumber value={startIndex + index} />
             <span className="rowBody">
               <span className="rowTitle">{event.title}</span>
               <span className="rowMeta">{formatEventDate(event.date)}</span>
@@ -160,13 +134,10 @@ function EventRows({ events, startIndex = 0 }: { events: Event[]; startIndex?: n
                 <span className="rowMeta">{[event.venue, event.city].filter(Boolean).join(', ')}</span>
               )}
             </span>
-            <span className="rowArrow" aria-hidden="true">
-              →
-            </span>
           </Link>
         </li>
       ))}
-    </ol>
+    </ul>
   );
 }
 
@@ -181,9 +152,6 @@ function EventsView({ data, currentDate }: { data: ColumnPortalData; currentDate
 
   return (
     <section className="section" aria-labelledby="mobile-events-heading">
-      <div id="mobile-events-heading">
-        <SectionHeading eyebrow="Calendar" title="Events" description="Performances, gatherings and appearances." />
-      </div>
       {!data.events.length && <p className="empty">New dates will appear here.</p>}
       {upcoming.length > 0 && (
         <div className="group">
@@ -194,7 +162,7 @@ function EventsView({ data, currentDate }: { data: ColumnPortalData; currentDate
       {past.length > 0 && (
         <div className="group">
           <h2>Archive</h2>
-          <EventRows events={past} startIndex={upcoming.length} />
+          <EventRows events={past} />
         </div>
       )}
     </section>
@@ -204,26 +172,17 @@ function EventsView({ data, currentDate }: { data: ColumnPortalData; currentDate
 function TextsView({ data }: { data: ColumnPortalData }) {
   return (
     <section className="section" aria-labelledby="mobile-texts-heading">
-      <div id="mobile-texts-heading">
-        <SectionHeading eyebrow="Reading" title="Texts" description="Essays, articles, papers and notes." />
-      </div>
       {data.texts.length ? (
-        <ol className="list">
-          {data.texts.map((text, index) => {
+        <ul className="list">
+          {data.texts.map((text) => {
             const link = textLink(text);
             const content = (
-              <>
-                <IndexNumber value={index} />
-                <span className="rowBody">
-                  <span className="rowTitle">{text.title}</span>
-                  <span className="rowMeta">
-                    {text.year} · {text.type}
-                  </span>
+              <span className="rowBody">
+                <span className="rowTitle">{text.title}</span>
+                <span className="rowMeta">
+                  {text.year} · {text.type}
                 </span>
-                <span className="rowArrow" aria-hidden="true">
-                  {link.external ? '↗' : '→'}
-                </span>
-              </>
+              </span>
             );
 
             return (
@@ -244,7 +203,7 @@ function TextsView({ data }: { data: ColumnPortalData }) {
               </li>
             );
           })}
-        </ol>
+        </ul>
       ) : (
         <p className="empty">New texts will appear here.</p>
       )}
@@ -258,9 +217,6 @@ function InfoView({ data }: { data: ColumnPortalData }) {
 
   return (
     <section className="section" aria-labelledby="mobile-info-heading">
-      <div id="mobile-info-heading">
-        <SectionHeading eyebrow="Biography" title="Info" description={profile?.tagline || profile?.subtitle} />
-      </div>
       {profile?.bio && <p className="bio">{profile.bio}</p>}
 
       {visibleSections.length > 0 && (
@@ -319,9 +275,6 @@ function ContactView({ data }: { data: ColumnPortalData }) {
 
   return (
     <section className="section contactSection" aria-labelledby="mobile-contact-heading">
-      <div id="mobile-contact-heading">
-        <SectionHeading eyebrow="Get in touch" title="Contact" />
-      </div>
       {contact?.availability_status && <p className="availability">{contact.availability_status}</p>}
       {channels.length ? (
         <ul className="list">
@@ -335,9 +288,6 @@ function ContactView({ data }: { data: ColumnPortalData }) {
               >
                 <span className="contactLabel">{channel.label}</span>
                 <span className="contactValue">{channel.value}</span>
-                <span className="rowArrow" aria-hidden="true">
-                  {channel.external ? '↗' : '→'}
-                </span>
               </a>
             </li>
           ))}
@@ -389,9 +339,6 @@ function HomeView({ data, currentDate }: { data: ColumnPortalData; currentDate: 
           <div className="coverType">
             <p className="coverRole">{profile?.title || 'Composer'}</p>
             <h1 id="mobile-home-heading">Parham Behzad</h1>
-            {(profile?.tagline || profile?.subtitle) && (
-              <p className="coverTagline">{profile?.tagline || profile?.subtitle}</p>
-            )}
           </div>
           <span className="coverMark" aria-hidden="true">
             PB
@@ -400,12 +347,8 @@ function HomeView({ data, currentDate }: { data: ColumnPortalData; currentDate: 
       </section>
 
       {(featuredWork || nextEvent) && (
-        <section className="now" aria-labelledby="mobile-now-heading">
+        <section className="now" aria-label="Featured work and upcoming event">
           <MobileGlassPane className="mobile-now-glass" trackScroll />
-          <div className="nowHeading">
-            <p id="mobile-now-heading">Now</p>
-            <span aria-hidden="true">{featuredWork && nextEvent ? '01—02' : '01'}</span>
-          </div>
           <div className="previews">
             {featuredWork && (
               <PreviewLink
@@ -437,6 +380,7 @@ function HomeView({ data, currentDate }: { data: ColumnPortalData; currentDate: 
 
 export default function MobilePortal({ data, initialPath = '/' }: MobilePortalProps) {
   const section = getSection(initialPath);
+  const isHome = section === 'home';
   const [currentDate, setCurrentDate] = useState(() => data.renderedAt.slice(0, 10));
 
   useEffect(() => {
@@ -447,12 +391,11 @@ export default function MobilePortal({ data, initialPath = '/' }: MobilePortalPr
   }, []);
 
   return (
-    <main className="pocket">
+    <main className="pocket" data-view={isHome ? 'home' : 'section'}>
       <div className="ambientField">
         <AmbientAsciiSpace mobileMode="ambient" fixedOnMobile />
       </div>
-      <div className="ambientScrim" data-view={section === 'home' ? 'cover' : 'reading'} aria-hidden />
-      {section !== 'home' && <MobileGlassPane />}
+      <div className="ambientScrim" data-view={isHome ? 'cover' : 'reading'} aria-hidden />
 
       <header className="topbar">
         <Link className="brand" href="/" aria-label="Parham Behzad, home">
@@ -463,14 +406,31 @@ export default function MobilePortal({ data, initialPath = '/' }: MobilePortalPr
         </Link>
       </header>
 
-      <div className="content">
-        {section === 'home' && <HomeView data={data} currentDate={currentDate} />}
-        {section === 'works' && <WorksView data={data} />}
-        {section === 'events' && <EventsView data={data} currentDate={currentDate} />}
-        {section === 'texts' && <TextsView data={data} />}
-        {section === 'info' && <InfoView data={data} />}
-        {section === 'contact' && <ContactView data={data} />}
-      </div>
+      {isHome ? (
+        <div className="content">
+          <HomeView data={data} currentDate={currentDate} />
+        </div>
+      ) : (
+        <div className="sectionWindow" key={section}>
+          <MobileGlassPane className="sectionWindowGlass" />
+          <SectionHeading
+            id={`mobile-${section}-heading`}
+            title={`${section.charAt(0).toUpperCase()}${section.slice(1)}`}
+          />
+          <div
+            className="sectionScroller glass-scrollbar"
+            role="region"
+            aria-labelledby={`mobile-${section}-heading`}
+            tabIndex={0}
+          >
+            {section === 'works' && <WorksView data={data} />}
+            {section === 'events' && <EventsView data={data} currentDate={currentDate} />}
+            {section === 'texts' && <TextsView data={data} />}
+            {section === 'info' && <InfoView data={data} />}
+            {section === 'contact' && <ContactView data={data} />}
+          </div>
+        </div>
+      )}
 
       <nav className="bottomNav" aria-label="Primary navigation">
         {NAV_ITEMS.map((item) => {
@@ -495,6 +455,8 @@ export default function MobilePortal({ data, initialPath = '/' }: MobilePortalPr
           --muted: rgba(241, 238, 230, 0.57);
           --faint: rgba(241, 238, 230, 0.12);
           --surface: #090a09;
+          --mobile-header-height: 52px;
+          --mobile-nav-height: 64px;
           position: relative;
           isolation: isolate;
           min-height: 100vh;
@@ -507,6 +469,14 @@ export default function MobilePortal({ data, initialPath = '/' }: MobilePortalPr
           font-family: 'JetBrains Mono', monospace !important;
           font-weight: 400;
           padding-bottom: calc(64px + env(safe-area-inset-bottom));
+        }
+
+        .pocket[data-view='section'] {
+          height: 100vh;
+          height: 100dvh;
+          min-height: 0;
+          overflow: hidden;
+          padding-bottom: 0;
         }
 
         .pocket a {
@@ -562,17 +532,47 @@ export default function MobilePortal({ data, initialPath = '/' }: MobilePortalPr
             radial-gradient(circle at 50% 0%, rgba(101, 115, 103, 0.04), transparent 34rem);
         }
 
-        .pocket .mobile-section-glass {
+        .pocket .sectionWindow {
+          position: fixed;
+          z-index: 3;
+          top: calc(var(--mobile-header-height) + env(safe-area-inset-top) + 12px);
+          right: max(12px, env(safe-area-inset-right));
+          bottom: calc(var(--mobile-nav-height) + env(safe-area-inset-bottom) + 12px);
+          left: max(12px, env(safe-area-inset-left));
+          display: flex;
+          flex-direction: column;
+          contain: paint;
+          isolation: isolate;
+          overflow: hidden;
+          border-radius: 28px;
+        }
+
+        .pocket .sectionWindowGlass {
           --glass-density: 0.18 !important;
           --glass-tint-alpha: 0.025 !important;
-          position: fixed;
-          z-index: 2;
-          top: calc(52px + env(safe-area-inset-top) + 12px);
-          right: max(12px, env(safe-area-inset-right));
-          bottom: calc(64px + env(safe-area-inset-bottom) + 12px);
-          left: max(12px, env(safe-area-inset-left));
-          border-radius: 28px;
+          position: absolute;
+          z-index: 0;
+          inset: 0;
+          border-radius: inherit;
           pointer-events: none;
+        }
+
+        .pocket .sectionScroller {
+          position: relative;
+          z-index: 1;
+          width: 100%;
+          min-height: 0;
+          flex: 1;
+          overflow-x: hidden;
+          overflow-y: auto;
+          overscroll-behavior-y: contain;
+          scroll-padding-block: 24px;
+          -webkit-overflow-scrolling: touch;
+        }
+
+        .pocket .sectionScroller:focus-visible {
+          outline: 1px solid var(--paper);
+          outline-offset: -3px;
         }
 
         .pocket .topbar {
@@ -629,8 +629,9 @@ export default function MobilePortal({ data, initialPath = '/' }: MobilePortalPr
 
         .pocket .portraitFrame {
           position: relative;
-          min-height: min(690px, calc(100svh - 140px));
-          aspect-ratio: 3 / 4;
+          width: 100%;
+          height: min(690px, calc(100svh - 140px));
+          min-height: 520px;
           overflow: hidden;
           background: #161815;
         }
@@ -643,6 +644,7 @@ export default function MobilePortal({ data, initialPath = '/' }: MobilePortalPr
         }
 
         .pocket .portraitFrame img {
+          object-position: 47% 30%;
           filter: grayscale(0.18) contrast(1.06) brightness(0.88);
         }
 
@@ -692,15 +694,6 @@ export default function MobilePortal({ data, initialPath = '/' }: MobilePortalPr
           line-height: 0.95;
         }
 
-        .pocket .coverTagline {
-          max-width: 34rem;
-          margin-top: 16px;
-          color: rgba(241, 238, 230, 0.72);
-          font-size: 12px;
-          font-weight: 300;
-          line-height: 1.55;
-        }
-
         .pocket .coverMark {
           position: absolute;
           z-index: 2;
@@ -720,7 +713,7 @@ export default function MobilePortal({ data, initialPath = '/' }: MobilePortalPr
         .pocket .now {
           position: relative;
           padding:
-            54px max(20px, env(safe-area-inset-right)) 28px
+            36px max(20px, env(safe-area-inset-right)) 28px
             max(20px, env(safe-area-inset-left));
         }
 
@@ -740,19 +733,6 @@ export default function MobilePortal({ data, initialPath = '/' }: MobilePortalPr
         .pocket .now > :not(.mobile-now-glass) {
           position: relative;
           z-index: 1;
-        }
-
-        .pocket .nowHeading {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          margin-bottom: 8px;
-          color: var(--muted);
-          font-size: 10px;
-          font-weight: 400;
-          letter-spacing: 0.18em;
-          line-height: 1;
-          text-transform: uppercase;
         }
 
         .pocket .previews {
@@ -816,40 +796,27 @@ export default function MobilePortal({ data, initialPath = '/' }: MobilePortalPr
         .pocket .section {
           width: 100%;
           max-width: 52rem;
-          min-height: calc(100svh - 116px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
           margin: 0 auto;
           padding:
-            52px max(20px, env(safe-area-inset-right)) 48px
+            0 max(20px, env(safe-area-inset-right)) 48px
             max(20px, env(safe-area-inset-left));
         }
 
         .pocket .sectionHeading {
+          position: relative;
+          z-index: 1;
+          width: auto;
+          flex: 0 0 auto;
+          margin-right: max(20px, env(safe-area-inset-right));
+          margin-left: max(20px, env(safe-area-inset-left));
+          padding-top: 52px;
           padding-bottom: 40px;
           border-bottom: 1px solid rgba(241, 238, 230, 0.28);
-        }
-
-        .pocket .eyebrow {
-          margin-bottom: 16px;
-          color: var(--muted);
-          font-size: 10px;
-          font-weight: 400;
-          letter-spacing: 0.2em;
-          line-height: 1;
-          text-transform: uppercase;
         }
 
         .pocket .sectionHeading h1 {
           font-size: clamp(42px, 14vw, 76px);
           line-height: 0.9;
-        }
-
-        .pocket .sectionIntro {
-          max-width: 38rem;
-          margin-top: 20px;
-          color: var(--muted);
-          font-size: 12px;
-          font-weight: 300;
-          line-height: 1.6;
         }
 
         .pocket .list {
@@ -859,20 +826,10 @@ export default function MobilePortal({ data, initialPath = '/' }: MobilePortalPr
         .pocket .row {
           display: grid;
           min-height: 86px;
-          grid-template-columns: 34px minmax(0, 1fr) 24px;
+          grid-template-columns: minmax(0, 1fr);
           align-items: center;
-          gap: 5px;
+          gap: 0;
           border-bottom: 1px solid var(--faint) !important;
-        }
-
-        .pocket .index {
-          align-self: start;
-          padding-top: 27px;
-          color: rgba(241, 238, 230, 0.4);
-          font-size: 9px;
-          font-weight: 400;
-          letter-spacing: 0.06em;
-          line-height: 1;
         }
 
         .pocket .rowBody {
@@ -898,13 +855,6 @@ export default function MobilePortal({ data, initialPath = '/' }: MobilePortalPr
           font-weight: 300;
           letter-spacing: 0.025em;
           line-height: 1.45;
-        }
-
-        .pocket .rowArrow {
-          justify-self: end;
-          color: rgba(241, 238, 230, 0.62);
-          font-size: 16px;
-          font-weight: 300;
         }
 
         .pocket .rowStatic {
@@ -1047,7 +997,7 @@ export default function MobilePortal({ data, initialPath = '/' }: MobilePortalPr
         }
 
         .pocket .contactRow {
-          grid-template-columns: 82px minmax(0, 1fr) 24px;
+          grid-template-columns: 82px minmax(0, 1fr);
         }
 
         .pocket .contactLabel {
@@ -1136,6 +1086,7 @@ export default function MobilePortal({ data, initialPath = '/' }: MobilePortalPr
 
         @media (max-height: 600px) and (orientation: landscape) {
           .pocket {
+            --mobile-nav-height: 52px;
             padding-bottom: calc(52px + env(safe-area-inset-bottom));
           }
 
@@ -1153,7 +1104,7 @@ export default function MobilePortal({ data, initialPath = '/' }: MobilePortalPr
           }
 
           .pocket .portraitFrame img {
-            object-position: center 30%;
+            object-position: 47% 30%;
           }
 
           .pocket .coverType {
@@ -1171,15 +1122,12 @@ export default function MobilePortal({ data, initialPath = '/' }: MobilePortalPr
             margin-bottom: 6px;
           }
 
-          .pocket .coverTagline {
-            display: none;
-          }
-
           .pocket .section {
-            padding-top: 32px;
+            padding-top: 0;
           }
 
           .pocket .sectionHeading {
+            padding-top: 32px;
             padding-bottom: 24px;
           }
 
@@ -1189,10 +1137,6 @@ export default function MobilePortal({ data, initialPath = '/' }: MobilePortalPr
 
           .pocket .bottomNav {
             min-height: calc(52px + env(safe-area-inset-bottom));
-          }
-
-          .pocket .mobile-section-glass {
-            bottom: calc(52px + env(safe-area-inset-bottom) + 10px);
           }
 
           .pocket .navItem {

@@ -26,7 +26,7 @@ import * as THREE from 'three';
 // the room reads as a flat plane of one repeated glyph. More steps give
 // the mid-tones (ambient-lit surfaces short of the point light's hot spot)
 // somewhere to land instead of jumping straight to max density.
-const RAMP = ' .\'`^",:;Il!i><~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$';
+const RAMP = ' .\'`^",:;Il!i><~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@';
 // Big enough that the point light's falloff (below) no longer reaches the
 // far walls at full strength — a small room lit this brightly is just
 // uniformly overexposed with no sense of scale, since light reaches every
