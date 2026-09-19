@@ -10,6 +10,10 @@ const nextConfig: NextConfig = {
     root: projectRoot,
   },
   outputFileTracingRoot: projectRoot,
+  images: {
+    // Serve AVIF where supported, WebP otherwise (the default is WebP only).
+    formats: ['image/avif', 'image/webp'],
+  },
   headers: async () => [
     {
       source: '/(.*)',

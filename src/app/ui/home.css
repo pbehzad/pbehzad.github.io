@@ -1,0 +1,97 @@
+/*
+ * Home view: one portrait inside one organic form, centred in the viewport.
+ * Everything here is static; nothing animates or redraws while idle.
+ */
+
+:root {
+  /* Frame width: about 53% of a desktop viewport, bounded by the viewport
+     height so the form never crowds the header, and by the gutters on
+     narrow screens. */
+  --portrait-inline-size: min(
+    calc(100vw - 2 * var(--gutter)),
+    85svh,
+    48rem,
+    max(53.5vw, 21rem)
+  );
+  --portrait-aspect: 1.14;
+}
+
+@layer components {
+  /* Cancels the shell's header offset so the portrait centres on the
+     viewport rather than on the area below the header. */
+  .ui-home {
+    display: grid;
+    place-items: center;
+    min-block-size: 100vh;
+    min-block-size: 100svh;
+    margin-block-start: calc(-1 * var(--shell-header-block-size));
+    padding-inline: var(--gutter-inline-start) var(--gutter-inline-end);
+  }
+
+  .ui-home-portrait {
+    position: relative;
+    inline-size: var(--portrait-inline-size);
+    aspect-ratio: var(--portrait-aspect);
+  }
+
+  .ui-home-portrait__photo,
+  .ui-home-portrait__light,
+  .ui-home-portrait__rim {
+    position: absolute;
+    inset: 0;
+    inline-size: 100%;
+    block-size: 100%;
+  }
+
+  /* Flat version: the photo cropped to the organic outline. The inline
+     mask image comes from portraitShape.ts. */
+  .ui-home-portrait__photo {
+    overflow: hidden;
+    background: var(--color-surface);
+    mask-size: 100% 100%;
+    mask-repeat: no-repeat;
+  }
+
+  /* Head-and-shoulders crop matching the mockup: the square photo is drawn
+     at 140% of the frame width and offset so the face sits left of centre
+     in the upper third. */
+  .ui-home-portrait__photo img {
+    position: absolute;
+    inset-block-start: -15.4%;
+    inset-inline-start: -27.7%;
+    inline-size: 140%;
+    max-inline-size: none;
+    block-size: auto;
+  }
+
+  .ui-home-portrait__light {
+    overflow: visible;
+    fill: rgb(0 0 0 / 0.01);
+    filter: url(#home-portrait-light);
+    pointer-events: none;
+  }
+
+  .ui-home-portrait__rim {
+    overflow: visible;
+    fill: none;
+    stroke: var(--color-rule);
+    stroke-width: 1px;
+    pointer-events: none;
+  }
+
+  @media (prefers-reduced-transparency: reduce) {
+    .ui-home-portrait__light {
+      display: none;
+    }
+  }
+
+  @media (forced-colors: active) {
+    .ui-home-portrait__light {
+      display: none;
+    }
+
+    .ui-home-portrait__rim {
+      stroke: CanvasText;
+    }
+  }
+}
