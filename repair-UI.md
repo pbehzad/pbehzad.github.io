@@ -278,24 +278,33 @@ Primary ownership: `HomeView`, portrait asset/presentation, home-only signature 
 
 ### Tasks
 
-- [ ] Use the canonical home mockup as the composition reference.
-- [ ] Center the portrait artwork in the viewport at desktop and mobile sizes.
-- [ ] Use `public/ParhamBehzad-display.jpg` or the confirmed source portrait; do not duplicate source images.
-- [ ] Generate responsive AVIF/WebP delivery through `next/image` or an equivalent framework-managed path.
-- [ ] Build a static organic mask/rim fallback with no displacement filter.
-- [ ] If live liquid is retained, constrain it to the portrait bounds and load it after meaningful content.
-- [ ] Remove central identity copy and selected-work content from the home view.
-- [ ] Decide whether the faint ASCII trace is a static image/CSS texture or omitted; do not use live Three.js.
-- [ ] Verify portrait crop, safe areas, and centering across the viewport matrix.
+- [x] Use the canonical home mockup as the composition reference. The organic outline in `src/app/ui/portraitShape.ts` is traced from the mockup, and the crop places the face left of centre in the upper third, as the mockup does.
+- [x] Center the portrait artwork in the viewport at desktop and mobile sizes. `.ui-home` cancels the shell's header offset, so the frame centres on the viewport. Measured in Chromium and Firefox: the frame centre equals the viewport centre at 1440 × 900, 1024 × 768, 768 × 1024, and 390 × 844, with no scrolling.
+- [x] Use `public/ParhamBehzad-display.jpg` or the confirmed source portrait; do not duplicate source images. The home view uses `ParhamBehzad-display.jpg` directly; no copy was added.
+- [x] Generate responsive AVIF/WebP delivery through `next/image` or an equivalent framework-managed path. `next.config.ts` now serves AVIF with a WebP fallback, adds a 1440 px candidate for 3× phones, and allows quality 65 for the portrait. The photo's film grain dominates its size: at 1440 px, AVIF is about 254 kB at quality 75 and 79 kB at quality 65, with face and hair detail intact.
+- [x] Build a static organic mask/rim fallback with no displacement filter. The flat version is the photo under an SVG mask of the outline plus a 1 px hairline. It uses no filter.
+- [x] If live liquid is retained, constrain it to the portrait bounds and load it after meaningful content. No live liquid is used. The only enhancement is a static specular rim, computed once by an SVG lighting filter from the outline itself, using the same technique as the menu droplet. It is bounded to the frame, uses no displacement or script, and is disabled for reduced transparency and forced colors.
+- [x] Remove central identity copy and selected-work content from the home view. The only heading is a visually hidden `h1` with the profile name; the brand link already shows the name.
+- [x] Decide whether the faint ASCII trace is a static image/CSS texture or omitted; do not use live Three.js. Decision: omitted for now. A static texture would be a new ornament that needs approval, and the page already reads as finished without it. It can return later as a static CSS texture behind the frame.
+- [x] Verify portrait crop, safe areas, and centering across the viewport matrix. Crop and centering are verified at all four viewports in Chromium and Firefox. Horizontal padding uses the safe-area gutters. Notched-device verification is part of R8.
 
 ### Exit gate
 
-- [ ] The page matches the canonical hierarchy at 1440 × 900.
-- [ ] The mobile version preserves the same empty composition without crowding.
-- [ ] The portrait has a useful flat/static fallback.
-- [ ] The common mobile portrait response is below 250 kB.
-- [ ] The home page is idle when the user is idle.
-- [ ] Failure of every optional visual effect leaves a finished-looking page.
+- [x] The page matches the canonical hierarchy at 1440 × 900: only the brand, the portrait form, and the menu control. See [`r3-home-desktop.png`](docs/ui-audit/r3-home-desktop.png). The static rim is quieter than the mockup's rendered glass, which needs visual review (see the handoff notes).
+- [x] The mobile version preserves the same empty composition without crowding. See [`r3-home-mobile.png`](docs/ui-audit/r3-home-mobile.png): a 336 × 295 frame centred at 390 × 844.
+- [x] The portrait has a useful flat/static fallback. See [`r3-home-fallbacks.png`](docs/ui-audit/r3-home-fallbacks.png) for reduced transparency, forced colors, the light filter removed, and stylesheets blocked.
+- [x] The common mobile portrait response is below 250 kB. At 390 × 844 and 3×, the page loads the 1440 px AVIF at 78,670 bytes. Desktop at 1440 × 900 loads 1080 px at 17,354 bytes.
+- [x] The home page is idle when the user is idle. Instrumented in Chromium over 3 s idle: 0 `requestAnimationFrame` calls, 0 intervals, 0 canvas or WebGL contexts, 0 running animations, and cumulative layout shift 0. The route loads no Three.js.
+- [x] Failure of every optional visual effect leaves a finished-looking page. The light layer's fill is 1% black, so if its filter fails, the page shows the same masked photo and hairline. Without JavaScript the page looks identical. With stylesheets blocked it renders as an ordered document.
+
+### R3 handoff notes
+
+- Evidence (Chromium and Firefox via Playwright against a production build, 2026-09-19): [desktop](docs/ui-audit/r3-home-desktop.png), [mobile](docs/ui-audit/r3-home-mobile.png), [fallbacks](docs/ui-audit/r3-home-fallbacks.png). Keyboard order is skip link, brand (`aria-current="page"`), then menu. Escape closes the menu and returns focus to the button.
+- Files: `src/app/page.tsx`, `src/app/ui/HomeView.tsx`, `src/app/ui/HomePortrait.tsx`, `src/app/ui/portraitShape.ts`, `src/app/ui/home.css`, plus a one-line CSS import in `src/app/layout.tsx` and image settings in `next.config.ts`.
+- Needs visual review: the rim strength (a cool key light at the upper left and a warm light at the lower right), the outline, and the crop. The mockup's thick refractive glass edge is not reproduced. Doing so would need a displacement filter on the photo, which is left for a separate, approved step.
+- The home route now throws if `profile.json` cannot be read, like `/design-lab/primitives`; the legacy portal fell back silently. Decide on a shared shell-level fallback when the shell is hoisted into a layout.
+- `next.config.ts` still sends `Cache-Control: no-store` for every path, including `/_next/image`. Optimized images are therefore not cached by browsers or the CDN. Revisit this in R9.
+- Real Safari (macOS, 2026-09-19, reported by the site owner; version not recorded): the home page renders the same as in Chrome, including the mask, the rim light, and the menu droplet. The Safari 16.4 baseline and iOS Safari remain part of R8.
 
 ## R4 — Implement the canonical Works index
 
