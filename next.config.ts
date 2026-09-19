@@ -1,6 +1,15 @@
+import path from "node:path";
 import type { NextConfig } from "next";
 
+// Pin the workspace root to this app. Lockfiles in parent directories
+// otherwise make Next.js infer the wrong root for Turbopack and tracing.
+const projectRoot = path.resolve(__dirname);
+
 const nextConfig: NextConfig = {
+  turbopack: {
+    root: projectRoot,
+  },
+  outputFileTracingRoot: projectRoot,
   headers: async () => [
     {
       source: '/(.*)',
