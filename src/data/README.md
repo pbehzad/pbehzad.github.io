@@ -2,25 +2,18 @@
 
 This directory defines the schemas and types for the portfolio content. Structured metadata uses JSON and long-form composition, text, event, and About bodies use HTML.
 
-## Directory Structure
+## Directory structure
 
 ```
-src/data/
-├── content/           # Structured JSON and long-form HTML
-│   ├── compositions.json
-│   ├── texts.json
-│   ├── tools.json
-│   ├── profile.json
-│   ├── contact.json
-│   ├── home.json
-│   └── texts/        # HTML files for essays/articles
-│       ├── post-heideggerian-aesthetics.html
-│       ├── circular-temporalities.html
-│       └── notation-as-interface.html
-├── types/            # TypeScript type definitions
-├── schemas/          # Zod validation schemas
-└── README.md         # This file
+project root/
+├── content-data/      # Ignored local-development content and media
+└── src/data/
+    ├── types/         # TypeScript type definitions
+    ├── schemas/       # Zod validation schemas
+    └── README.md      # This file
 ```
+
+Production may instead read the same content layout from the configured GitHub content repository. Do not commit `content-data/`, tokens, or private content to this repository.
 
 ## How to Edit Content
 
@@ -31,7 +24,7 @@ useful for migrations or recovery.
 
 ### 1. Editing Compositions
 
-Edit [content/compositions.json](content/compositions.json)
+For direct local recovery or migration work, edit `content-data/compositions.json`.
 
 ```json
 {
@@ -68,7 +61,9 @@ Edit [content/compositions.json](content/compositions.json)
 
 ### 2. Editing Texts
 
-#### Metadata: Edit [content/texts.json](content/texts.json)
+#### Metadata
+
+For direct local recovery or migration work, edit `content-data/texts.json`.
 
 ```json
 {
@@ -111,7 +106,7 @@ converts its rendered body to an HTML file.
 
 ### 3. Editing Tools
 
-Edit [content/tools.json](content/tools.json)
+For direct local recovery or migration work, edit `content-data/tools.json`.
 
 ```json
 {
@@ -147,7 +142,7 @@ Edit [content/tools.json](content/tools.json)
 
 ### 4. Editing Profile (About Section)
 
-Edit [content/profile.json](content/profile.json)
+For direct local recovery or migration work, edit `content-data/profile.json`.
 
 ```json
 {
@@ -194,7 +189,7 @@ Edit [content/profile.json](content/profile.json)
 
 ### 5. Editing Contact Info
 
-Edit [content/contact.json](content/contact.json)
+For direct local recovery or migration work, edit `content-data/contact.json`.
 
 ```json
 {
@@ -211,7 +206,7 @@ Edit [content/contact.json](content/contact.json)
 
 ### 6. Editing Home Page Content
 
-Edit [content/home.json](content/home.json)
+For direct local recovery or migration work, edit `content-data/home.json`.
 
 ```json
 {

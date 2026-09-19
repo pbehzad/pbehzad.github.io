@@ -13,6 +13,7 @@
     "build": "next build --turbopack",
     "start": "next start",
     "lint": "eslint",
+    "typecheck": "tsc --noEmit",
     "validate": "ts-node --project tsconfig.scripts.json scripts/validate-content.ts",
     "new:composition": "ts-node --project tsconfig.scripts.json scripts/new-composition.ts",
     "new:text": "ts-node --project tsconfig.scripts.json scripts/new-text.ts"

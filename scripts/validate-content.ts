@@ -2,13 +2,15 @@
  * Content Validation Script
  *
  * Run this to validate all content files before committing:
- * npx ts-node scripts/validate-content.ts
+ * npm run validate
  */
 
 import fs from 'fs';
 import path from 'path';
+import { z } from 'zod';
 import {
   compositionsArraySchema,
+  eventsArraySchema,
   textsArraySchema,
   toolsArraySchema,
   profileSchema,
@@ -16,7 +18,7 @@ import {
   homeContentSchema
 } from '../src/data/schemas';
 
-const contentDir = path.join(__dirname, '../src/data/content');
+const contentDir = path.join(process.cwd(), 'content-data');
 
 interface ValidationResult {
   file: string;
@@ -24,7 +26,7 @@ interface ValidationResult {
   errors?: string[];
 }
 
-function validateFile(filename: string, schema: any): ValidationResult {
+function validateFile(filename: string, schema: z.ZodType<unknown>): ValidationResult {
   try {
     const filePath = path.join(contentDir, filename);
     const content = fs.readFileSync(filePath, 'utf8');
@@ -38,7 +40,7 @@ function validateFile(filename: string, schema: any): ValidationResult {
       return {
         file: filename,
         valid: false,
-        errors: result.error.errors.map((e: any) => `${e.path.join('.')}: ${e.message}`)
+        errors: result.error.issues.map((issue) => `${issue.path.join('.')}: ${issue.message}`)
       };
     }
   } catch (error) {
@@ -54,6 +56,7 @@ console.log('🔍 Validating content files...\n');
 
 const validations: ValidationResult[] = [
   validateFile('compositions.json', compositionsArraySchema),
+  validateFile('events.json', eventsArraySchema),
   validateFile('texts.json', textsArraySchema),
   validateFile('tools.json', toolsArraySchema),
   validateFile('profile.json', profileSchema),

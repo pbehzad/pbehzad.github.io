@@ -1,36 +1,52 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# parhambehzad.com
 
-## Getting Started
+The Next.js portfolio and content-management application for Parham Behzad.
 
-First, run the development server:
+The public UI is entering a barely-there redesign. Existing routes, content schemas, storage adapters, admin tools, and published content are being preserved while the heavy six-column visual runtime is replaced.
+
+## Start here
+
+- Contributors and agents: [`AGENTS.md`](AGENTS.md)
+- Active redesign roadmap: [`repair-UI.md`](repair-UI.md)
+- Baseline audit and design brief: [`basecase-UI.md`](basecase-UI.md)
+- Documentation index: [`docs/README.md`](docs/README.md)
+- Content system guide: [`src/data/README.md`](src/data/README.md)
+
+Canonical targets:
+
+- [Home](docs/ui-audit/redesign-homepage-concept-v4-centered.png)
+- [Works](docs/ui-audit/redesign-works-concept-v3-no-highlighter.png)
+
+## Local development
 
 ```bash
+npm ci
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Local content is read from the ignored `content-data/` directory unless `CONTENT_STORAGE=github` is configured. Do not commit environment files, tokens, or private content.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Quality checks
 
-## Learn More
+```bash
+npm run lint
+npm run typecheck
+npm run build
+```
 
-To learn more about Next.js, take a look at the following resources:
+Run `npm run validate` when a complete local content set is present in `content-data/`. The roadmap tracks the remaining work needed to make content validation useful in a fresh checkout.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Main areas
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```text
+src/app/          public routes, admin UI, and API routes
+src/services/     content reads used by public pages
+src/data/         schemas, types, and content documentation
+src/lib/          storage and content-management infrastructure
+public/           static assets and vendored Zaya reader
+docs/             audit assets and working guides
+```
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Public redesign work should not alter admin, API, storage, or content behavior unless its work package explicitly includes that scope.
