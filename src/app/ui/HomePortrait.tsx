@@ -3,10 +3,13 @@ import { PORTRAIT_SHAPE_MASK, PORTRAIT_SHAPE_PATH } from './portraitShape';
 
 const PORTRAIT_SRC = '/ParhamBehzad-display.jpg';
 const PORTRAIT_SOURCE_SIZE = 1800;
+// The photo's film grain dominates file size: at 1440 px, quality 75 is
+// about 250 kB of AVIF and quality 65 about 80 kB with the detail intact.
+const PORTRAIT_QUALITY = 65;
 
-// The photo is drawn at 140% of the frame width (see home.css), so request
-// candidates for that rendered width rather than the frame's.
-const PORTRAIT_SIZES = '(max-width: 40rem) calc(140vw - 3.5rem), (max-width: 90rem) 75vw, 1080px';
+// The photo is drawn at 140% of the frame width (see home.css), so these are
+// 1.4 times the frame: 21rem on phones, about 53.5vw up to 48rem above that.
+const PORTRAIT_SIZES = '(max-width: 40rem) 29.4rem, (max-width: 90rem) 75vw, 1080px';
 
 type HomePortraitProps = {
   alt: string;
@@ -34,6 +37,7 @@ export function HomePortrait({ alt }: HomePortraitProps) {
           width={PORTRAIT_SOURCE_SIZE}
           height={PORTRAIT_SOURCE_SIZE}
           sizes={PORTRAIT_SIZES}
+          quality={PORTRAIT_QUALITY}
           priority
         />
       </div>
@@ -86,7 +90,7 @@ function PortraitLightDefs() {
           <feSpecularLighting
             in="height"
             surfaceScale="9"
-            specularConstant="1.1"
+            specularConstant="1.4"
             specularExponent="34"
             lightingColor="#ffffff"
             result="key"

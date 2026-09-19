@@ -54,11 +54,11 @@
 
   /* Head-and-shoulders crop matching the mockup: the square photo is drawn
      at 140% of the frame width and offset so the face sits left of centre
-     in the upper third. */
+     in the upper third, as in the mockup. */
   .ui-home-portrait__photo img {
     position: absolute;
     inset-block-start: -15.4%;
-    inset-inline-start: -27.7%;
+    inset-inline-start: -21%;
     inline-size: 140%;
     max-inline-size: none;
     block-size: auto;
@@ -74,7 +74,9 @@
   .ui-home-portrait__rim {
     overflow: visible;
     fill: none;
-    stroke: var(--color-rule);
+    /* Brighter than --color-rule so the edge stays visible where the
+       photo is black. */
+    stroke: rgb(235 233 226 / 0.34);
     stroke-width: 1px;
     pointer-events: none;
   }
