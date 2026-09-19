@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import "./fonts.css";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -27,11 +28,12 @@ export default function RootLayout({
       <head>
         <link rel="icon" type="image/svg+xml" href="/branding/logo-primary.svg" />
         <link rel="shortcut icon" href="/branding/logo-primary.svg" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
-          href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;700;800;900&family=Major+Mono+Display&display=swap"
-          rel="stylesheet"
+          rel="preload"
+          href="/fonts/jetbrains-mono-latin.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
         />
       </head>
       <body className="antialiased">
