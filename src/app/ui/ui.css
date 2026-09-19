@@ -25,7 +25,7 @@
   --color-rule: rgb(235 233 226 / 0.16);
   --color-surface: #0d0e0d;
   --color-focus: #ffffff;
-  --color-scrim: rgb(8 9 8 / 0.94);
+  --color-scrim: rgb(8 9 8 / 0.985);
 
   /* Type */
   --font-ui: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
@@ -69,8 +69,8 @@
 
   /* Layering: a small fixed scale. */
   --layer-base: 0;
-  --layer-header: 10;
-  --layer-menu: 20;
+  --layer-menu: 10;
+  --layer-menu-control: 20;
   --layer-skip-link: 30;
 }
 
