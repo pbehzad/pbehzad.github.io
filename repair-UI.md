@@ -201,22 +201,30 @@ Primary ownership: public tokens, typography, focus styles, primitive components
 
 ### Tasks
 
-- [ ] Add a small public token set for background, foreground, muted text, rules, focus, spacing, type, motion, and layering.
-- [ ] Remove public reliance on universal font-weight, heading-uppercase, transition, and focus rules.
-- [ ] Establish the near-black/warm-white color system from the audit.
-- [ ] Load the approved mono fonts without render-blocking external CSS.
-- [ ] Add `SkipLink`, `BrandLink`, `MenuButton`, and basic content-width primitives.
-- [ ] Establish visible keyboard focus that fits the minimal aesthetic.
-- [ ] Establish shared empty, loading, and error states that contain no visual effects.
-- [ ] Add reduced-motion and reduced-transparency handling at the token/primitive level.
-- [ ] Keep admin styling isolated from public styling.
+- [x] Add a small public token set for background, foreground, muted text, rules, focus, spacing, type, motion, and layering. Defined on `:root` in `src/app/ui/ui.css`.
+- [x] Remove public reliance on universal font-weight, heading-uppercase, transition, and focus rules. Inside `.ui`, an unlayered isolation block rolls back the legacy element rules with `revert-layer`, so Tailwind preflight, the layered primitives, and utilities apply normally. Two legacy `!important` rules remain until R7: the universal font-family, which matches the approved font, and `animation-timing-function`.
+- [x] Establish the near-black/warm-white color system from the audit (`--color-bg: #080908`, `--color-fg: #ebe9e2`, muted, rule, surface, focus, and scrim).
+- [x] Load the approved mono fonts without render-blocking external CSS (self-hosted in R0).
+- [x] Add `SkipLink`, `BrandLink`, `MenuButton`, and basic content-width primitives. The components live in `src/app/ui/`; content widths are `.ui-measure` (66ch) and `.ui-index-column` (32rem). All are Server Component–compatible and ship no page JavaScript.
+- [x] Establish visible keyboard focus that fits the minimal aesthetic: a 2 px warm-white outline with a 3 px offset on `:focus-visible` only, and `Highlight` in forced-colors mode. Verified in Chromium and Firefox; pointer focus draws no outline.
+- [x] Establish shared empty, loading, and error states that contain no visual effects. `StatusMessage` is text only: `role="status"` for empty and loading, `role="alert"` for errors, and callers supply the wording.
+- [x] Add reduced-motion and reduced-transparency handling at the token/primitive level. Reduced motion sets the duration tokens to 0; reduced transparency makes `--color-scrim` opaque. Verified with emulated media in Chromium.
+- [x] Keep admin styling isolated from public styling. Public rules are scoped to `.ui` and `.ui-*`, and the tokens use names nothing else defines or reads. Verified 2026-09-19: Chromium screenshots of `/admin/login` (with and without JavaScript) and of the legacy `/about`, `/compositions`, `/compositions/overcomplication`, and `/texts/post-heideggerian-aesthetics` (without JavaScript) are byte-identical to the `ui-baseline` build.
 
 ### Exit gate
 
-- [ ] A primitives preview or temporary route renders correctly with CSS/effects disabled.
-- [ ] Text remains readable at 200% zoom.
-- [ ] Focus is visible and touch targets meet 44 × 44 CSS pixels.
-- [ ] No primitive starts a timer, render loop, observer network, or WebGL context.
+- [x] A primitives preview or temporary route renders correctly with CSS/effects disabled. The temporary route `/design-lab/primitives` is `noindex` and scheduled for removal after R2. With stylesheets blocked, it renders as a plain, ordered document.
+- [x] Text remains readable at 200% zoom. No horizontal overflow at 720 × 450 or 320 × 568 CSS pixels (1440 × 900 and 640 × 1136 at 200%).
+- [x] Focus is visible and touch targets meet 44 × 44 CSS pixels: brand 125 × 44, menu button 52 × 52, skip link 149 × 45.
+- [x] No primitive starts a timer, render loop, observer network, or WebGL context. Instrumented in Chromium over 3 s idle: 0 `requestAnimationFrame`, 0 intervals, 0 WebGL or 2D contexts, and 0 running animations. The single timeout and observer come from the Next.js runtime and do not repeat.
+
+### R1 handoff notes
+
+- Evidence (Chromium 1440 × 900 and 390 × 844, 2026-09-19; the route was also checked in Firefox): [`r1-primitives-desktop.png`](docs/ui-audit/r1-primitives-desktop.png), [`r1-primitives-mobile.png`](docs/ui-audit/r1-primitives-mobile.png), [`r1-primitives-menu-focus.png`](docs/ui-audit/r1-primitives-menu-focus.png).
+- Render new public UI inside an element with the `ui` class. Inside it, Tailwind utilities work normally; outside it, legacy unlayered rules still override them.
+- The header gutters (`--gutter-inline-*`, `--gutter-block-start`) match the mockup's corner placement: the brand and menu sit 48 px in from the sides and 23 px from the top at 1440 px. R2 owns the final header layout.
+- For R4: some composition titles are stored in uppercase, and `year` holds full dates such as `2025-06-01`. The Works mockup shows lowercase titles and a bare year. Decide the display treatment without changing content data.
+- Not yet tested in real Safari. `revert-layer` requires Safari 15.4 or later, which is within the 16.4 baseline.
 
 ## R2 — Build the shared shell and collapsed menu
 
