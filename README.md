@@ -19,6 +19,8 @@ Canonical targets:
 
 ## Local development
 
+Requires Node.js 20.9.0 (see `.nvmrc`) and npm 10. Next.js 15.5 supports Node.js 18.18 or later. The Node.js version for Vercel builds comes from the Vercel project settings, not from `.nvmrc`.
+
 ```bash
 npm ci
 npm run dev
@@ -36,7 +38,7 @@ npm run typecheck
 npm run build
 ```
 
-Run `npm run validate` when a complete local content set is present in `content-data/`. The roadmap tracks the remaining work needed to make content validation useful in a fresh checkout.
+Run `npm run validate` to check the local content set in `content-data/`; it exits with setup instructions if the directory is missing. In a fresh checkout, run `npm run validate:fixtures` to check the schemas against the non-secret fixtures in `scripts/fixtures/content/`.
 
 ## Main areas
 

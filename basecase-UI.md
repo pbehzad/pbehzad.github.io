@@ -140,6 +140,26 @@ The production build succeeds, but the visual stack adds significant client code
 
 The primary problem is not just download size. It is that the downloaded code starts persistent graphics work on pages whose main job is reading.
 
+### Baseline route behavior
+
+Recorded 2026-09-19 for R0: a production build (`npm run build`, then `next start`) with `CONTENT_STORAGE=local` and the configured `content-data/` set, probed with unauthenticated `curl` requests. The redesign must preserve these status codes and redirects. Detail routes were probed with one published slug per type.
+
+| Entry point | Status | Notes |
+| --- | --- | --- |
+| `/`, `/compositions`, `/events`, `/texts`, `/about`, `/contact` | 200 | Static (`○`) routes |
+| `/compositions/[slug]`, `/events/[slug]`, `/texts/[slug]` | 200 | Dynamic (`ƒ`) routes; 259 kB first-load JavaScript |
+| `/compositions/does-not-exist`, `/no-such-route` | 404 | Unknown slugs and routes use the not-found page |
+| `/sitemap.xml` | 200 | Static |
+| `/design-lab/metal` | 200 | Public but not linked; 253 kB first-load JavaScript |
+| `/admin`, `/admin/compositions`, `/admin/files` | 307 → `/admin/login` | `src/middleware.ts` guards `/admin/:path*` |
+| `/admin/login` | 200 | |
+| `/api/content/*` (compositions, compositions/[slug], events, texts, profile, contact, home, tools) | 200 | Public read endpoints |
+| `/api/admin/compositions`, `/api/admin/files` | 401 | Middleware guards `/api/admin/:path*` |
+| `POST /api/admin/login` with an empty body | 401 | |
+| `/api/media/does-not-exist.png` | 404 | |
+
+Admin, API, content storage, and media routes are outside the visual redesign. R7 and R9 should re-run this probe and compare the results.
+
 ## Safari diagnosis
 
 The `liquid-glass-web-react` package states that it supports Safari and contains Safari-specific handling. Its own documentation also warns that Safari caps the size of an SVG-filtered source and may degrade on very large regions.

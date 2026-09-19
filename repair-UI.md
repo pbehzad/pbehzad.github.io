@@ -50,10 +50,10 @@ The earlier ASCII wireframes and “quiet index” proposal inside `basecase-UI.
 - [x] `npm run lint` has no errors on the preparation baseline.
 - [x] `npm run build` passes on the preparation baseline.
 - [x] `npm run validate` passes against the configured local content set.
-- [ ] Replace external font tags with `next/font` or self-hosted fonts; one lint warning remains until this is done.
-- [ ] Resolve the Turbopack workspace-root warning caused by parent-directory lockfiles.
-- [ ] Decide and implement a fresh-checkout content validation strategy; `npm run validate` currently requires ignored local files in `content-data/`.
-- [ ] Create the implementation branch/worktrees for the first active packages.
+- [x] Replace external font tags with `next/font` or self-hosted fonts. Self-hosted in `public/fonts/` (see R0); lint now reports 0 problems.
+- [x] Resolve the Turbopack workspace-root warning caused by parent-directory lockfiles (see R0).
+- [x] Decide and implement a fresh-checkout content validation strategy: `npm run validate:fixtures` checks committed fixtures; `npm run validate` checks `content-data/` (see R0).
+- [x] Create the implementation branch/worktrees for the first active packages. R0 is on `ui-baseline`; later packages branch from it once it is merged.
 
 ## Approved design contract
 
@@ -167,25 +167,29 @@ Suggested owner: integration/build agent
 
 ### Tasks
 
-- [ ] Confirm the expected Node/npm versions or add an `engines` entry/tool-version file.
-- [ ] Run `npm ci` from a fresh worktree.
+- [x] Confirm the expected Node/npm versions or add an `engines` entry/tool-version file. `.nvmrc` pins Node.js 20.9.0, the version R0 was verified with, alongside npm 10.9.2; the README documents this. No `engines` entry was added because it would override the Vercel project's Node.js setting.
+- [x] Run `npm ci` from a fresh worktree. Verified 2026-09-19 in a detached worktree with no `content-data/` or `.env.local`: `npm ci`, `lint`, `typecheck`, `validate:fixtures`, and `build` all pass, and `validate` exits 1 with setup guidance. `npm audit` reports advisories in transitive dependencies and `next` 15.5.12; those are left for a separate dependency task.
 - [x] Add an explicit `npm run typecheck` command.
 - [x] Remove existing ESLint errors in `scripts/validate-content.ts`.
-- [ ] Replace the `<head>` Google Fonts stylesheet in `src/app/layout.tsx` with `next/font` or self-hosted assets.
-- [ ] Configure the correct Turbopack root so parent lockfiles do not influence builds.
-- [ ] Choose a local-content validation approach:
+- [x] Replace the `<head>` Google Fonts stylesheet in `src/app/layout.tsx` with `next/font` or self-hosted assets.
+
+  Self-hosted WOFF2 files (latin and latin-ext subsets, SIL OFL licenses included) live in `public/fonts/`, with `@font-face` rules in `src/app/fonts.css` and a preload for the main JetBrains Mono file. `next/font` was not used because legacy code and canvas text measurement (`DesktopColumnPortal`) reference the literal family names `JetBrains Mono` and `Major Mono Display`, which `next/font` would hash. R1 may switch to `next/font` once those consumers are retired. Verified 2026-09-19: the production server returns 200 `font/woff2` for all four files, the built HTML has no `googleapis` reference, and a headless Chrome capture of `/about` at 1440 × 900 matches the baseline typography.
+- [x] Configure the correct Turbopack root so parent lockfiles do not influence builds. `turbopack.root` and `outputFileTracingRoot` are pinned to the app directory in `next.config.ts`; verified 2026-09-19: `npm run build` prints no warnings.
+- [x] Choose a local-content validation approach:
   - provide documented non-secret fixtures, or
   - add a schema-only validation mode for fresh checkouts, while keeping full local-content validation explicit.
-- [ ] Record baseline route behavior for all public and admin entry points.
+
+  Decision: non-secret placeholder fixtures live in `scripts/fixtures/content/` and are checked with `npm run validate:fixtures`. `npm run validate` stays the explicit full check of `content-data/` and exits 1 with setup instructions when that directory is missing. Verified 2026-09-19: fixtures pass, configured `content-data/` passes, and the missing-directory path prints guidance and exits 1.
+- [x] Record baseline route behavior for all public and admin entry points. See [Baseline route behavior](basecase-UI.md#baseline-route-behavior) (2026-09-19).
 - [x] Confirm production build output before public UI files change.
 
 ### Exit gate
 
-- [ ] `npm run lint` passes with no errors; remaining warnings are listed and owned.
-- [ ] `npm run typecheck` passes.
-- [ ] `npm run build` passes from the repository root without an ambiguous workspace-root warning.
-- [ ] Content validation behavior is actionable in both fresh and configured local checkouts.
-- [ ] Admin and content infrastructure are explicitly confirmed out of scope for the visual replacement.
+- [x] `npm run lint` passes with no errors; remaining warnings are listed and owned. As of 2026-09-19: 0 errors, 0 warnings.
+- [x] `npm run typecheck` passes (2026-09-19).
+- [x] `npm run build` passes from the repository root without an ambiguous workspace-root warning (2026-09-19).
+- [x] Content validation behavior is actionable in both fresh and configured local checkouts. Evidence: see the R0 validation decision above.
+- [x] Admin and content infrastructure are explicitly confirmed out of scope for the visual replacement. `AGENTS.md` protects `src/app/admin/**`, `src/app/api/**`, `src/data/**`, `src/lib/**`, and `src/services/**`; R0 changed none of them, and their route behavior is recorded as the baseline to preserve.
 
 ## R1 — Introduce tokens and semantic primitives
 
