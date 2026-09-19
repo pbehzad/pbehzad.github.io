@@ -1,0 +1,10 @@
+{
+  "hero": {
+    "name": "Fixture Name",
+    "title": "Fixture title",
+    "subtitle": "Fixture subtitle",
+    "tagline": "Fixture tagline"
+  },
+  "recent_works": [],
+  "updated_at": "2024-01-01T00:00:00Z"
+}

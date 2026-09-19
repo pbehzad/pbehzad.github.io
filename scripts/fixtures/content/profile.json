@@ -1,0 +1,14 @@
+{
+  "name": "Fixture Name",
+  "bio": "Fixture biography.",
+  "about_sections": [
+    {
+      "id": "fixture-section",
+      "title": "Fixture section",
+      "html_content": "<p>Fixture section.</p>",
+      "link_url": null,
+      "visible": true
+    }
+  ],
+  "updated_at": "2024-01-01T00:00:00Z"
+}

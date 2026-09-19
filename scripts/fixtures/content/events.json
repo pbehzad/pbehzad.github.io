@@ -1,0 +1,16 @@
+[
+  {
+    "id": "fixture-event",
+    "slug": "fixture-event",
+    "title": "Fixture event",
+    "date": "2024-01-01",
+    "venue": "Fixture venue",
+    "city": "Fixture city",
+    "country": null,
+    "role": "composer",
+    "url": null,
+    "status": "published",
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  }
+]

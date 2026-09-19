@@ -1,8 +1,11 @@
 /**
  * Content Validation Script
  *
- * Run this to validate all content files before committing:
+ * Validate the configured local content set in content-data/:
  * npm run validate
+ *
+ * Validate the committed, non-secret fixtures (works in a fresh checkout):
+ * npm run validate:fixtures
  */
 
 import fs from 'fs';
@@ -18,7 +21,18 @@ import {
   homeContentSchema
 } from '../src/data/schemas';
 
-const contentDir = path.join(process.cwd(), 'content-data');
+const useFixtures = process.argv.includes('--fixtures');
+const contentDir = useFixtures
+  ? path.join(process.cwd(), 'scripts', 'fixtures', 'content')
+  : path.join(process.cwd(), 'content-data');
+
+if (!fs.existsSync(contentDir)) {
+  console.log(`❌ No local content set found at ${path.relative(process.cwd(), contentDir)}/`);
+  console.log('   Full validation needs the local content files. Either:');
+  console.log('   - copy the content repository files into content-data/, or');
+  console.log('   - run `npm run validate:fixtures` to check the schemas against the committed fixtures.');
+  process.exit(1);
+}
 
 interface ValidationResult {
   file: string;
@@ -52,7 +66,7 @@ function validateFile(filename: string, schema: z.ZodType<unknown>): ValidationR
   }
 }
 
-console.log('🔍 Validating content files...\n');
+console.log(`🔍 Validating content files in ${path.relative(process.cwd(), contentDir)}/...\n`);
 
 const validations: ValidationResult[] = [
   validateFile('compositions.json', compositionsArraySchema),

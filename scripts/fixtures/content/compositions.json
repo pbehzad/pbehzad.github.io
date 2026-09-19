@@ -1,0 +1,20 @@
+[
+  {
+    "id": "fixture-composition",
+    "slug": "fixture-composition",
+    "title": "Fixture composition",
+    "year": "2024",
+    "instruments": "solo instrument",
+    "duration": null,
+    "description": null,
+    "score_url": "/media/fixture-score.pdf",
+    "audio_urls": [],
+    "tags": [],
+    "featured": false,
+    "status": "published",
+    "premiere": null,
+    "related_texts": ["fixture-text"],
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  }
+]

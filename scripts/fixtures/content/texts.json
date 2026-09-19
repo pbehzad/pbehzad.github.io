@@ -1,0 +1,17 @@
+[
+  {
+    "id": "fixture-text",
+    "slug": "fixture-text",
+    "title": "Fixture text",
+    "year": 2024,
+    "type": "essay",
+    "content_file": null,
+    "pdf_url": null,
+    "external_url": null,
+    "tags": [],
+    "status": "draft",
+    "related_compositions": ["fixture-composition"],
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  }
+]

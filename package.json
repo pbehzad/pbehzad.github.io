@@ -15,6 +15,7 @@
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "validate": "ts-node --project tsconfig.scripts.json scripts/validate-content.ts",
+    "validate:fixtures": "ts-node --project tsconfig.scripts.json scripts/validate-content.ts --fixtures",
     "new:composition": "ts-node --project tsconfig.scripts.json scripts/new-composition.ts",
     "new:text": "ts-node --project tsconfig.scripts.json scripts/new-text.ts"
   },
