@@ -290,7 +290,7 @@ Primary ownership: `HomeView`, portrait asset/presentation, home-only signature 
 
 ### Exit gate
 
-- [x] The page matches the canonical hierarchy at 1440 × 900: only the brand, the portrait form, and the menu control. See [`r3-home-desktop.png`](docs/ui-audit/r3-home-desktop.png). The static rim is quieter than the mockup's rendered glass, which needs visual review (see the handoff notes).
+- [x] The page matches the canonical hierarchy at 1440 × 900: only the brand, the portrait form, and the menu control. See [`r3-home-desktop.png`](docs/ui-audit/r3-home-desktop.png). The static rim is quieter than the mockup's rendered glass and was approved as is (2026-09-19).
 - [x] The mobile version preserves the same empty composition without crowding. See [`r3-home-mobile.png`](docs/ui-audit/r3-home-mobile.png): a 336 × 295 frame centred at 390 × 844.
 - [x] The portrait has a useful flat/static fallback. See [`r3-home-fallbacks.png`](docs/ui-audit/r3-home-fallbacks.png) for reduced transparency, forced colors, the light filter removed, and stylesheets blocked.
 - [x] The common mobile portrait response is below 250 kB. At 390 × 844 and 3×, the page loads the 1440 px AVIF at 78,670 bytes. Desktop at 1440 × 900 loads 1080 px at 17,354 bytes.
@@ -301,7 +301,7 @@ Primary ownership: `HomeView`, portrait asset/presentation, home-only signature 
 
 - Evidence (Chromium and Firefox via Playwright against a production build, 2026-09-19): [desktop](docs/ui-audit/r3-home-desktop.png), [mobile](docs/ui-audit/r3-home-mobile.png), [fallbacks](docs/ui-audit/r3-home-fallbacks.png). Keyboard order is skip link, brand (`aria-current="page"`), then menu. Escape closes the menu and returns focus to the button.
 - Files: `src/app/page.tsx`, `src/app/ui/HomeView.tsx`, `src/app/ui/HomePortrait.tsx`, `src/app/ui/portraitShape.ts`, `src/app/ui/home.css`, plus a one-line CSS import in `src/app/layout.tsx` and image settings in `next.config.ts`.
-- Needs visual review: the rim strength (a cool key light at the upper left and a warm light at the lower right), the outline, and the crop. The mockup's thick refractive glass edge is not reproduced. Doing so would need a displacement filter on the photo, which is left for a separate, approved step.
+- Visual review: the rim, outline, and crop were approved by the site owner on 2026-09-19. The mockup's thick refractive glass edge is intentionally not reproduced.
 - The home route now throws if `profile.json` cannot be read, like `/design-lab/primitives`; the legacy portal fell back silently. Decide on a shared shell-level fallback when the shell is hoisted into a layout.
 - `next.config.ts` still sends `Cache-Control: no-store` for every path, including `/_next/image`. Optimized images are therefore not cached by browsers or the CDN. Revisit this in R9.
 - Real Safari (macOS, 2026-09-19, reported by the site owner; version not recorded): the home page renders the same as in Chrome, including the mask, the rim light, and the menu droplet. The Safari 16.4 baseline and iOS Safari remain part of R8.
