@@ -243,7 +243,12 @@ Primary ownership: `SiteShell`, header, menu, shared responsive layout
 - [x] Implement focus management, Escape dismissal, route-change dismissal, and focus return. While the menu is open, Tab cycles between the button and the links, `main` is `inert`, and page scrolling is locked. Escape, a click outside the links, or the button closes the menu and returns focus to the button; a link click or any pathname change also closes it. Verified in Chromium and Firefox; the persistent-layout pathname case is exercised once two routes share the shell (R3–R5).
 - [x] Keep the closed navigation visually hidden without making it unavailable to assistive technology. The closed list is `display: none`, so its links cannot receive focus, as the menu rules require. Assistive technology reaches it through the always-present "Menu" button, whose `aria-expanded` and `aria-controls` expose the relationship.
 - [x] Implement a flat menu-button fallback first: an opaque surface circle with a 1 px rule border. Before hydration, or without JavaScript, the control is a link to `#site-menu`, and the menu opens through CSS `:target`.
-- [x] Add the bounded liquid appearance only as a progressive enhancement: behind `@supports (backdrop-filter)`, a real 12 px backdrop blur of content scrolling under the fixed control, plus a 1 px top hairline. It is disabled for reduced transparency and forced colors and uses the same geometry as the fallback. It adds no SVG filter, script, or dependency. Visual approval is pending (see the R2 handoff notes).
+- [x] Add the bounded liquid appearance only as a progressive enhancement. The refractive droplet was approved on 2026-09-19. It has three static layers, all at the fallback's 52 × 52 geometry:
+  - a rim lit by `feSpecularLighting` over a height map from the control's own disc, in every engine;
+  - a 12 px backdrop blur where `backdrop-filter` is supported;
+  - in Chromium only, backdrop refraction through a generated displacement map (`npm run generate:menu-droplet` writes `src/app/ui/menuDropletMap.ts`).
+
+  WebKit and Gecko drop an SVG backdrop filter entirely, so the `-webkit-` and `-moz-` aliases are documented engine proxies that keep those engines on the blur. The droplet adds no script, animation loop, or dependency, and it is disabled for reduced transparency and forced colors. Evidence: [`r2-menu-droplet-closeup.png`](docs/ui-audit/r2-menu-droplet-closeup.png), at 3× in Chromium then Firefox, at rest, over a test-only stripe probe, and over text.
 - [x] Replace viewport-JavaScript layout branching with CSS. The new shell has no viewport checks in JavaScript; the legacy `ColumnPortal` branching is removed with the legacy runtime in R7.
 - [ ] Confirm active routes and history/back behavior. History and back are verified: the menu closes on navigation, and going back restores a closed menu. `aria-current` marking (`page` on a section index, `true` inside it) is implemented but cannot be tested until a section route renders in the shell (R4).
 
@@ -260,8 +265,8 @@ Primary ownership: `SiteShell`, header, menu, shared responsive layout
 - Evidence (Chromium, 2026-09-19): [closed desktop](docs/ui-audit/r2-shell-closed-desktop.png), [open desktop](docs/ui-audit/r2-shell-open-desktop.png), [closed mobile](docs/ui-audit/r2-shell-closed-mobile.png), [open mobile](docs/ui-audit/r2-shell-open-mobile.png), [open without JavaScript](docs/ui-audit/r2-shell-nojs-open.png).
 - Usage: a page renders `<SiteShell brandName={profile.name} isHome={…}>` around its view. Content data stays in the route; the shell only receives the name. Once R3–R6 have migrated every public route, hoist the shell into a shared route-group layout so the menu persists across navigations.
 - The open menu is the conservative flat state from this roadmap: a 98.5% near-black layer with the section list on the index column. It needs visual review before it is treated as final.
-- The menu control's enhancement is a real backdrop blur, not the mockup's thick refractive droplet. Matching the mockup would need SVG displacement (for example, the existing `liquid-glass-web-react`) and design approval under "Questions that require design approval".
-- Before rebuilding, stop any running `next start`; building under a live server corrupted `.next` twice during R2.
+- The menu droplet uses a hand-written static SVG filter, not `liquid-glass-web-react`, which filters the content itself and would force a page-sized filter region. Headless Firefox showed no blur on the stripe probe; confirm the blur in real Firefox and Safari. After R2 no dependency changed.
+- Do not build in the repository while `npm run dev` is running: both write to `.next`, and that corrupted production builds twice during R2. Build in a separate copy instead.
 
 ## R3 — Implement the canonical home
 
