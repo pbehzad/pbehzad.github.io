@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { BrandLink } from './BrandLink';
+import { MenuDropletDefs } from './MenuDropletDefs';
 import { SiteMenu } from './SiteMenu';
 import { SkipLink } from './SkipLink';
 import { PUBLIC_SECTIONS } from './navigation';
@@ -19,6 +20,7 @@ type SiteShellProps = {
 export function SiteShell({ brandName, isHome = false, children }: SiteShellProps) {
   return (
     <div className="ui ui-shell">
+      <MenuDropletDefs />
       <SkipLink targetId={MAIN_ID} />
       <header className="ui-shell__header">
         <BrandLink name={brandName} isCurrent={isHome} />

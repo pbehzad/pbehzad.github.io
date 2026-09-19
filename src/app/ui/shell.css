@@ -118,17 +118,58 @@
     }
   }
 
+  /* Droplet rim: specular light computed by a static SVG filter from the
+     control's own disc (see MenuDropletDefs). The layer's own fill is
+     discarded by the filter; if the filter cannot resolve, the layer shows
+     the flat surface colour instead. */
+  .ui-menu-button {
+    position: relative;
+  }
+
+  .ui-menu-button__light {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: var(--color-surface);
+    filter: url(#menu-droplet-light);
+    pointer-events: none;
+  }
+
+  .ui-menu-button__icon {
+    position: relative;
+  }
+
+  /* Droplet refraction of content scrolling beneath the control. Only
+     Chromium renders SVG backdrop filters. WebKit and Gecko both accept the
+     syntax and then drop the whole backdrop filter, blur included. There is
+     no feature query for rendering support, so the -webkit- and -moz-
+     aliases serve as engine proxies here; those engines keep the plain blur.
+     Verified 2026-09-19 in Chromium and Firefox. */
+  @supports (backdrop-filter: url(#a)) and (not (-webkit-backdrop-filter: none)) and (not (-moz-appearance: none)) {
+    .ui-menu-button {
+      backdrop-filter: url(#menu-droplet-refract) blur(1px) saturate(1.4);
+    }
+  }
+
   @media (prefers-reduced-transparency: reduce) {
     .ui-menu-button {
       background: var(--color-surface);
       box-shadow: none;
       backdrop-filter: none;
     }
+
+    .ui-menu-button__light {
+      display: none;
+    }
   }
 
   @media (forced-colors: active) {
     .ui-menu-button {
       backdrop-filter: none;
+    }
+
+    .ui-menu-button__light {
+      display: none;
     }
 
     .ui-site-menu__link[aria-current] {

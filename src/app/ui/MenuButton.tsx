@@ -22,10 +22,20 @@ export function MenuButton({ controls, expanded, label = 'Menu', onClick, ref }:
       aria-expanded={expanded}
       onClick={onClick}
     >
+      <MenuButtonFace label={label} />
+    </button>
+  );
+}
+
+/** Shared inner layers for the menu control, whether it renders as a button or a link. */
+export function MenuButtonFace({ label }: { label: string }) {
+  return (
+    <>
+      <span className="ui-menu-button__light" aria-hidden="true" />
       <span className="ui-menu-button__icon" aria-hidden="true">
         ≡
       </span>
       <span className="ui-visually-hidden">{label}</span>
-    </button>
+    </>
   );
 }

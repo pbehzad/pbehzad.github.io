@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import type { KeyboardEvent as ReactKeyboardEvent, MouseEvent as ReactMouseEvent } from 'react';
-import { MenuButton } from './MenuButton';
+import { MenuButton, MenuButtonFace } from './MenuButton';
 import { getCurrentState } from './navigation';
 import type { NavigationSection } from './navigation';
 
@@ -98,8 +98,7 @@ export function SiteMenu({ sections, contentId }: SiteMenuProps) {
           />
         ) : (
           <a className="ui-menu-button" href={`#${PANEL_ID}`}>
-            <span className="ui-menu-button__icon" aria-hidden="true">≡</span>
-            <span className="ui-visually-hidden">Menu</span>
+            <MenuButtonFace label="Menu" />
           </a>
         )}
       </div>

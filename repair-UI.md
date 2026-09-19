@@ -12,7 +12,7 @@ Replace the heavy six-column, always-animated public interface with the approved
 
 The result should feel almost empty, load and remain idle like a conventional document, and retain liquid glass only as a bounded signature. Safari must receive the same usable interface even when every optional optical effect is unavailable.
 
-## Start here tomorrow
+## Start here 
 
 Every agent should:
 
