@@ -1,13 +1,11 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { getAllCompositions, getProfile } from '@/services/contentService';
-import { BrandLink } from '../../ui/BrandLink';
-import { MenuButton } from '../../ui/MenuButton';
-import { SkipLink } from '../../ui/SkipLink';
+import { SiteShell } from '../../ui/SiteShell';
 import { StatusMessage } from '../../ui/StatusMessage';
 
-// Temporary R1 review surface for the public tokens and primitives.
-// Remove once the shared shell (R2) and page views replace it.
+// Temporary review surface for the public tokens, primitives, and shell.
+// Remove once the page views (R3–R6) replace it.
 
 export const metadata: Metadata = {
   title: 'Design Lab — Primitives',
@@ -21,20 +19,8 @@ export default async function PrimitivesPreviewPage() {
   ]);
 
   return (
-    <div className="ui">
-      <SkipLink targetId="main" />
-
-      <header className="flex items-start justify-between ps-[var(--gutter-inline-start)] pe-[var(--gutter-inline-end)] pt-[var(--gutter-block-start)]">
-        <BrandLink name={profile.name} />
-        <MenuButton controls="preview-menu" expanded={false} />
-        <nav id="preview-menu" aria-label="Preview menu" hidden>
-          <ul>
-            <li><Link href="/compositions">Works</Link></li>
-          </ul>
-        </nav>
-      </header>
-
-      <main id="main" tabIndex={-1} className="flex flex-col gap-[var(--space-9)] px-[var(--gutter)] py-[var(--space-9)]">
+    <SiteShell brandName={profile.name}>
+      <div className="flex flex-col gap-[var(--space-9)] px-[var(--gutter)] py-[var(--space-9)]">
         <section className="ui-index-column" aria-labelledby="preview-title">
           <h1 id="preview-title" className="ui-label">primitives</h1>
           {error ? (
@@ -73,14 +59,7 @@ export default async function PrimitivesPreviewPage() {
             <StatusMessage kind="error">Error state example.</StatusMessage>
           </div>
         </section>
-
-        <section className="ui-index-column" aria-labelledby="preview-menu-states">
-          <h2 id="preview-menu-states" className="ui-label">menu button, expanded</h2>
-          <div className="mt-[var(--space-5)]">
-            <MenuButton controls="preview-menu" expanded label="Close menu" />
-          </div>
-        </section>
-      </main>
-    </div>
+      </div>
+    </SiteShell>
   );
 }
