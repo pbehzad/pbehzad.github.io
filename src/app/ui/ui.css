@@ -1,0 +1,313 @@
+/*
+ * Public design system: tokens and primitives for the redesigned public site.
+ *
+ * Tokens live on :root so any surface can read them. Every rule that styles
+ * elements is scoped to `.ui`, the root class of the new public shell, so the
+ * admin application and the legacy public UI are unaffected.
+ *
+ * globals.css still applies unlayered legacy element rules (universal margin
+ * and padding reset, uppercase headings, inverted link hover, focus
+ * box-shadow, button press transform, image contrast filter). Unlayered rules
+ * beat every layered rule, including Tailwind utilities, so the isolation
+ * block below rolls them back inside `.ui` with `revert-layer`. Within `.ui`,
+ * Tailwind preflight, the layered primitives, and utilities then apply as
+ * usual. Two legacy rules use !important and cannot be rolled back: the
+ * universal JetBrains Mono font-family and a linear animation-timing-function.
+ * Neither conflicts with the approved design; both go with the legacy runtime
+ * in R7, together with this isolation block.
+ */
+
+:root {
+  /* Color */
+  --color-bg: #080908;
+  --color-fg: #ebe9e2;
+  --color-muted: rgb(235 233 226 / 0.56);
+  --color-rule: rgb(235 233 226 / 0.16);
+  --color-surface: #0d0e0d;
+  --color-focus: #ffffff;
+  --color-scrim: rgb(8 9 8 / 0.94);
+
+  /* Type */
+  --font-ui: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  --text-label: 0.8125rem;
+  --text-meta: 0.8125rem;
+  --text-body: 1rem;
+  --text-title: 1.375rem;
+  --leading-tight: 1.2;
+  --leading-body: 1.6;
+  --tracking-label: 0.14em;
+  --weight-regular: 400;
+
+  /* Space */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4rem;
+  --space-9: 6rem;
+  --gutter: clamp(1.25rem, 3.4vw, 3rem);
+  --gutter-inline-start: max(var(--gutter), env(safe-area-inset-left));
+  --gutter-inline-end: max(var(--gutter), env(safe-area-inset-right));
+  --gutter-block: clamp(1rem, 1.6vw, 1.5rem);
+  --gutter-block-start: max(var(--gutter-block), env(safe-area-inset-top));
+
+  /* Size */
+  --measure: 66ch;
+  --index-width: 32rem;
+  --hit-target: 2.75rem;
+  --menu-size: 3.25rem;
+  --focus-width: 2px;
+  --focus-offset: 3px;
+
+  /* Motion: interaction feedback only; nothing runs while idle. */
+  --duration-fast: 120ms;
+  --duration-base: 180ms;
+  --ease-out: cubic-bezier(0.2, 0, 0, 1);
+
+  /* Layering: a small fixed scale. */
+  --layer-base: 0;
+  --layer-header: 10;
+  --layer-menu: 20;
+  --layer-skip-link: 30;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-fast: 0ms;
+    --duration-base: 0ms;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  :root {
+    --color-scrim: var(--color-bg);
+  }
+}
+
+/* Legacy isolation (unlayered on purpose; see the header comment). */
+
+.ui * {
+  margin: revert-layer;
+  padding: revert-layer;
+}
+
+.ui :is(h1, h2, h3, h4, h5, h6) {
+  font-weight: revert-layer;
+  letter-spacing: revert-layer;
+  line-height: revert-layer;
+  text-transform: revert-layer;
+}
+
+.ui a {
+  border-bottom: revert-layer;
+  color: revert-layer;
+  text-decoration: revert-layer;
+  transition: revert-layer;
+}
+
+.ui a:hover {
+  background: revert-layer;
+  color: revert-layer;
+}
+
+.ui button {
+  border: revert-layer;
+  cursor: revert-layer;
+  outline: revert-layer;
+  transition: revert-layer;
+}
+
+.ui button:active {
+  transform: revert-layer;
+}
+
+.ui :is(input, textarea, select) {
+  background: revert-layer;
+  border: revert-layer;
+  color: revert-layer;
+  font-size: revert-layer;
+  padding: revert-layer;
+  transition: revert-layer;
+}
+
+.ui :focus {
+  border-color: revert-layer;
+  box-shadow: revert-layer;
+  outline: revert-layer;
+}
+
+.ui img {
+  filter: revert-layer;
+}
+
+@layer base {
+  /* The root of every redesigned public page. */
+  .ui {
+    min-block-size: 100vh;
+    min-block-size: 100svh;
+    background: var(--color-bg);
+    color: var(--color-fg);
+    font-family: var(--font-ui);
+    font-size: var(--text-body);
+    font-weight: var(--weight-regular);
+    line-height: var(--leading-body);
+  }
+
+  .ui :is(h1, h2, h3, h4, h5, h6) {
+    line-height: var(--leading-tight);
+  }
+
+  .ui a {
+    transition: color var(--duration-fast) var(--ease-out);
+  }
+
+  .ui button {
+    cursor: pointer;
+  }
+
+  /* Keyboard focus is always visible; pointer focus draws nothing. */
+  .ui :focus-visible {
+    outline: var(--focus-width) solid var(--color-focus);
+    outline-offset: var(--focus-offset);
+  }
+
+  @media (forced-colors: active) {
+    .ui :focus-visible {
+      outline-color: Highlight;
+    }
+  }
+}
+
+@layer components {
+  /* Text roles */
+
+  .ui-label {
+    color: var(--color-muted);
+    font-size: var(--text-label);
+    line-height: var(--leading-tight);
+  }
+
+  .ui-meta {
+    color: var(--color-muted);
+    font-size: var(--text-meta);
+    line-height: var(--leading-body);
+  }
+
+  .ui-title {
+    font-size: var(--text-title);
+    line-height: var(--leading-tight);
+  }
+
+  /* Inline links in running text keep a visible affordance beyond hover. */
+  .ui-link {
+    text-decoration: underline;
+    text-decoration-color: var(--color-rule);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.25em;
+    transition: text-decoration-color var(--duration-fast) var(--ease-out);
+  }
+
+  .ui-link:hover {
+    text-decoration-color: currentColor;
+  }
+
+  /* Content widths */
+
+  .ui-measure {
+    inline-size: 100%;
+    max-inline-size: var(--measure);
+    margin-inline: auto;
+  }
+
+  .ui-index-column {
+    inline-size: 100%;
+    max-inline-size: var(--index-width);
+    margin-inline: auto;
+  }
+
+  /* Skip link: hidden until focused, then shown above everything. */
+
+  .ui-skip-link {
+    position: fixed;
+    inset-block-start: var(--space-2);
+    inset-inline-start: var(--space-2);
+    z-index: var(--layer-skip-link);
+    padding: var(--space-3) var(--space-4);
+    background: var(--color-bg);
+    color: var(--color-fg);
+    font-size: var(--text-label);
+    transform: translateY(calc(-100% - var(--space-4)));
+  }
+
+  .ui-skip-link:focus-visible {
+    transform: none;
+  }
+
+  /* Brand link */
+
+  .ui-brand {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: var(--hit-target);
+    font-size: var(--text-label);
+    letter-spacing: var(--tracking-label);
+    line-height: 1;
+    text-transform: uppercase;
+  }
+
+  /* Menu button: flat fallback. The liquid appearance arrives in R2 as an
+     optional enhancement that must not change these dimensions. */
+
+  .ui-menu-button {
+    display: inline-grid;
+    place-items: center;
+    inline-size: var(--menu-size);
+    block-size: var(--menu-size);
+    border: 1px solid var(--color-rule);
+    border-radius: 50%;
+    background: var(--color-surface);
+    color: var(--color-fg);
+    transition: border-color var(--duration-fast) var(--ease-out);
+  }
+
+  .ui-menu-button:hover,
+  .ui-menu-button[aria-expanded='true'] {
+    border-color: var(--color-muted);
+  }
+
+  .ui-menu-button__icon {
+    font-size: var(--text-body);
+    line-height: 1;
+  }
+
+  /* Status messages for empty, loading, and error states: text only. */
+
+  .ui-status {
+    color: var(--color-muted);
+    font-size: var(--text-meta);
+  }
+
+  .ui-status[data-kind='error'] {
+    color: var(--color-fg);
+  }
+
+  /* Hidden visually, still read by assistive technology. */
+
+  .ui-visually-hidden {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  @media (forced-colors: active) {
+    .ui-menu-button {
+      border-color: ButtonText;
+    }
+  }
+}

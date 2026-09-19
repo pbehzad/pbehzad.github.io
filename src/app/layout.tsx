@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./fonts.css";
 import "./globals.css";
+import "./ui/ui.css";
 
 export const metadata: Metadata = {
   title: "Parham Behzad",
