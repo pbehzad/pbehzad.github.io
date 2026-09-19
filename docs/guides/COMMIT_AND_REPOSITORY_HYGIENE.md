@@ -7,7 +7,7 @@ Applies to: all contributors and agents
 ## Branches and parallel work
 
 - Use one branch or managed worktree per work package when tasks run in parallel.
-- Use branch names such as `codex/ui-shell`, `codex/ui-home`, or `codex/ui-works`.
+- Use branch names such as `ui-shell`, `ui-home`, or `ui-works`.
 - Branch from the agreed integration point. Do not guess a base ref when the task names one.
 - Avoid overlapping file ownership. Shell/token work lands before page work that consumes it.
 - Do not hand-edit another worktree or copy its `.git` metadata.
