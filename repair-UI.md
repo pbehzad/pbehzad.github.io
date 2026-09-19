@@ -236,24 +236,32 @@ Primary ownership: `SiteShell`, header, menu, shared responsive layout
 
 ### Tasks
 
-- [ ] Build one semantic `SiteShell` shared by desktop and mobile.
-- [ ] Place the brand at top left and the menu control at top right using safe-area-aware spacing.
-- [ ] Ensure the initial server-rendered HTML includes the brand, navigation, and main content.
-- [ ] Implement the menu as an accessible button with `aria-expanded` and `aria-controls`.
-- [ ] Implement focus management, Escape dismissal, route-change dismissal, and focus return.
-- [ ] Keep the closed navigation visually hidden without making it unavailable to assistive technology.
-- [ ] Implement a flat menu-button fallback first.
-- [ ] Add the bounded liquid appearance only as a progressive enhancement.
-- [ ] Replace viewport-JavaScript layout branching with CSS.
-- [ ] Confirm active routes and history/back behavior.
+- [x] Build one semantic `SiteShell` shared by desktop and mobile (`src/app/ui/SiteShell.tsx`): skip link, a `banner` with the brand and menu, and one `main`.
+- [x] Place the brand at top left and the menu control at top right using safe-area-aware spacing. The gutters use `env(safe-area-inset-*)`. The brand scrolls with the page; the menu control is fixed so it is always reachable. Notched-device verification is part of R8.
+- [x] Ensure the initial server-rendered HTML includes the brand, navigation, and main content. Verified with JavaScript disabled: all five section links are present in the HTML.
+- [x] Implement the menu as an accessible button with `aria-expanded` and `aria-controls` (accessible name "Menu", controlling `#site-menu`).
+- [x] Implement focus management, Escape dismissal, route-change dismissal, and focus return. While the menu is open, Tab cycles between the button and the links, `main` is `inert`, and page scrolling is locked. Escape, a click outside the links, or the button closes the menu and returns focus to the button; a link click or any pathname change also closes it. Verified in Chromium and Firefox; the persistent-layout pathname case is exercised once two routes share the shell (R3–R5).
+- [x] Keep the closed navigation visually hidden without making it unavailable to assistive technology. The closed list is `display: none`, so its links cannot receive focus, as the menu rules require. Assistive technology reaches it through the always-present "Menu" button, whose `aria-expanded` and `aria-controls` expose the relationship.
+- [x] Implement a flat menu-button fallback first: an opaque surface circle with a 1 px rule border. Before hydration, or without JavaScript, the control is a link to `#site-menu`, and the menu opens through CSS `:target`.
+- [x] Add the bounded liquid appearance only as a progressive enhancement: behind `@supports (backdrop-filter)`, a real 12 px backdrop blur of content scrolling under the fixed control, plus a 1 px top hairline. It is disabled for reduced transparency and forced colors and uses the same geometry as the fallback. It adds no SVG filter, script, or dependency. Visual approval is pending (see the R2 handoff notes).
+- [x] Replace viewport-JavaScript layout branching with CSS. The new shell has no viewport checks in JavaScript; the legacy `ColumnPortal` branching is removed with the legacy runtime in R7.
+- [ ] Confirm active routes and history/back behavior. History and back are verified: the menu closes on navigation, and going back restores a closed menu. `aria-current` marking (`page` on a section index, `true` inside it) is implemented but cannot be tested until a section route renders in the shell (R4).
 
 ### Exit gate
 
-- [ ] The shell works with JavaScript disabled except for opening the enhanced menu; navigation remains present through a no-script or always-available semantic path.
-- [ ] The menu works with keyboard, touch, pointer, screen-reader semantics, and reduced motion.
-- [ ] Safari receives a usable control whether or not the liquid enhancement initializes.
-- [ ] No visible resting navigation bar appears.
-- [ ] No content shifts when the enhancement loads or fails.
+- [x] The shell works with JavaScript disabled except for opening the enhanced menu; navigation remains present through a no-script or always-available semantic path. Verified in Chromium and Firefox with JavaScript off: the control opens the menu through `:target`, and a fallback "Close menu" link closes it.
+- [x] The menu works with keyboard, touch, pointer, screen-reader semantics, and reduced motion. Verified in Chromium and Firefox (automated), including taps at 390 × 844 and an ARIA tree snapshot showing the banner, `button "Menu" [expanded]`, `navigation "Site"`, and `main`. The menu uses no motion. A real screen reader pass is part of R8.
+- [ ] Safari receives a usable control whether or not the liquid enhancement initializes. Blocked — needs real Safari; Playwright WebKit is unavailable on macOS 13. The flat path is covered by the `@supports` guard and the reduced-transparency fallback, which was verified in Chromium.
+- [x] No visible resting navigation bar appears. See [`r2-shell-closed-desktop.png`](docs/ui-audit/r2-shell-closed-desktop.png) and [`r2-shell-closed-mobile.png`](docs/ui-audit/r2-shell-closed-mobile.png).
+- [x] No content shifts when the enhancement loads or fails. The control rect is identical before and after hydration (52 × 52 at the same position), and cumulative layout shift is 0 in Chromium and Firefox.
+
+### R2 handoff notes
+
+- Evidence (Chromium, 2026-09-19): [closed desktop](docs/ui-audit/r2-shell-closed-desktop.png), [open desktop](docs/ui-audit/r2-shell-open-desktop.png), [closed mobile](docs/ui-audit/r2-shell-closed-mobile.png), [open mobile](docs/ui-audit/r2-shell-open-mobile.png), [open without JavaScript](docs/ui-audit/r2-shell-nojs-open.png).
+- Usage: a page renders `<SiteShell brandName={profile.name} isHome={…}>` around its view. Content data stays in the route; the shell only receives the name. Once R3–R6 have migrated every public route, hoist the shell into a shared route-group layout so the menu persists across navigations.
+- The open menu is the conservative flat state from this roadmap: a 98.5% near-black layer with the section list on the index column. It needs visual review before it is treated as final.
+- The menu control's enhancement is a real backdrop blur, not the mockup's thick refractive droplet. Matching the mockup would need SVG displacement (for example, the existing `liquid-glass-web-react`) and design approval under "Questions that require design approval".
+- Before rebuilding, stop any running `next start`; building under a live server corrupted `.next` twice during R2.
 
 ## R3 — Implement the canonical home
 
