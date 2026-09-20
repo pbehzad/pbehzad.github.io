@@ -81,13 +81,37 @@
 
   /* Author-managed HTML. Flat and semantic: headings, paragraphs, lists. */
 
+  .ui-prose {
+    /* An author can paste a URL or a compound noun that no engine will break
+       on its own; without this it pushes the page sideways on a phone. */
+    overflow-wrap: anywhere;
+  }
+
   .ui-prose > * + * {
     margin-block-start: var(--space-4);
   }
 
+  /* An author's heading takes the same small muted role as the site's own
+     headings, so every heading on the site reads as a label and the body
+     text stays the bright thing. Case is the author's; only depth differs,
+     and it differs by the space above, not by an invented size ramp. */
   .ui-prose :is(h2, h3, h4) {
-    font-size: var(--text-body);
+    color: var(--color-muted);
+    font-size: var(--text-label);
+    font-weight: var(--weight-regular);
     text-transform: none;
+  }
+
+  .ui-prose > * + h2 {
+    margin-block-start: var(--space-7);
+  }
+
+  .ui-prose > * + :is(h3, h4) {
+    margin-block-start: var(--space-6);
+  }
+
+  .ui-prose > :is(h2, h3, h4) + * {
+    margin-block-start: var(--space-3);
   }
 
   .ui-prose :is(ul, ol) {
