@@ -3,25 +3,72 @@ import { StatusMessage } from './StatusMessage';
 
 export type IndexItem = {
   key: string;
-  href: string;
+  /** Omitted when an entry has no destination; the row is then plain text. */
+  href?: string;
   title: string;
   meta?: string;
+  /** Leaves the site, so the row is a plain anchor rather than a route link. */
+  external?: boolean;
+};
+
+export type IndexGroup = {
+  key: string;
+  /** Sub-heading above the group. Omit it for a single ungrouped list. */
+  label?: string;
+  items: readonly IndexItem[];
 };
 
 type IndexViewProps = {
   label: string;
-  items: readonly IndexItem[];
+  groups: readonly IndexGroup[];
   /** Shown instead of the list when the content could not be loaded. */
   errorMessage?: string;
   emptyMessage: string;
 };
 
+/** Title and metadata as one row, so a linked row has one purpose and one focus ring. */
+function IndexRowContent({ item }: { item: IndexItem }) {
+  return (
+    <>
+      <span className="ui-index__title">{item.title}</span>
+      {item.meta && <span className="ui-index__meta">{item.meta}</span>}
+    </>
+  );
+}
+
+function IndexRow({ item }: { item: IndexItem }) {
+  if (!item.href) {
+    return (
+      <div className="ui-index__row">
+        <IndexRowContent item={item} />
+      </div>
+    );
+  }
+
+  if (item.external) {
+    return (
+      <a className="ui-index__link" href={item.href} target="_blank" rel="noopener noreferrer">
+        <IndexRowContent item={item} />
+        <span className="ui-visually-hidden"> (opens in a new tab)</span>
+      </a>
+    );
+  }
+
+  return (
+    <Link className="ui-index__link" href={item.href}>
+      <IndexRowContent item={item} />
+    </Link>
+  );
+}
+
 /**
- * Shared section index: a small label and a sparse vertical list of links
- * floating directly on the background. No cards, rules, or highlights; the
- * section adapters (Works, Events, Texts) only map content to items.
+ * Shared section index: a small label and a sparse vertical list floating
+ * directly on the background. No cards, rules, or highlights; the section
+ * adapters (Works, Events, Texts) only map content to items and groups.
  */
-export function IndexView({ label, items, errorMessage, emptyMessage }: IndexViewProps) {
+export function IndexView({ label, groups, errorMessage, emptyMessage }: IndexViewProps) {
+  const total = groups.reduce((count, group) => count + group.items.length, 0);
+
   return (
     <section className="ui-index" aria-labelledby="index-title">
       <div className="ui-index-column">
@@ -31,19 +78,21 @@ export function IndexView({ label, items, errorMessage, emptyMessage }: IndexVie
         <div className="ui-index__body">
           {errorMessage ? (
             <StatusMessage kind="error">{errorMessage}</StatusMessage>
-          ) : items.length === 0 ? (
+          ) : total === 0 ? (
             <StatusMessage kind="empty">{emptyMessage}</StatusMessage>
           ) : (
-            <ul className="ui-index__list">
-              {items.map((item) => (
-                <li key={item.key}>
-                  <Link className="ui-index__link" href={item.href}>
-                    <span className="ui-index__title">{item.title}</span>
-                    {item.meta && <span className="ui-index__meta">{item.meta}</span>}
-                  </Link>
-                </li>
-              ))}
-            </ul>
+            groups.map((group) => (
+              <div key={group.key} className="ui-index__group">
+                {group.label && <h2 className="ui-label">{group.label}</h2>}
+                <ul className="ui-index__list">
+                  {group.items.map((item) => (
+                    <li key={item.key}>
+                      <IndexRow item={item} />
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))
           )}
         </div>
       </div>

@@ -1,7 +1,8 @@
-import React from 'react';
 import type { Metadata } from 'next';
-import ColumnPortalData from '../components/ColumnPortalData';
 import { getProfile } from '@/services/contentService';
+import { getPublicMediaUrl } from '@/lib/media-storage';
+import { SiteShell } from '../ui/SiteShell';
+import { AboutView } from '../ui/AboutView';
 
 export async function generateMetadata(): Promise<Metadata> {
   try {
@@ -21,5 +22,18 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function AboutPage() {
-  return <ColumnPortalData initialPath="/about" />;
+  const { data: profile } = await getProfile();
+
+  const sections = (profile.about_sections ?? [])
+    .filter((section) => section.visible)
+    .map((section) => ({
+      ...section,
+      link_url: section.link_url ? getPublicMediaUrl(section.link_url) : section.link_url,
+    }));
+
+  return (
+    <SiteShell brandName={profile.name}>
+      <AboutView profile={profile} sections={sections} />
+    </SiteShell>
+  );
 }

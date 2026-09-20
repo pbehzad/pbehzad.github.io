@@ -29,7 +29,7 @@ export function WorksIndex({ compositions, hasError }: WorksIndexProps) {
   return (
     <IndexView
       label="works"
-      items={compositions.map(toIndexItem)}
+      groups={[{ key: 'works', items: compositions.map(toIndexItem) }]}
       errorMessage={hasError ? 'Works could not be loaded.' : undefined}
       emptyMessage="No works are published yet."
     />

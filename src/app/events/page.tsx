@@ -1,6 +1,7 @@
-import React from 'react';
 import type { Metadata } from 'next';
-import ColumnPortalData from '../components/ColumnPortalData';
+import { getAllEvents, getProfile } from '@/services/contentService';
+import { SiteShell } from '../ui/SiteShell';
+import { EventsIndex } from '../ui/EventsIndex';
 
 export const metadata: Metadata = {
   title: 'Events — Parham Behzad',
@@ -8,5 +9,14 @@ export const metadata: Metadata = {
 };
 
 export default async function EventsPage() {
-  return <ColumnPortalData initialPath="/events" />;
+  const [{ data: profile }, { data: events, error }] = await Promise.all([
+    getProfile(),
+    getAllEvents(),
+  ]);
+
+  return (
+    <SiteShell brandName={profile.name}>
+      <EventsIndex events={events} hasError={Boolean(error)} />
+    </SiteShell>
+  );
 }

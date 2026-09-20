@@ -1,0 +1,171 @@
+/*
+ * Information pages (About, Contact): the same placement and restraint as a
+ * section index, with a readable measure for prose. No cards, panels, or
+ * rules; content floats directly on the background.
+ */
+
+@layer components {
+  .ui-page {
+    padding-block: var(--content-block-start) var(--space-9);
+    padding-inline: var(--gutter-inline-start) var(--gutter-inline-end);
+  }
+
+  .ui-page__body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+    margin-block-start: var(--space-6);
+  }
+
+  /* The bio, at body size; `pre-line` keeps the line breaks the author typed. */
+  .ui-page__lede {
+    white-space: pre-line;
+  }
+
+  .ui-page__note,
+  .ui-page__terms {
+    color: var(--color-muted);
+    font-size: var(--text-meta);
+    text-transform: lowercase;
+  }
+
+  .ui-page__note::first-letter,
+  .ui-page__terms > li::first-letter {
+    text-transform: uppercase;
+  }
+
+  /* About sections keep the open/closed state the content model gives them.
+     The marker is the only affordance; there is no box around a section. */
+
+  .ui-disclosure__summary {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    min-block-size: var(--hit-target);
+    list-style: none;
+    cursor: pointer;
+    text-transform: lowercase;
+  }
+
+  .ui-disclosure__summary::-webkit-details-marker {
+    display: none;
+  }
+
+  /* A rotating caret drawn in text, so it survives with stylesheets loaded
+     but images, filters, or fonts unavailable. */
+  .ui-disclosure__summary::before {
+    content: '+';
+    color: var(--color-muted);
+    font-size: var(--text-meta);
+    line-height: 1;
+  }
+
+  .ui-disclosure[open] > .ui-disclosure__summary::before {
+    content: '−';
+  }
+
+  /* The heading carries no size of its own; the summary row sets the type. */
+  .ui-disclosure__title {
+    font-size: inherit;
+    font-weight: inherit;
+  }
+
+  .ui-disclosure__body {
+    padding-block-start: var(--space-3);
+    padding-inline-start: calc(var(--space-3) + 1ch);
+  }
+
+  .ui-disclosure__body > * + * {
+    margin-block-start: var(--space-4);
+  }
+
+  /* Author-managed HTML. Flat and semantic: headings, paragraphs, lists. */
+
+  .ui-prose > * + * {
+    margin-block-start: var(--space-4);
+  }
+
+  .ui-prose :is(h2, h3, h4) {
+    font-size: var(--text-body);
+    text-transform: none;
+  }
+
+  .ui-prose :is(ul, ol) {
+    padding-inline-start: 1.5em;
+    list-style: revert;
+  }
+
+  .ui-prose li + li {
+    margin-block-start: var(--space-2);
+  }
+
+  .ui-prose a {
+    text-decoration: underline;
+    text-decoration-color: var(--color-rule);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.25em;
+  }
+
+  .ui-prose a:hover {
+    text-decoration-color: currentColor;
+  }
+
+  .ui-prose blockquote {
+    padding-inline-start: var(--space-4);
+    border-inline-start: 1px solid var(--color-rule);
+    color: var(--color-muted);
+  }
+
+  .ui-prose :is(img, video) {
+    max-inline-size: 100%;
+    block-size: auto;
+  }
+
+  /* Contact channels: label and value inside one link. */
+
+  .ui-channels {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+  }
+
+  .ui-channel {
+    display: inline-flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    justify-content: center;
+    min-block-size: var(--hit-target);
+    overflow-wrap: anywhere;
+  }
+
+  .ui-channel__label {
+    color: var(--color-muted);
+    font-size: var(--text-meta);
+    line-height: var(--leading-tight);
+    text-transform: lowercase;
+  }
+
+  /* Values are stored in upper case; addresses and hosts read lower case.
+     The href keeps the stored value, so the destination is unchanged. */
+  .ui-channel__value {
+    line-height: var(--leading-tight);
+    text-transform: lowercase;
+    text-decoration: underline;
+    text-decoration-color: var(--color-rule);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.25em;
+    transition: text-decoration-color var(--duration-fast) var(--ease-out);
+  }
+
+  .ui-channel:hover .ui-channel__value,
+  .ui-channel:focus-visible .ui-channel__value {
+    text-decoration-color: currentColor;
+  }
+
+  @media (forced-colors: active) {
+    .ui-channel:hover .ui-channel__value,
+    .ui-channel:focus-visible .ui-channel__value {
+      text-decoration-color: LinkText;
+    }
+  }
+}

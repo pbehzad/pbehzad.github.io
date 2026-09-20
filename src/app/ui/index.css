@@ -1,17 +1,26 @@
 /*
- * Section index (Works, and later Events and Texts): a label and a sparse
- * list floating on the background, placed as in the canonical Works mockup.
+ * Section index (Works, Events, Texts): a label and a sparse list floating
+ * on the background, placed as in the canonical Works mockup.
  */
 
 @layer components {
-  /* The label sits about a quarter of the way down the viewport. */
   .ui-index {
-    padding-block: max(var(--space-7), 27svh - var(--shell-header-block-size)) var(--space-9);
+    padding-block: var(--content-block-start) var(--space-9);
     padding-inline: var(--gutter-inline-start) var(--gutter-inline-end);
   }
 
+  /* Groups (Events splits into upcoming and past) are headings, not boxes. */
   .ui-index__body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-8);
     margin-block-start: var(--space-6);
+  }
+
+  .ui-index__group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
   }
 
   .ui-index__list {
@@ -22,13 +31,17 @@
 
   /* Title and metadata form one link, so the row has one purpose and one
      focus ring. Hover and focus change only the title's underline. */
-  .ui-index__link {
+  .ui-index__link,
+  .ui-index__row {
     display: inline-flex;
     flex-direction: column;
     gap: var(--space-2);
+    overflow-wrap: anywhere;
+  }
+
+  .ui-index__link {
     min-block-size: var(--hit-target);
     justify-content: center;
-    overflow-wrap: anywhere;
   }
 
   /* Titles are stored in mixed case; the index shows them in lowercase, as

@@ -59,6 +59,9 @@
   /* Centred, this puts the index's start edge where the Works mockup has it
      (560 px at 1440 px); the open menu shares it. */
   --index-width: 20rem;
+  /* Shared start of page content: the label sits about a quarter of the way
+     down the viewport, as the Works mockup has it. */
+  --content-block-start: max(var(--space-7), 27svh - var(--shell-header-block-size));
   --hit-target: 2.75rem;
   --menu-size: 3.25rem;
   --focus-width: 2px;
