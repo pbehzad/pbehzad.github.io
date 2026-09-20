@@ -355,26 +355,38 @@ Primary ownership: route-specific view adapters
 
 ### Events and Texts
 
-- [ ] Reuse the semantic index structure instead of cloning Works markup.
-- [ ] Decide the minimum identifying metadata for each content type.
-- [ ] Preserve dates, external links, PDFs, and detail-route behavior.
-- [ ] Keep state and grouping understandable without decorative containers.
-- [ ] Capture desktop and mobile screenshots for review before page-specific polish.
+- [x] Reuse the semantic index structure instead of cloning Works markup. `EventsIndex` and `TextsIndex` are adapters over the shared `IndexView`, as `WorksIndex` is. `IndexView` gained optional groups, external links, and rows without a destination; no section owns markup of its own.
+- [x] Decide the minimum identifying metadata for each content type. One muted line per row, as in Works: Events show the stored ISO date and `venue, city`; Texts show year and type. The ISO date is kept unformatted because it is unambiguous and aligns in the mono column.
+- [x] Preserve dates, external links, PDFs, and detail-route behavior. Verified against a production build: every event links to `/events/{slug}`; a text with a managed body or a PDF links to `/texts/{slug}`, one with neither falls back to `external_url` as a plain anchor with `target="_blank"`, `rel="noopener noreferrer"` and a visually hidden “(opens in a new tab)”, and one with no destination at all renders as plain text. That is the legacy portal's rule, unchanged.
+- [x] Keep state and grouping understandable without decorative containers. Events split into `upcoming` (soonest first) and `past` (most recent first) under `h2` labels, with no box, rule, or background. The split uses the local date, not UTC, so an event cannot flip near midnight. Heading outline on `/events`: `h1 events`, `h2 upcoming`, `h2 past`.
+- [x] Capture desktop and mobile screenshots for review before page-specific polish. [events desktop](docs/ui-audit/r5-events-desktop.png), [events mobile](docs/ui-audit/r5-events-mobile.png), [texts desktop](docs/ui-audit/r5-texts-desktop.png), [texts mobile](docs/ui-audit/r5-texts-mobile.png).
 
 ### About and Contact
 
-- [ ] Render existing profile/contact data without hardcoded copy.
-- [ ] Use a stable readable measure and clear link affordances.
-- [ ] Preserve disclosure semantics only where content genuinely requires them.
-- [ ] Keep naming consistent: use “About,” not a mixture of “About” and “Info.”
-- [ ] Validate email and external-link behavior.
+- [x] Render existing profile/contact data without hardcoded copy. Both pages read the content service. The only UI copy is the section label and the empty/error messages.
+- [x] Use a stable readable measure and clear link affordances. About uses `.ui-measure` (66ch) for prose; Contact keeps the index column. Links in both carry a resting underline in `--color-rule` that goes to `currentColor` on hover and focus, so they are never hover-only.
+- [x] Preserve disclosure semantics only where content genuinely requires them. Only About's `about_sections` use them, because the content model itself carries `initially_open`. Each visible section is one native `<details>`, with its title inside `<summary>` as an `h2` so the sections appear in the heading outline. Verified open and closed, from the keyboard, and with JavaScript disabled.
+- [x] Keep naming consistent: use “About,” not a mixture of “About” and “Info.” The route, the menu entry, the page label, and the metadata title all say About. “Info” survives only in the legacy `MobilePortal`, which R7 retires.
+- [x] Validate email and external-link behavior. Email renders as `mailto:` with no `target`; every other channel gets `https://` prepended when the stored value omits a scheme, opens in a new tab with `rel="noopener noreferrer"`, and carries a visually hidden “(opens in a new tab)”. Each row is one link whose accessible name is “<label> <value>”.
 
 ### Exit gate
 
-- [ ] All four routes use the shared shell and token system.
-- [ ] No page creates a new glass container or ambient renderer.
-- [ ] Empty, error, keyboard, and mobile states are verified.
-- [ ] Review screenshots have been accepted or their differences documented.
+- [x] All four routes use the shared shell and token system. Each renders `<SiteShell>` around one view built from `ui.css`, `index.css`, and `page.css` tokens. `--content-block-start` is now a token shared by `.ui-index` and `.ui-page`, so all five public indexes and information pages start at the same height.
+- [x] No page creates a new glass container or ambient renderer. Instrumented over 2 s idle in Chromium and Firefox on all four routes: 0 animation frames, 0 running animations, 0 canvases. None of the JavaScript any of the four routes loads contains Three.js or `liquid-glass-web-react`. First-load JavaScript is 119 kB on each, matching Works.
+- [x] Empty, error, keyboard, and mobile states are verified. See [`r5-states.png`](docs/ui-audit/r5-states.png) and [`r5-edge-cases.png`](docs/ui-audit/r5-edge-cases.png). Tab order on every route is skip link, brand, menu, then content in document order; `aria-current="page"` marks the right entry in the open menu on all four routes, in both engines. There is no horizontal overflow at 1440 × 900, 1024 × 768, 768 × 1024, 390 × 844, 720 × 450, or 320 × 568 (the last two are 1440 × 900 and 640 × 1136 at 200%), in either engine, including the edge-case content. All four routes render their heading and content with JavaScript disabled.
+- [ ] Review screenshots have been accepted or their differences documented. Awaiting the site owner. The open question is text casing on the information pages: the index rows lowercase stored titles as the mockup does, and Contact lowercases its channel values, but About shows the bio and tagline exactly as stored, which is upper case in the current content. See the R5 handoff notes.
+
+### R5 handoff notes
+
+- Evidence (Chromium and Firefox via Playwright against a production build, 2026-09-20): [events desktop](docs/ui-audit/r5-events-desktop.png), [events mobile](docs/ui-audit/r5-events-mobile.png), [texts desktop](docs/ui-audit/r5-texts-desktop.png), [texts mobile](docs/ui-audit/r5-texts-mobile.png), [about desktop](docs/ui-audit/r5-about-desktop.png), [about mobile](docs/ui-audit/r5-about-mobile.png), [contact desktop](docs/ui-audit/r5-contact-desktop.png), [contact mobile](docs/ui-audit/r5-contact-mobile.png), [states](docs/ui-audit/r5-states.png), [edge cases](docs/ui-audit/r5-edge-cases.png). The state and edge-case sheets come from a dev server with altered content, so Next's dev indicator appears in them.
+- Files: `src/app/events/page.tsx`, `src/app/texts/page.tsx`, `src/app/about/page.tsx`, `src/app/contact/page.tsx`, `src/app/ui/EventsIndex.tsx`, `src/app/ui/TextsIndex.tsx`, `src/app/ui/AboutView.tsx`, `src/app/ui/ContactView.tsx`, `src/app/ui/page.css`, plus `src/app/ui/IndexView.tsx` (groups, external links, rows without a destination), `src/app/ui/WorksIndex.tsx` (one unlabelled group), `src/app/ui/index.css`, `--content-block-start` in `src/app/ui/ui.css`, and a one-line CSS import in `src/app/layout.tsx`.
+- Open review question: casing. The Works mockup lowercases index titles, and `.ui-index__title` applies that to Events and Texts unchanged. Contact lowercases its channel values, because addresses and hosts read better that way and the `href` keeps the stored value. About's bio and tagline are rendered exactly as stored, because lowercasing real prose would destroy proper nouns — but the current content stores them in upper case, so About reads louder than the rest of the site. Confirm with the site owner before treating it as settled.
+- `/texts` intentionally renders an entry with no managed body, no PDF, and no `external_url` as plain text rather than a link, preserving the legacy rule. The local placeholder content has no links at all, so every row on `/texts` is currently plain text. That is content, not a layout bug.
+- Texts are now sorted newest first (year descending, then title), which the content service and the legacy portal did not do. Works is already newest first, so the indexes now agree.
+- Schema limits worth knowing, found while testing edge cases: `venue` and `city` are required, so an event cannot reach the view without a place; and `bio` is required, so `AboutView`'s empty state is defensive and unreachable through valid content. An invalid `profile.json` fails the whole page, on these routes as on `/compositions` and the home page — the shell needs the name. `getContactInfo` throws the same way, but `/contact` catches it, because the page still has the profile.
+- Production rendering is dynamic because the GitHub storage adapter fetches with `cache: 'no-store'`, which is what keeps the Events upcoming/past split current. A local build with `CONTENT_STORAGE=local` prerenders these routes instead and would freeze that split at build time. Confirm the routes stay dynamic on Vercel.
+- Detail pages are still the legacy portal until R6, so leaving any of these indexes still drops the new shell.
+- Not yet tested in real Safari.
 
 ## R6 — Replace detail and reading shells
 
