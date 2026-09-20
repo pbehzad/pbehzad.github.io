@@ -4,6 +4,7 @@ import "./globals.css";
 import "./ui/ui.css";
 import "./ui/shell.css";
 import "./ui/home.css";
+import "./ui/index.css";
 
 export const metadata: Metadata = {
   title: "Parham Behzad",

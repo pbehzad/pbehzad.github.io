@@ -1,0 +1,71 @@
+/*
+ * Section index (Works, and later Events and Texts): a label and a sparse
+ * list floating on the background, placed as in the canonical Works mockup.
+ */
+
+@layer components {
+  /* The label sits about a quarter of the way down the viewport. */
+  .ui-index {
+    padding-block: max(var(--space-7), 27svh - var(--shell-header-block-size)) var(--space-9);
+    padding-inline: var(--gutter-inline-start) var(--gutter-inline-end);
+  }
+
+  .ui-index__body {
+    margin-block-start: var(--space-6);
+  }
+
+  .ui-index__list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+  }
+
+  /* Title and metadata form one link, so the row has one purpose and one
+     focus ring. Hover and focus change only the title's underline. */
+  .ui-index__link {
+    display: inline-flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    min-block-size: var(--hit-target);
+    justify-content: center;
+    overflow-wrap: anywhere;
+  }
+
+  /* Titles are stored in mixed case; the index shows them in lowercase, as
+     in the mockup. Assistive technology still reads the stored text. */
+  .ui-index__title {
+    font-size: var(--text-title);
+    line-height: var(--leading-tight);
+    text-transform: lowercase;
+    text-decoration: underline;
+    text-decoration-color: transparent;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.25em;
+    transition: text-decoration-color var(--duration-fast) var(--ease-out);
+  }
+
+  .ui-index__link:hover .ui-index__title,
+  .ui-index__link:focus-visible .ui-index__title {
+    text-decoration-color: var(--color-muted);
+  }
+
+  /* Metadata in sentence case: "PIANO, MIDI-KEYBOARD" reads "Piano, midi-keyboard". */
+  .ui-index__meta {
+    display: block;
+    color: var(--color-muted);
+    font-size: var(--text-meta);
+    line-height: var(--leading-tight);
+    text-transform: lowercase;
+  }
+
+  .ui-index__meta::first-letter {
+    text-transform: uppercase;
+  }
+
+  @media (forced-colors: active) {
+    .ui-index__link:hover .ui-index__title,
+    .ui-index__link:focus-visible .ui-index__title {
+      text-decoration-color: LinkText;
+    }
+  }
+}
