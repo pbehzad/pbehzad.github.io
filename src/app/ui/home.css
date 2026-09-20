@@ -26,6 +26,8 @@
     min-block-size: 100svh;
     margin-block-start: calc(-1 * var(--shell-header-block-size));
     padding-inline: var(--gutter-inline-start) var(--gutter-inline-end);
+    /* The ASCII trace extends past the form; never let it scroll the page. */
+    overflow: clip;
   }
 
   .ui-home-portrait {
@@ -35,8 +37,8 @@
   }
 
   .ui-home-portrait__photo,
-  .ui-home-portrait__light,
-  .ui-home-portrait__rim {
+  .ui-home-portrait__glass,
+  .ui-home-portrait__light {
     position: absolute;
     inset: 0;
     inline-size: 100%;
@@ -64,31 +66,49 @@
     block-size: auto;
   }
 
+  .ui-home-portrait__glass,
   .ui-home-portrait__light {
     overflow: visible;
-    fill: rgb(0 0 0 / 0.01);
-    filter: url(#home-portrait-light);
     pointer-events: none;
+  }
+
+  .ui-home-portrait__light-shape {
+    fill: rgb(0 0 0 / 0.01);
   }
 
   .ui-home-portrait__rim {
-    overflow: visible;
     fill: none;
-    /* Brighter than --color-rule so the edge stays visible where the
-       photo is black. */
-    stroke: rgb(235 233 226 / 0.34);
+    stroke: var(--color-rule);
     stroke-width: 1px;
+  }
+
+  /* Faint ASCII trace of the photo behind the form: static text, visible
+     only in two soft zones to the right of and below the form. Font size,
+     line height, and offsets come from homePortraitGeometry.ts. */
+  .ui-home-portrait__trace {
+    position: absolute;
+    margin: 0;
+    color: rgb(235 233 226 / 0.4);
+    font-weight: var(--weight-regular);
+    letter-spacing: 0;
+    white-space: pre;
+    user-select: none;
     pointer-events: none;
+    mask-image:
+      radial-gradient(22% 36% at 77% 42%, #000 35%, transparent 100%),
+      radial-gradient(16% 11% at 30% 87%, #000 25%, transparent 100%);
   }
 
   @media (prefers-reduced-transparency: reduce) {
-    .ui-home-portrait__light {
+    .ui-home-portrait__light-shape {
       display: none;
     }
   }
 
   @media (forced-colors: active) {
-    .ui-home-portrait__light {
+    .ui-home-portrait__glass,
+    .ui-home-portrait__light-shape,
+    .ui-home-portrait__trace {
       display: none;
     }
 

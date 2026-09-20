@@ -12,51 +12,12 @@
 
 import fs from 'fs';
 import path from 'path';
-import zlib from 'zlib';
+import { encodeRgbPng, toPngDataUri } from './lib/png';
 
 const SIZE = 64;
 // Fraction of the radius where refraction begins; the band runs to the rim.
 const BAND_START = 0.5;
 const BAND_EXPONENT = 1.6;
-
-function crc32(buffer: Buffer): number {
-  let crc = 0xffffffff;
-  for (const byte of buffer) {
-    crc ^= byte;
-    for (let bit = 0; bit < 8; bit++) {
-      crc = (crc >>> 1) ^ (0xedb88320 & -(crc & 1));
-    }
-  }
-  return (crc ^ 0xffffffff) >>> 0;
-}
-
-function chunk(type: string, data: Buffer): Buffer {
-  const length = Buffer.alloc(4);
-  length.writeUInt32BE(data.length);
-  const body = Buffer.concat([Buffer.from(type, 'ascii'), data]);
-  const crc = Buffer.alloc(4);
-  crc.writeUInt32BE(crc32(body));
-  return Buffer.concat([length, body, crc]);
-}
-
-function encodePng(width: number, height: number, rgb: Uint8Array): Buffer {
-  const header = Buffer.alloc(13);
-  header.writeUInt32BE(width, 0);
-  header.writeUInt32BE(height, 4);
-  header[8] = 8; // bit depth
-  header[9] = 2; // colour type: RGB
-  const rows = Buffer.alloc(height * (width * 3 + 1));
-  for (let y = 0; y < height; y++) {
-    rows[y * (width * 3 + 1)] = 0; // filter: none
-    Buffer.from(rgb.buffer, y * width * 3, width * 3).copy(rows, y * (width * 3 + 1) + 1);
-  }
-  return Buffer.concat([
-    Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
-    chunk('IHDR', header),
-    chunk('IDAT', zlib.deflateSync(rows, { level: 9 })),
-    chunk('IEND', Buffer.alloc(0)),
-  ]);
-}
 
 const pixels = new Uint8Array(SIZE * SIZE * 3);
 for (let y = 0; y < SIZE; y++) {
@@ -75,7 +36,7 @@ for (let y = 0; y < SIZE; y++) {
   }
 }
 
-const dataUri = `data:image/png;base64,${encodePng(SIZE, SIZE, pixels).toString('base64')}`;
+const dataUri = toPngDataUri(encodeRgbPng(SIZE, SIZE, pixels));
 const outFile = path.join(process.cwd(), 'src', 'app', 'ui', 'menuDropletMap.ts');
 fs.writeFileSync(
   outFile,
