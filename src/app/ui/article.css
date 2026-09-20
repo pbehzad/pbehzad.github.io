@@ -1,0 +1,202 @@
+/*
+ * Reading pages (composition, event, text detail): one column at a readable
+ * measure, placed like a section index and floating directly on the
+ * background. The only bounded surface is the PDF reader's frame, because an
+ * embedded document needs an edge; everything else is flat and semantic.
+ */
+
+@layer components {
+  .ui-article {
+    padding-block: var(--content-block-start) var(--space-9);
+    padding-inline: var(--gutter-inline-start) var(--gutter-inline-end);
+  }
+
+  /* The menu control is fixed, so on a long text every line eventually
+     scrolls beneath it. Where the column is wide enough to reach that
+     corner, it gives the control a lane of its own rather than letting a
+     word disappear into the blur. Above this width the centred measure
+     already clears the control. */
+  @media (width < 52rem) {
+    .ui-article {
+      padding-inline-end: calc(var(--gutter-inline-end) + var(--menu-size));
+    }
+  }
+
+  /* Tabbing to a link the control covers must not park it under the
+     control: scrolling a focus target into view stops below the header. */
+  .ui-article :is(a, button, summary, [tabindex]) {
+    scroll-margin-block-start: calc(var(--shell-header-block-size) + var(--space-4));
+  }
+
+  /* Back to the parent index: the same lowercase label the menu uses, so
+     arriving on a detail page and leaving it read the same way. */
+  .ui-article__back {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-block-size: var(--hit-target);
+    color: var(--color-muted);
+    font-size: var(--text-label);
+    text-transform: lowercase;
+    text-decoration: underline;
+    text-decoration-color: transparent;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.25em;
+    transition:
+      color var(--duration-fast) var(--ease-out),
+      text-decoration-color var(--duration-fast) var(--ease-out);
+  }
+
+  .ui-article__back:hover,
+  .ui-article__back:focus-visible {
+    color: var(--color-fg);
+    text-decoration-color: currentColor;
+  }
+
+  .ui-article__header {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    margin-block-start: var(--space-4);
+  }
+
+  /* The same size and case as the index row it was reached from, so the
+     title does not jump between the two pages. */
+  .ui-article__title {
+    font-size: var(--text-title);
+    line-height: var(--leading-tight);
+    text-transform: lowercase;
+    overflow-wrap: anywhere;
+  }
+
+  .ui-article__meta {
+    color: var(--color-muted);
+    font-size: var(--text-meta);
+    line-height: var(--leading-body);
+    text-transform: lowercase;
+    overflow-wrap: anywhere;
+  }
+
+  .ui-article__meta::first-letter {
+    text-transform: uppercase;
+  }
+
+  /* Vertical rhythm: one gap between parts of the article, one smaller gap
+     inside a part. No rule, box, or divider separates them. */
+  .ui-article__body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-7);
+    margin-block-start: var(--space-7);
+  }
+
+  .ui-article__body:empty {
+    display: none;
+  }
+
+  .ui-article__section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  /* Author prose keeps the line breaks the author typed. */
+  .ui-article__lede {
+    white-space: pre-line;
+    overflow-wrap: anywhere;
+  }
+
+  .ui-article__abstract {
+    color: var(--color-muted);
+    white-space: pre-line;
+    overflow-wrap: anywhere;
+  }
+
+  /* Named metadata: term and value, no leaders or boxes. */
+  .ui-facts {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    color: var(--color-muted);
+    font-size: var(--text-meta);
+  }
+
+  .ui-facts__row {
+    display: grid;
+    grid-template-columns: minmax(0, 8rem) minmax(0, 1fr);
+    gap: var(--space-2) var(--space-4);
+  }
+
+  .ui-facts dt {
+    text-transform: lowercase;
+  }
+
+  .ui-facts dd {
+    overflow-wrap: anywhere;
+  }
+
+  /* One column below the measure's narrow end, where a label and a venue
+     cannot share a line. */
+  @media (width < 30rem) {
+    .ui-facts__row {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 0;
+    }
+  }
+
+  .ui-article__links {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  .ui-article__link {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: var(--hit-target);
+    overflow-wrap: anywhere;
+    text-decoration: underline;
+    text-decoration-color: var(--color-rule);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.25em;
+    transition: text-decoration-color var(--duration-fast) var(--ease-out);
+  }
+
+  .ui-article__link:hover,
+  .ui-article__link:focus-visible {
+    text-decoration-color: currentColor;
+  }
+
+  /* PDF reader: the frame is the one bounded surface on a reading page. The
+     file's own link sits under it, so the document is reachable when the
+     viewer does not run. */
+  .ui-reader {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  .ui-reader__frame {
+    border: 1px solid var(--color-rule);
+    background: var(--color-surface);
+  }
+
+  .ui-reader__frame-inner {
+    display: block;
+    inline-size: 100%;
+    block-size: min(70svh, 40rem);
+    min-block-size: 20rem;
+    border: 0;
+  }
+
+  @media (forced-colors: active) {
+    .ui-article__link:hover,
+    .ui-article__link:focus-visible {
+      text-decoration-color: LinkText;
+    }
+
+    .ui-reader__frame {
+      border-color: CanvasText;
+    }
+  }
+}

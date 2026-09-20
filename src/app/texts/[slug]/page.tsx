@@ -1,10 +1,10 @@
 import { cache } from 'react';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { getTextBySlug } from '@/services/contentService';
+import { getProfile, getTextBySlug } from '@/services/contentService';
 import { getTextHtml } from '@/lib/text-content-manager';
-import DetailShell from '@/app/components/DetailShell';
-import PdfFlipViewer from '@/app/components/PdfFlipViewer';
+import { SiteShell } from '@/app/ui/SiteShell';
+import { TextArticle } from '@/app/ui/TextArticle';
 
 const getText = cache(async (slug: string) => (await getTextBySlug(slug)).data);
 
@@ -28,7 +28,7 @@ export default async function TextPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const text = await getText(slug);
+  const [text, { data: profile }] = await Promise.all([getText(slug), getProfile()]);
 
   if (!text || text.status !== 'published') {
     notFound();
@@ -37,59 +37,8 @@ export default async function TextPage({
   const contentHtml = text.content_file ? await getTextHtml(text.content_file) : null;
 
   return (
-    <DetailShell backHref="/texts" backLabel="texts">
-      {/* Header */}
-      <header className="mt-8 mb-12">
-        <h1 className="text-4xl md:text-6xl font-black uppercase tracking-wider">
-          {text.title}
-        </h1>
-        <div className="mt-4 flex flex-wrap gap-x-6 gap-y-1 text-sm opacity-50">
-          <span>{text.year}</span>
-          <span>{text.type}</span>
-          {text.published_in && <span>{text.published_in}</span>}
-        </div>
-      </header>
-
-      {text.description && (
-        <p className="mb-12 text-sm opacity-60 leading-relaxed whitespace-pre-line">
-          {text.description}
-        </p>
-      )}
-
-      {/* Abstract */}
-      {text.abstract && (
-        <p className="mb-12 text-sm opacity-60 leading-relaxed italic whitespace-pre-line">
-          {text.abstract}
-        </p>
-      )}
-
-      {/* Body */}
-      {contentHtml && (
-        <div
-          className="prose prose-invert prose-sm max-w-none mb-12"
-          dangerouslySetInnerHTML={{ __html: contentHtml }}
-        />
-      )}
-
-      {text.pdf_url && (
-        <PdfFlipViewer pdfUrl={text.pdf_url} title={text.title} />
-      )}
-
-      {/* External publication link */}
-      {text.external_url && (
-        <div className="border-t border-white/10 pt-8 mt-12 flex flex-col gap-2 text-sm">
-          {text.external_url && (
-            <a
-              href={text.external_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="opacity-50 hover:opacity-100 transition-opacity"
-            >
-              Read online &rarr;
-            </a>
-          )}
-        </div>
-      )}
-    </DetailShell>
+    <SiteShell brandName={profile.name}>
+      <TextArticle text={text} contentHtml={contentHtml} />
+    </SiteShell>
   );
 }
