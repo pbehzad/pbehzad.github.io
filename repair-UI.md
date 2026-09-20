@@ -250,7 +250,7 @@ Primary ownership: `SiteShell`, header, menu, shared responsive layout
 
   WebKit and Gecko drop an SVG backdrop filter entirely, so the `-webkit-` and `-moz-` aliases are documented engine proxies that keep those engines on the blur. The droplet adds no script, animation loop, or dependency, and it is disabled for reduced transparency and forced colors. Evidence: [`r2-menu-droplet-closeup.png`](docs/ui-audit/r2-menu-droplet-closeup.png), at 3× in Chromium then Firefox, at rest, over a test-only stripe probe, and over text.
 - [x] Replace viewport-JavaScript layout branching with CSS. The new shell has no viewport checks in JavaScript; the legacy `ColumnPortal` branching is removed with the legacy runtime in R7.
-- [ ] Confirm active routes and history/back behavior. History and back are verified: the menu closes on navigation, and going back restores a closed menu. `aria-current="page"` on a section index is verified on `/compositions` (R4). `true` inside a section can only be tested once a detail route renders in the shell (R6).
+- [x] Confirm active routes and history/back behavior. History and back are verified: the menu closes on navigation, and going back restores a closed menu. `aria-current="page"` is verified on `/compositions` in a production build (2026-09-20): the menu marks Works as the current page and no other section. `aria-current="true"` for a detail route inside a section is exercised in R6.
 
 ### Exit gate
 
