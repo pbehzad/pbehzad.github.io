@@ -6,8 +6,8 @@ Applies to: all contributors and agents
 
 ## Branches and parallel work
 
-- Use one branch or managed worktree per work package when tasks run in parallel.
-- Use branch names such as `ui-shell`, `ui-home`, or `ui-works`.
+- The redesign lives on one long-running branch, `repair-UI`, alongside `main`. Do not create a branch per work package; commit boundaries, not branches, separate the packages.
+- When several agents work at once, they share that branch and the checkout, so keep file ownership narrow and commit explicit paths.
 - Branch from the agreed integration point. Do not guess a base ref when the task names one.
 - Avoid overlapping file ownership. Shell/token work lands before page work that consumes it.
 - Do not hand-edit another worktree or copy its `.git` metadata.
@@ -89,7 +89,7 @@ Add route-specific browser and screenshot checks for UI work. Add `npm run valid
 
 ```text
 Work package: R# — name
-Branch/worktree: name or path
+Branch: repair-UI
 Outcome: one sentence
 Changed: file list
 Checks: command — pass/fail/skipped and reason
