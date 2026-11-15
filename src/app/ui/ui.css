@@ -202,11 +202,6 @@
     line-height: var(--leading-body);
   }
 
-  .ui-title {
-    font-size: var(--text-title);
-    line-height: var(--leading-tight);
-  }
-
   /* Inline links in running text keep a visible affordance beyond hover. */
   .ui-link {
     text-decoration: underline;

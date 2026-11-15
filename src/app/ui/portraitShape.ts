@@ -6,7 +6,7 @@
  * the box is sized. Coordinates stay inside the box so the rim is never cut
  * off at the edges.
  */
-export const PORTRAIT_OUTLINE: readonly (readonly [number, number])[] = [
+const PORTRAIT_OUTLINE: readonly (readonly [number, number])[] = [
   [0.485, 0.02],
   [0.72, 0.16],
   [0.97, 0.52],
