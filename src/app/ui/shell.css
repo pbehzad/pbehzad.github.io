@@ -5,6 +5,19 @@
 
 :root {
   --shell-header-block-size: calc(var(--gutter-block-start) + var(--menu-size));
+  /* Inline end of every content column. The menu control is fixed, so on a
+     long page every line eventually scrolls beneath it. Below 52 rem a column
+     can reach that corner, so it gives the control a lane of its own rather
+     than letting a word disappear into the blur. At 52 rem and wider, the
+     widest column (the reading measure) already clears the control. The open
+     menu uses the same edge so its list stays aligned with page content. */
+  --content-inline-end: var(--gutter-inline-end);
+}
+
+@media (width < 52rem) {
+  :root {
+    --content-inline-end: calc(var(--gutter-inline-end) + var(--menu-size));
+  }
 }
 
 @layer components {
@@ -57,7 +70,7 @@
     overflow-y: auto;
     overscroll-behavior: contain;
     padding-block: calc(var(--shell-header-block-size) + var(--space-8)) var(--space-8);
-    padding-inline: var(--gutter-inline-start) var(--gutter-inline-end);
+    padding-inline: var(--gutter-inline-start) var(--content-inline-end);
     background: var(--color-scrim);
   }
 

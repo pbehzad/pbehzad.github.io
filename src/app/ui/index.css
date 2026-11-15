@@ -6,7 +6,7 @@
 @layer components {
   .ui-index {
     padding-block: var(--content-block-start) var(--space-9);
-    padding-inline: var(--gutter-inline-start) var(--gutter-inline-end);
+    padding-inline: var(--gutter-inline-start) var(--content-inline-end);
   }
 
   /* Groups (Events splits into upcoming and past) are headings, not boxes. */

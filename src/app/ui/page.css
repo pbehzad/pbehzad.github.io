@@ -7,7 +7,7 @@
 @layer components {
   .ui-page {
     padding-block: var(--content-block-start) var(--space-9);
-    padding-inline: var(--gutter-inline-start) var(--gutter-inline-end);
+    padding-inline: var(--gutter-inline-start) var(--content-inline-end);
   }
 
   .ui-page__body {

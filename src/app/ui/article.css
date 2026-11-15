@@ -8,18 +8,7 @@
 @layer components {
   .ui-article {
     padding-block: var(--content-block-start) var(--space-9);
-    padding-inline: var(--gutter-inline-start) var(--gutter-inline-end);
-  }
-
-  /* The menu control is fixed, so on a long text every line eventually
-     scrolls beneath it. Where the column is wide enough to reach that
-     corner, it gives the control a lane of its own rather than letting a
-     word disappear into the blur. Above this width the centred measure
-     already clears the control. */
-  @media (width < 52rem) {
-    .ui-article {
-      padding-inline-end: calc(var(--gutter-inline-end) + var(--menu-size));
-    }
+    padding-inline: var(--gutter-inline-start) var(--content-inline-end);
   }
 
   /* Tabbing to a link the control covers must not park it under the
