@@ -2,7 +2,7 @@
 
 Status: ready for implementation
 
-Last updated: 2026-09-19
+Last updated: 2026-11-15
 
 Scope: public portfolio UI; existing content and admin infrastructure remain in place
 
@@ -435,19 +435,28 @@ Suggested owner: integration/performance agent
 
 ### Tasks
 
-- [ ] Confirm no public route imports `DesktopColumnPortal`, `MobilePortal`, `AsciiSpace`, or the legacy glass layers.
-- [ ] Remove dead portal, divider, heading-fit, animation, tuner, and lens code only after confirming no admin/design-lab consumer remains.
-- [ ] Remove `three`, `@chenglou/pretext`, and `liquid-glass-web-react` only if no approved bounded effect or non-public tool still uses them.
-- [ ] If a liquid dependency remains, isolate it in a home/menu-only dynamic boundary with a flat fallback.
-- [ ] Remove obsolete global CSS and comments tied to retired UI.
-- [ ] Re-run route, sitemap, and build verification after each deletion group.
+- [x] Confirm no public route imports `DesktopColumnPortal`, `MobilePortal`, `AsciiSpace`, or the legacy glass layers. Nothing imported anything in `src/app/components/`: no public route, no admin page (the admin has its own `src/app/admin/components/`), the design lab, or a script.
+- [x] Remove dead portal, divider, heading-fit, animation, tuner, and lens code only after confirming no admin/design-lab consumer remains. All 16 files in `src/app/components/` are deleted (4,472 lines), including `DetailShell` and `PdfFlipViewer`, which R6 left for this package.
+- [x] Remove `three`, `@chenglou/pretext`, and `liquid-glass-web-react` only if no approved bounded effect or non-public tool still uses them. `@chenglou/pretext` and `liquid-glass-web-react` are removed. `three` stays because `/design-lab/metal`, an unlinked non-public experiment, still uses it. `@tailwindcss/typography` is also removed: it was never loaded, because Tailwind 4 needs an `@plugin` line and no stylesheet had one.
+- [x] If a liquid dependency remains, isolate it in a home/menu-only dynamic boundary with a flat fallback. Not applicable: no liquid dependency remains. The home and menu effects are the repository's own CSS and static SVG filters, and `three` loads only in the design-lab route's chunk.
+- [x] Remove obsolete global CSS and comments tied to retired UI. `globals.css` drops every class-scoped rule (portal grid and hydration placeholder, glass material, detail panel, nav, scrollbars, divider, swipe hint, `body.portal-lock`, `brutal-box`, `hard-shadow`, `brutalist-scroll`), from 799 to 152 lines. Major Mono Display (`@font-face` rules, both WOFF2 files, and its licence) is removed because only the portals used it. The unscoped element rules stay, because the admin builds on them; comments in `globals.css`, `ui.css` and `fonts.css` now say so.
+- [x] Re-run route, sitemap, and build verification after each deletion group. Six groups, each followed by typecheck, lint, a production build, a 200 for all 16 sitemap routes, a 404 for an unknown path and an unknown slug in each section, a 200 for `/admin/login`, and the redirect from `/admin`.
 
 ### Exit gate
 
-- [ ] Default public routes do not download the Three.js chunk.
-- [ ] List and article routes create no WebGL context and run no ambient loop.
-- [ ] No dead exports, styles, dependencies, or fallback paths remain.
-- [ ] Admin, APIs, content storage, and design-lab decisions are unchanged or separately documented.
+- [x] Default public routes do not download the Three.js chunk. Checked on all 16 sitemap routes in Chromium and Firefox against a production build: no script any route loads contains a Three.js signature. `/design-lab/metal`, used as a control, does.
+- [x] List and article routes create no WebGL context and run no ambient loop. Same routes and engines, including home: no WebGL or 2D context, no canvas, 0 animation frames over 2 s idle, no running animations, no intervals. The control route creates a WebGL context and keeps requesting frames, which shows the probe works.
+- [x] No dead exports, styles, dependencies, or fallback paths remain. Every export in `src/app/ui/` has an importer (the portrait generator script counts). Every `.ui-*` class in its stylesheets is used. `.ui-title`, whose only user was the primitives preview, is removed, and `PORTRAIT_OUTLINE` is no longer exported. Every dependency is imported except `react-dom`, which Next.js requires.
+- [x] Admin, APIs, content storage, and design-lab decisions are unchanged or separately documented. No file under `src/app/admin/`, `src/app/api/`, `src/lib/`, `src/services/` or `src/data/` changed. A pixel comparison of the pre-R7 build (`23a7c8f0`) against the result matched on every sitemap route and `/admin/login` at 1440 × 900 and 390 × 844 in Chromium. The one exception was `/events` at 390 px, which differs by 33 pixels even between two captures of the same build. Design-lab decisions are recorded in the handoff notes.
+
+### R7 handoff notes
+
+- Evidence (Chromium and Firefox via Playwright against production builds, 2026-11-15): the measurements above. No screenshots are committed because the package changes no pixels.
+- Removed: `/design-lab/primitives`, the temporary R1/R2 review route that was always scheduled for removal; it now returns 404. Kept: `/design-lab/metal`, which still returns 200, loads 250 kB of first-load JavaScript and runs a WebGL loop. It is not linked, not in the sitemap, and has no `noindex`. Keeping it is the only reason `three` remains. Deleting it, or adding `noindex`, is the site owner's call.
+- The isolation block in `ui.css` remains, together with the two `!important` element rules it cannot roll back. Retiring both means scoping `globals.css` to `.admin-shell`, which is an admin change and was left alone.
+- Left in place, outside this package: `src/services/hooks/useContent.ts` has no consumer but is protected infrastructure. `public/file.svg`, `globe.svg`, `next.svg`, `vercel.svg`, `window.svg` and `ParhamBehzad.jpg`, and `src/ParhamBehzad.jpg`, have no references, but the legacy UI never used them either, and public files are reachable URLs. Review them with image delivery in R9.
+- First-load JavaScript shared by all routes fell from 130 kB to 126 kB. Public routes stay at 119 kB and home at 124 kB.
+- Next safe task: R8. Its real-Safari items still need hardware that this environment does not have.
 
 ## R8 — Browser, accessibility, and performance QA
 
