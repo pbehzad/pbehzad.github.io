@@ -2,19 +2,19 @@
  * Public design system: tokens and primitives for the redesigned public site.
  *
  * Tokens live on :root so any surface can read them. Every rule that styles
- * elements is scoped to `.ui`, the root class of the new public shell, so the
- * admin application and the legacy public UI are unaffected.
+ * elements is scoped to `.ui`, the root class of the public shell, so the
+ * admin application is unaffected.
  *
- * globals.css still applies unlayered legacy element rules (universal margin
- * and padding reset, uppercase headings, inverted link hover, focus
- * box-shadow, button press transform, image contrast filter). Unlayered rules
- * beat every layered rule, including Tailwind utilities, so the isolation
- * block below rolls them back inside `.ui` with `revert-layer`. Within `.ui`,
- * Tailwind preflight, the layered primitives, and utilities then apply as
- * usual. Two legacy rules use !important and cannot be rolled back: the
- * universal JetBrains Mono font-family and a linear animation-timing-function.
- * Neither conflicts with the approved design; both go with the legacy runtime
- * in R7, together with this isolation block.
+ * globals.css applies unlayered base element rules that the admin builds on
+ * (universal margin and padding reset, uppercase headings, inverted link
+ * hover, focus box-shadow, button press transform, image contrast filter).
+ * Unlayered rules beat every layered rule, including Tailwind utilities, so
+ * the isolation block below rolls them back inside `.ui` with `revert-layer`.
+ * Within `.ui`, Tailwind preflight, the layered primitives, and utilities
+ * then apply as usual. Two of those rules use !important and cannot be rolled
+ * back: the universal JetBrains Mono font-family and a linear
+ * animation-timing-function. Neither conflicts with the approved design. The
+ * isolation block can go once the base rules are scoped to `.admin-shell`.
  */
 
 :root {
@@ -92,7 +92,8 @@
   }
 }
 
-/* Legacy isolation (unlayered on purpose; see the header comment). */
+/* Isolation from the base element rules (unlayered on purpose; see the
+   header comment). */
 
 .ui * {
   margin: revert-layer;
