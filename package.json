@@ -22,7 +22,6 @@
     "new:text": "ts-node --project tsconfig.scripts.json scripts/new-text.ts"
   },
   "dependencies": {
-    "@tailwindcss/typography": "^0.5.19",
     "gray-matter": "^4.0.3",
     "jose": "^6.1.3",
     "next": "15.5.12",
