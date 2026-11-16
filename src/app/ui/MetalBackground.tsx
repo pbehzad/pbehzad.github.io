@@ -18,6 +18,24 @@ const ShadesTuner =
 // lab, which renders this same field itself.
 const EXCLUDED_PREFIXES = ['/admin', '/design-lab'];
 
+// The field's pace, as a multiple of the shader's own speed (which the
+// design lab still uses as-is). At the owner's direction it starts at full
+// speed when the field appears and slows linearly to an eighth of it over
+// the next SETTLE_S seconds, then holds that slow movement. It counts from
+// the field's start, not the page load, so the whole slowdown is seen.
+// The canvas persists across client navigation, so the visit, not each
+// page, sets the pace.
+const SETTLED_SPEED = 1 / 8;
+const SETTLE_S = 8;
+// The field's clock advances by at most this much per frame, so a hitch or
+// a long frame does not jump the picture forward.
+const MAX_FIELD_STEP_S = 0.25;
+
+function fieldSpeed(secondsSinceStart: number) {
+  const progress = Math.min(1, Math.max(0, secondsSinceStart / SETTLE_S));
+  return 1 + (SETTLED_SPEED - 1) * progress;
+}
+
 // Resolution, as drawing-buffer pixels per CSS pixel. The raymarch is paid
 // per pixel on every page, so it starts at one pixel per CSS pixel, never
 // retina, and steps down on a GPU that cannot hold TARGET_FPS. An Intel UHD
@@ -90,6 +108,14 @@ function MetalField() {
     let windowStart = 0;
     let windowFrames = 0;
     let warmedUp = false;
+    // The field's own clock, advanced each frame at fieldSpeed(). It is
+    // integrated rather than computed as time × speed, which would run the
+    // field backwards while the speed eases down. It starts at the page's
+    // age, as the plain clock did, so the opening picture is unchanged.
+    let fieldTime = performance.now() / 1000;
+    // When the field started; the slowdown counts from here. A restored
+    // WebGL context re-runs init() but keeps this, so it does not restart.
+    const fieldStart = performance.now();
 
     const resize = () => renderer?.resize(canvas.clientWidth, canvas.clientHeight, pixelRatio);
 
@@ -109,7 +135,7 @@ function MetalField() {
 
     const drawStill = () => {
       if (!renderer) return;
-      renderer.draw(performance.now() / 1000, [0, 0]);
+      renderer.draw(fieldTime, [0, 0]);
       show();
     };
 
@@ -146,15 +172,16 @@ function MetalField() {
       // Capped at TARGET_FPS: refreshes in between draw nothing.
       if (now - last < FRAME_INTERVAL_MS - FRAME_SLACK_MS) return;
       // Clamped at zero: the first frame's timestamp can precede start().
-      const delta = Math.min(Math.max(0, now - last) / 1000, 0.05);
+      const elapsed = Math.max(0, now - last) / 1000;
       govern(now);
       last = now;
+      fieldTime += Math.min(elapsed, MAX_FIELD_STEP_S) * fieldSpeed((now - fieldStart) / 1000);
       // The pointer opens a void in the field; ease towards it at the same
       // rate whatever the frame rate.
-      const ease = 1 - Math.pow(0.0015, delta);
+      const ease = 1 - Math.pow(0.0015, Math.min(elapsed, 0.05));
       pointer[0] += (aim[0] - pointer[0]) * ease;
       pointer[1] += (aim[1] - pointer[1]) * ease;
-      renderer.draw(now / 1000, pointer);
+      renderer.draw(fieldTime, pointer);
       show();
     };
 
