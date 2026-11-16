@@ -96,6 +96,24 @@
     gap: var(--space-4);
   }
 
+  /* Phones: the same rhythm, one step tighter, to match the compact type
+     scale (ui.css). */
+  @media (width < 48rem) {
+    .ui-article__header {
+      gap: var(--space-2);
+      margin-block-start: var(--space-3);
+    }
+
+    .ui-article__body {
+      gap: var(--space-6);
+      margin-block-start: var(--space-6);
+    }
+
+    .ui-article__section {
+      gap: var(--space-3);
+    }
+  }
+
   /* The short introduction under the title (a work's, event's or text's
      description): larger, in Light. Author text keeps the line breaks the
      author typed. */

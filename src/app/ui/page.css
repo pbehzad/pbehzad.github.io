@@ -17,6 +17,14 @@
     margin-block-start: var(--space-6);
   }
 
+  /* Phones: tighter, to match the compact type scale (ui.css). */
+  @media (width < 48rem) {
+    .ui-page__body {
+      gap: var(--space-5);
+      margin-block-start: var(--space-5);
+    }
+  }
+
   /* The bio: the page's introduction, larger and in Light, like a work's
      description. `pre-line` keeps the line breaks the author typed. */
   .ui-page__lede {

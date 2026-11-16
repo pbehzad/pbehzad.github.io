@@ -147,6 +147,12 @@
     margin-inline-start: var(--frame-start);
   }
 
+  @media (width < 48rem) {
+    .ui-site-menu__list {
+      gap: var(--space-3);
+    }
+  }
+
   /* The site's own voice at its largest: Sans Light. */
   .ui-site-menu__link {
     display: inline-flex;

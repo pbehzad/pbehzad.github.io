@@ -57,7 +57,7 @@
   --text-body: 1.0625rem;
   --text-lede: clamp(1.1875rem, 1.05rem + 0.4vw, 1.4375rem);
   --text-nav: 0.875rem;
-  --text-title: clamp(1.375rem, 1.1rem + 0.6vw, 1.75rem);
+  --text-title: clamp(1.25rem, 1.05rem + 0.45vw, 1.4375rem);
   --text-menu: clamp(1.875rem, 1.4rem + 1.4vw, 2.625rem);
   --text-display: clamp(2rem, 1.35rem + 1.7vw, 2.875rem);
   --leading-tight: 1.2;
@@ -128,6 +128,23 @@
   --layer-menu: 10;
   --layer-menu-control: 20;
   --layer-skip-link: 30;
+}
+
+/* Phones: a compact scale, so a screen holds more and the hierarchy stays
+   the same, only smaller. Every role keeps its face and weight. Content
+   also starts nearer the header than the desktop's quarter-height drop. */
+@media (width < 48rem) {
+  :root {
+    --text-label: 0.75rem;
+    --text-meta: 0.75rem;
+    --text-nav: 0.8125rem;
+    --text-body: 0.9375rem;
+    --text-lede: 1.0625rem;
+    --text-title: 1.125rem;
+    --text-menu: 1.625rem;
+    --text-display: 1.625rem;
+    --content-block-start: var(--space-7);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -104,6 +104,25 @@
     gap: var(--space-5);
   }
 
+  /* Phones: tighter, to match the compact type scale (ui.css). */
+  @media (width < 48rem) {
+    .ui-home__layout {
+      gap: var(--space-6);
+    }
+
+    .ui-home__events {
+      gap: var(--space-4);
+    }
+
+    .ui-home__events-list {
+      gap: var(--space-3);
+    }
+
+    .ui-home__events .ui-index__link {
+      gap: var(--space-1);
+    }
+  }
+
   /* The way on to the full list: muted, like the back link on articles. */
   .ui-home__more {
     display: inline-flex;

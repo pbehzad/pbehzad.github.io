@@ -72,6 +72,28 @@
     line-height: var(--leading-tight);
   }
 
+  /* Phones: the same list, packed closer, to match the compact type scale
+     (ui.css). Each row keeps its 44 px hit target. */
+  @media (width < 48rem) {
+    .ui-index__body {
+      gap: var(--space-7);
+      margin-block-start: var(--space-5);
+    }
+
+    .ui-index__group {
+      gap: var(--space-4);
+    }
+
+    .ui-index__list {
+      gap: var(--space-3);
+    }
+
+    .ui-index__link,
+    .ui-index__row {
+      gap: var(--space-1);
+    }
+  }
+
   /* Where the frame is wide, title and metadata share a line, like a
      catalogue: titles in a fixed first column, metadata aligned in the
      second. Every row has the same width, so the columns line up without a
