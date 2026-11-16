@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
+import { IBM_Plex_Mono, IBM_Plex_Sans, IBM_Plex_Serif } from "next/font/google";
 import "./fonts.css";
 import "./globals.css";
 import "./ui/ui.css";
@@ -12,24 +12,60 @@ import "./ui/metal.css";
 import { MetalBackground } from "./ui/MetalBackground";
 
 // Public typefaces, downloaded and self-hosted by next/font at build time.
-// Sans carries titles and reading text; Mono carries the brand, labels,
-// dates and metadata. Only the latin files are preloaded; latin-ext (Dvořák,
-// Łódź) still loads on demand through its unicode-range. The public tokens
-// read these through --font-plex-sans and --font-plex-mono (ui.css).
+// The three IBM Plex families each have one voice (see the type system in
+// ui.css): Serif for the work (titles, introductions, reading text), Sans
+// for the site (menu, navigation, headings within texts), Mono for the
+// archive (the brand, labels, dates, metadata). latin-ext (Dvořák, Łódź)
+// loads on demand through its unicode-range.
+//
+// next/font preloads every file it declares, on every page, so the faces
+// are grouped by need. Serif Light and Regular and Mono Regular and Medium
+// are above the fold on every page, so they are preloaded. Serif Bold, the
+// Serif italic and every Sans weight appear only in some places, so they
+// are declared without preload and a page downloads them only if it uses
+// them. ui.css names each group through its own variable.
+const plexSerif = IBM_Plex_Serif({
+  subsets: ["latin"],
+  weight: ["300", "400"],
+  display: "swap",
+  variable: "--font-plex-serif",
+});
+
+const plexSerifBold = IBM_Plex_Serif({
+  subsets: ["latin"],
+  weight: ["700"],
+  display: "swap",
+  preload: false,
+  variable: "--font-plex-serif-bold",
+});
+
+const plexSerifItalic = IBM_Plex_Serif({
+  subsets: ["latin"],
+  weight: ["400"],
+  style: ["italic"],
+  display: "swap",
+  preload: false,
+  variable: "--font-plex-serif-italic",
+});
+
 const plexSans = IBM_Plex_Sans({
   subsets: ["latin"],
-  weight: ["400", "600"],
-  style: ["normal", "italic"],
+  weight: ["300", "500", "700"],
   display: "swap",
+  preload: false,
   variable: "--font-plex-sans",
 });
 
 const plexMono = IBM_Plex_Mono({
   subsets: ["latin"],
-  weight: ["400"],
+  weight: ["400", "500"],
   display: "swap",
   variable: "--font-plex-mono",
 });
+
+const FONT_VARIABLES = [plexSerif, plexSerifBold, plexSerifItalic, plexSans, plexMono]
+  .map((font) => font.variable)
+  .join(" ");
 
 export const metadata: Metadata = {
   title: "Parham Behzad",
@@ -53,7 +89,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${plexSans.variable} ${plexMono.variable}`}>
+    <html lang="en" className={FONT_VARIABLES}>
       <head>
         <link rel="icon" type="image/svg+xml" href="/branding/logo-primary.svg" />
         <link rel="shortcut icon" href="/branding/logo-primary.svg" />

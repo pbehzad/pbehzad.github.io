@@ -20,8 +20,9 @@
     gap: var(--space-2);
     min-block-size: var(--hit-target);
     color: var(--color-muted);
-    font-family: var(--font-ui-mono);
-    font-size: var(--text-label);
+    font-family: var(--font-ui-sans);
+    font-size: var(--text-nav);
+    font-weight: var(--weight-medium);
     text-transform: lowercase;
     text-decoration: underline;
     text-decoration-color: transparent;
@@ -48,10 +49,13 @@
   /* The same size as the index row it was reached from, so the title does
      not jump between the two pages. Title and metadata keep their stored
      case, as on the index. */
+  /* The page's title, large and in Light: the one display line on a
+     reading page. */
   .ui-article__title {
-    font-size: var(--text-title);
-    letter-spacing: var(--tracking-title);
-    line-height: var(--leading-tight);
+    font-size: var(--text-display);
+    font-weight: var(--weight-light);
+    letter-spacing: var(--tracking-display);
+    line-height: var(--leading-display);
     overflow-wrap: anywhere;
   }
 
@@ -63,9 +67,14 @@
     overflow-wrap: anywhere;
   }
 
-  /* Running text never runs the frame's full width. */
-  .ui-article :is(.ui-article__title, .ui-article__lede, .ui-article__abstract, .ui-prose) {
+  /* Running text never runs the frame's full width. The introduction is
+     larger, so its own measure is narrower in ems to keep a similar width. */
+  .ui-article :is(.ui-article__title, .ui-article__text, .ui-article__abstract, .ui-prose) {
     max-inline-size: var(--measure-article);
+  }
+
+  .ui-article .ui-article__lede {
+    max-inline-size: 34em;
   }
 
   /* Vertical rhythm: one gap between parts of the article, one smaller gap
@@ -87,8 +96,19 @@
     gap: var(--space-4);
   }
 
-  /* Author prose keeps the line breaks the author typed. */
+  /* The short introduction under the title (a work's, event's or text's
+     description): larger, in Light. Author text keeps the line breaks the
+     author typed. */
   .ui-article__lede {
+    font-size: var(--text-lede);
+    font-weight: var(--weight-light);
+    line-height: var(--leading-lede);
+    white-space: pre-line;
+    overflow-wrap: anywhere;
+  }
+
+  /* Plain reading text the author typed, such as program notes. */
+  .ui-article__text {
     white-space: pre-line;
     overflow-wrap: anywhere;
   }
@@ -138,10 +158,14 @@
     gap: var(--space-3);
   }
 
+  /* Media links (Video, Audio) lead somewhere: Sans Medium, like all
+     navigation. */
   .ui-article__link {
     display: inline-flex;
     align-items: center;
     min-block-size: var(--hit-target);
+    font-family: var(--font-ui-sans);
+    font-weight: var(--weight-medium);
     overflow-wrap: anywhere;
     text-decoration: underline;
     text-decoration-color: var(--color-rule);

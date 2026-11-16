@@ -47,6 +47,7 @@
   /* Titles and metadata show exactly as stored: their case is the
      composer's (Team CEO, one is coming..., Pierre Boulez Saal), so the
      site does not impose one. */
+  /* Serif Regular: the work's name. Light is kept for larger type. */
   .ui-index__title {
     font-size: var(--text-title);
     letter-spacing: var(--tracking-title);

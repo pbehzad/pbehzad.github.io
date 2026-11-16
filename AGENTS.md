@@ -27,7 +27,7 @@ If sources conflict, the latest explicit user instruction wins, followed by the 
 
 ## Non-negotiable design contract
 
-- The interface is super-minimal and mostly empty: near-black field, warm-white text, IBM Plex typography (Sans for titles and reading text, Mono for the brand, labels, dates, and metadata), and deliberate negative space.
+- The interface is super-minimal and mostly empty: near-black field, warm-white text, IBM Plex typography in three voices (Serif for the work: titles, introductions, reading text; Sans for the site: menu, navigation, headings within texts; Mono for the archive: the brand, labels, dates, metadata), with weights ranking within each voice as set out in `src/app/ui/ui.css`, and deliberate negative space.
 - Content hangs from one shared frame, about 60rem wide and set a little left of centre, not centred. Labels, lists, articles, and the open menu share its start edge.
 - The persistent shell contains a tiny name at top left and a single liquid menu button at top right. The header is sticky; content scrolls under a fade from the page colour, never under a visible bar. Do not restore a visible header navigation bar.
 - The home page contains the portrait as a picture on a CRT (curved glass, scanlines, phosphor grille, halation; no ASCII trace), drawn once in WebGL over the plain photo, which stays the real image and the fallback, and a short preview of the next few upcoming events (the most recent ones when none are announced). It contains no visible name, role, selected-work list, card, or supporting copy.

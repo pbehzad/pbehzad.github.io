@@ -147,11 +147,14 @@
     margin-inline-start: var(--frame-start);
   }
 
+  /* The site's own voice at its largest: Sans Light. */
   .ui-site-menu__link {
     display: inline-flex;
     align-items: center;
     min-block-size: var(--hit-target);
-    font-size: var(--text-title);
+    font-family: var(--font-ui-sans);
+    font-size: var(--text-menu);
+    font-weight: var(--weight-light);
     letter-spacing: var(--tracking-title);
     line-height: var(--leading-tight);
     text-decoration: underline;
@@ -177,8 +180,9 @@
     margin-inline-start: var(--frame-start);
     padding-block: var(--space-3);
     color: var(--color-muted);
-    font-family: var(--font-ui-mono);
-    font-size: var(--text-label);
+    font-family: var(--font-ui-sans);
+    font-size: var(--text-nav);
+    font-weight: var(--weight-medium);
   }
 
   /* Optional glass for the menu control: a real backdrop blur of whatever

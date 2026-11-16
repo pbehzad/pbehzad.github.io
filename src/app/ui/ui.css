@@ -28,20 +28,49 @@
   --color-focus: #ffffff;
   --color-scrim: rgb(8 9 8 / 0.985);
 
-  /* Type: IBM Plex, loaded by next/font in layout.tsx. Sans is the voice of
-     titles and reading text; Mono is the voice of the brand, labels, dates
-     and metadata. */
-  --font-ui: var(--font-plex-sans), 'IBM Plex Sans', system-ui, sans-serif;
+  /* Type: three IBM Plex families, each with one voice, and weights that
+     rank within it. Light appears only at large sizes, where it holds up
+     on the dark field.
+
+     Serif, the work: what you read.
+       Light 300    page titles, introductions (a description, the bio)
+       Regular 400  list titles, reading text; its italic for work titles,
+                    emphasis and quotations
+       Bold 700     emphasis the author marks as strong
+     Sans, the site: how you move and how a text is structured.
+       Light 300    the menu
+       Medium 500   navigation links (back, all events, media), sub-headings
+                    within texts, About's section titles
+       Bold 700     main headings within texts
+     Mono, the archive: facts.
+       Regular 400  labels, dates, instrumentation, venues, facts
+       Medium 500   the brand
+
+     Each loading group is its own family (layout.tsx), named here. */
+  --font-ui: var(--font-plex-serif), 'IBM Plex Serif', Georgia, serif;
+  --font-ui-bold: var(--font-plex-serif-bold), var(--font-ui);
+  --font-ui-italic: var(--font-plex-serif-italic), var(--font-ui);
+  --font-ui-sans: var(--font-plex-sans), 'IBM Plex Sans', system-ui, sans-serif;
   --font-ui-mono: var(--font-plex-mono), 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
   --text-label: 0.8125rem;
   --text-meta: 0.8125rem;
   --text-body: 1.0625rem;
+  --text-lede: clamp(1.1875rem, 1.05rem + 0.4vw, 1.4375rem);
+  --text-nav: 0.875rem;
   --text-title: clamp(1.375rem, 1.1rem + 0.6vw, 1.75rem);
+  --text-menu: clamp(1.875rem, 1.4rem + 1.4vw, 2.625rem);
+  --text-display: clamp(2rem, 1.35rem + 1.7vw, 2.875rem);
   --leading-tight: 1.2;
+  --leading-display: 1.08;
+  --leading-lede: 1.5;
   --leading-body: 1.6;
   --tracking-label: 0.14em;
   --tracking-title: -0.01em;
+  --tracking-display: -0.02em;
+  --weight-light: 300;
   --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-bold: 700;
 
   /* Space */
   --space-1: 0.25rem;
@@ -196,6 +225,17 @@
     font-family: var(--font-ui-mono);
   }
 
+  /* The real italic and bold faces, never synthesised ones. */
+  .ui :is(em, i, cite) {
+    font-family: var(--font-ui-italic);
+    font-style: italic;
+  }
+
+  .ui :is(strong, b) {
+    font-family: var(--font-ui-bold);
+    font-weight: var(--weight-bold);
+  }
+
   .ui a {
     transition: color var(--duration-fast) var(--ease-out);
   }
@@ -275,8 +315,9 @@
     padding: var(--space-3) var(--space-4);
     background: var(--color-bg);
     color: var(--color-fg);
-    font-family: var(--font-ui-mono);
-    font-size: var(--text-label);
+    font-family: var(--font-ui-sans);
+    font-size: var(--text-nav);
+    font-weight: var(--weight-medium);
     transform: translateY(calc(-100% - var(--space-4)));
   }
 
@@ -292,6 +333,7 @@
     min-block-size: var(--hit-target);
     font-family: var(--font-ui-mono);
     font-size: var(--text-label);
+    font-weight: var(--weight-medium);
     letter-spacing: var(--tracking-label);
     line-height: 1;
     text-transform: uppercase;

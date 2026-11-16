@@ -17,8 +17,12 @@
     margin-block-start: var(--space-6);
   }
 
-  /* The bio, at body size; `pre-line` keeps the line breaks the author typed. */
+  /* The bio: the page's introduction, larger and in Light, like a work's
+     description. `pre-line` keeps the line breaks the author typed. */
   .ui-page__lede {
+    font-size: var(--text-lede);
+    font-weight: var(--weight-light);
+    line-height: var(--leading-lede);
     white-space: pre-line;
   }
 
@@ -62,10 +66,11 @@
     content: '−';
   }
 
-  /* The heading carries no size of its own; the summary row sets the type. */
+  /* Sans Medium: structure, and the control that opens the section. */
   .ui-disclosure__title {
+    font-family: var(--font-ui-sans);
     font-size: inherit;
-    font-weight: inherit;
+    font-weight: var(--weight-medium);
   }
 
   .ui-disclosure__body {
@@ -89,16 +94,25 @@
     margin-block-start: var(--space-4);
   }
 
-  /* An author's heading takes the same small muted role as the site's own
-     headings, so every heading on the site reads as a label and the body
-     text stays the bright thing. Case is the author's; only depth differs,
-     and it differs by the space above, not by an invented size ramp. */
+  /* An author's headings structure a long text, so they speak in the site's
+     Sans, against the Serif text: h2 in Bold a step larger than the text,
+     h3 and h4 in Medium at text size. Case is the author's. */
   .ui-prose :is(h2, h3, h4) {
-    color: var(--color-muted);
-    font-family: var(--font-ui-mono);
-    font-size: var(--text-label);
-    font-weight: var(--weight-regular);
+    color: var(--color-fg);
+    font-family: var(--font-ui-sans);
+    font-size: var(--text-body);
+    font-weight: var(--weight-medium);
+    line-height: var(--leading-tight);
     text-transform: none;
+  }
+
+  .ui-prose h2 {
+    font-size: 1.1875rem;
+    font-weight: var(--weight-bold);
+  }
+
+  .ui-prose h4 {
+    color: var(--color-muted);
   }
 
   .ui-prose > * + h2 {
@@ -133,10 +147,14 @@
     text-decoration-color: currentColor;
   }
 
+  /* A quotation in the Serif italic, a step larger than the text. */
   .ui-prose blockquote {
     padding-inline-start: var(--space-4);
     border-inline-start: 1px solid var(--color-rule);
-    color: var(--color-muted);
+    font-family: var(--font-ui-italic);
+    font-size: 1.1875rem;
+    font-style: italic;
+    line-height: var(--leading-lede);
   }
 
   .ui-prose :is(img, video) {

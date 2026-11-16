@@ -71,7 +71,7 @@ export function CompositionArticle({ composition }: CompositionArticleProps) {
 
       {programNotes && (
         <ArticleSection title="program notes">
-          <p className="ui-article__lede">{programNotes}</p>
+          <p className="ui-article__text">{programNotes}</p>
         </ArticleSection>
       )}
 
