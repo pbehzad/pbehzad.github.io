@@ -1,33 +1,98 @@
 /*
- * Home view: one portrait inside one organic form, centred in the viewport.
+ * Home view: the portrait inside its organic form, with a short events
+ * preview beside it (below it on narrow screens). The composition hangs from
+ * the shared frame's start edge, so it sits left of centre like every page.
  * Everything here is static; nothing animates or redraws while idle.
  */
 
 :root {
-  /* Frame width: about 53% of a desktop viewport, bounded by the viewport
-     height so the form never crowds the header, and by the gutters on
-     narrow screens. */
+  /* Portrait frame width. Narrow screens: the column, up to 30rem. */
   --portrait-inline-size: min(
-    calc(100vw - 2 * var(--gutter)),
-    85svh,
-    48rem,
-    max(53.5vw, 21rem)
+    calc(100vw - var(--gutter-inline-start) - var(--gutter-inline-end)),
+    30rem
   );
   --portrait-aspect: 1.14;
+  /* The ASCII trace spills about a third of the frame's width past its
+     right edge; the events column starts beyond where it has faded. */
+  --home-column-gap: calc(var(--portrait-inline-size) * 0.28);
+}
+
+@media (width >= 56rem) {
+  :root {
+    /* Beside the events: bounded by the viewport height too, so the form
+       never crowds the header. */
+    --portrait-inline-size: min(38vw, 36rem, 66svh * 1.14);
+  }
 }
 
 @layer components {
-  /* Cancels the shell's header offset so the portrait centres on the
-     viewport rather than on the area below the header. */
+  /* Starts under the sticky header (the negative margin) so the
+     composition centres on the viewport, and pads itself clear of it. */
   .ui-home {
     display: grid;
-    place-items: center;
+    align-content: center;
     min-block-size: 100vh;
     min-block-size: 100svh;
     margin-block-start: calc(-1 * var(--shell-header-block-size));
-    padding-inline: var(--gutter-inline-start) var(--gutter-inline-end);
+    padding-block: calc(var(--shell-header-block-size) + var(--space-5)) var(--space-8);
+    padding-inline: var(--gutter-inline-start) var(--content-inline-end);
     /* The ASCII trace extends past the form; never let it scroll the page. */
     overflow: clip;
+  }
+
+  /* Narrow screens: the portrait, then the events. */
+  .ui-home__layout {
+    display: grid;
+    gap: var(--space-7);
+    margin-inline-start: var(--frame-start);
+  }
+
+  /* Wide screens: the portrait on the frame's start edge, the events to its
+     right, both centred on the portrait's middle. */
+  @media (width >= 56rem) {
+    .ui-home__layout {
+      grid-template-columns: var(--portrait-inline-size) minmax(0, 22rem);
+      column-gap: var(--home-column-gap);
+      align-items: center;
+    }
+  }
+
+  .ui-home__events {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-5);
+  }
+
+  /* The index rows, stacked as on a phone: title, then date and place. */
+  .ui-home__events-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+  }
+
+  /* The way on to the full list: muted, like the back link on articles. */
+  .ui-home__more {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-block-size: var(--hit-target);
+    color: var(--color-muted);
+    font-family: var(--font-ui-mono);
+    font-size: var(--text-label);
+    text-decoration: underline;
+    text-decoration-color: transparent;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.25em;
+    transition:
+      color var(--duration-fast) var(--ease-out),
+      text-decoration-color var(--duration-fast) var(--ease-out);
+  }
+
+  .ui-home__more:hover,
+  .ui-home__more:focus-visible {
+    color: var(--color-fg);
+    text-decoration-color: currentColor;
   }
 
   .ui-home-portrait {

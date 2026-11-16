@@ -19,8 +19,13 @@ const PORTRAIT_SRC = '/ParhamBehzad-display.jpg';
 // about 250 kB of AVIF and quality 65 about 80 kB with the detail intact.
 const PORTRAIT_QUALITY = 65;
 // The photo is drawn at 140% of the frame width (see home.css), so these are
-// 1.4 times the frame: 21rem on phones, about 53.5vw up to 48rem above that.
-const PORTRAIT_SIZES = '(max-width: 40rem) 29.4rem, (max-width: 90rem) 75vw, 1080px';
+// about 1.4 times --portrait-inline-size: up to 30rem wide below 56rem, then
+// 38vw up to 36rem. Phones declare a little less (30rem) than the drawn
+// width, so a 3x phone takes the 1440 px file (about 80 kB of AVIF) rather
+// than the 1920 px one (about 335 kB); the overscan the mask crops away
+// absorbs the difference.
+const PORTRAIT_SIZES =
+  '(max-width: 34rem) 30rem, (max-width: 56rem) 42rem, (max-width: 94.7rem) 53.2vw, 50.4rem';
 
 // The trace grid spans TRACE_BOX.width of the frame across TRACE_COLUMNS
 // glyphs of 0.6em each, so its font size follows the frame.

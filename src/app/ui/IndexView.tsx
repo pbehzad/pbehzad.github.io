@@ -36,7 +36,8 @@ function IndexRowContent({ item }: { item: IndexItem }) {
   );
 }
 
-function IndexRow({ item }: { item: IndexItem }) {
+/** One linked (or plain) row; also used by the home page's events preview. */
+export function IndexRow({ item }: { item: IndexItem }) {
   if (!item.href) {
     return (
       <div className="ui-index__row">
