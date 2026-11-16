@@ -70,7 +70,7 @@
 
   /* Running text never runs the frame's full width. */
   .ui-article :is(.ui-article__title, .ui-article__lede, .ui-article__abstract, .ui-prose) {
-    max-inline-size: var(--measure);
+    max-inline-size: var(--measure-article);
   }
 
   /* Vertical rhythm: one gap between parts of the article, one smaller gap
