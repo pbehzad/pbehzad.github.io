@@ -79,14 +79,15 @@
     display: block;
   }
 
-  /* Shares the index column so menu items align with page content. */
+  /* Hangs from the frame's start edge, so menu items align with page
+     content. */
   .ui-site-menu__list {
     display: flex;
     flex-direction: column;
     gap: var(--space-5);
     inline-size: 100%;
-    max-inline-size: var(--index-width);
-    margin-inline: auto;
+    max-inline-size: var(--frame-width);
+    margin-inline-start: var(--frame-start);
   }
 
   .ui-site-menu__link {
@@ -114,8 +115,9 @@
   .ui-site-menu__fallback-close {
     display: block;
     inline-size: 100%;
-    max-inline-size: var(--index-width);
-    margin: var(--space-7) auto 0;
+    max-inline-size: var(--frame-width);
+    margin-block-start: var(--space-7);
+    margin-inline-start: var(--frame-start);
     padding-block: var(--space-3);
     color: var(--color-muted);
     font-family: var(--font-ui-mono);

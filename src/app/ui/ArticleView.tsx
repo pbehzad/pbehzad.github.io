@@ -13,8 +13,9 @@ type ArticleViewProps = {
 const TITLE_ID = 'article-title';
 
 /**
- * Shared reading shell for composition, event, and text pages. One column at
- * a readable measure, floating on the background: no glass, canvas, panel, or
+ * Shared reading shell for composition, event, and text pages. It spans the
+ * shared frame, and running text inside it keeps the reading measure (see
+ * article.css), floating on the background: no glass, canvas, panel, or
  * backdrop filter. The section adapters supply the title, the metadata line,
  * and the body.
  */
@@ -23,7 +24,7 @@ export function ArticleView({ section, title, meta, children }: ArticleViewProps
 
   return (
     <article className="ui-article" aria-labelledby={TITLE_ID}>
-      <div className="ui-measure">
+      <div className="ui-frame">
         {/* One step back to the parent index. The `h1` below names the current
             page and the menu already lists every section, so the trail stops
             at the parent rather than restating either. */}

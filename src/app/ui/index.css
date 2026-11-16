@@ -1,6 +1,6 @@
 /*
  * Section index (Works, Events, Texts): a label and a sparse list floating
- * on the background, placed as in the canonical Works mockup.
+ * on the background, hung from the shared frame's start edge.
  */
 
 @layer components {
@@ -75,6 +75,26 @@
 
   .ui-index__meta::first-letter {
     text-transform: uppercase;
+  }
+
+  /* Where the frame is wide, title and metadata share a line, like a
+     catalogue: titles in a fixed first column, metadata aligned in the
+     second. Every row has the same width, so the columns line up without a
+     table, and the fixed title column keeps short titles near their
+     metadata. The home preview (home.css) keeps the stacked rows. */
+  @media (width >= 48rem) {
+    .ui-index .ui-index__list {
+      gap: var(--space-4);
+    }
+
+    .ui-index :is(.ui-index__link, .ui-index__row) {
+      display: grid;
+      grid-template-columns: minmax(0, 26rem) minmax(0, 1fr);
+      column-gap: var(--space-6);
+      align-items: baseline;
+      align-content: center;
+      inline-size: 100%;
+    }
   }
 
   @media (forced-colors: active) {

@@ -55,7 +55,7 @@ export function ContactView({ contact, hasError }: ContactViewProps) {
 
   return (
     <section className="ui-page" aria-labelledby="page-title">
-      <div className="ui-index-column">
+      <div className="ui-frame">
         <h1 id="page-title" className="ui-label">
           contact
         </h1>

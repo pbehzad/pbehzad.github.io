@@ -64,9 +64,17 @@
      proportional face's "0" is wider than its average letter, so 66ch set
      about 85 characters a line. */
   --measure: 34em;
-  /* Centred, this puts the index's start edge where the Works mockup has it
-     (560 px at 1440 px); the open menu shares it. */
-  --index-width: 20rem;
+  /* The content frame every page shares: wide, and set a little left of
+     centre rather than on it. Its start edge is the one vertical axis that
+     labels, lists, articles and the open menu all hang from. The lean
+     grows with the viewport and is spent first when space runs out, so the
+     frame meets the gutter on smaller screens. At 1440 px it runs from
+     139 to 1099 px, its middle about 100 px left of the viewport's. */
+  --frame-width: 60rem;
+  --frame-lean: clamp(0rem, 7vw, 8rem);
+  /* Offset from the start of the containing block; 100% is resolved where
+     the property is used. */
+  --frame-start: max(0px, (100% - var(--frame-width)) / 2 - var(--frame-lean));
   /* Shared start of page content: the label sits about a quarter of the way
      down the viewport, as the Works mockup has it. */
   --content-block-start: max(var(--space-7), 27svh - var(--shell-header-block-size));
@@ -234,18 +242,21 @@
     text-decoration-color: currentColor;
   }
 
-  /* Content widths */
+  /* Content widths. Both start on the frame's axis: `.ui-frame` is the whole
+     frame, `.ui-measure` a reading column hung from the same edge. */
 
+  .ui-frame,
   .ui-measure {
     inline-size: 100%;
-    max-inline-size: var(--measure);
-    margin-inline: auto;
+    margin-inline-start: var(--frame-start);
   }
 
-  .ui-index-column {
-    inline-size: 100%;
-    max-inline-size: var(--index-width);
-    margin-inline: auto;
+  .ui-frame {
+    max-inline-size: var(--frame-width);
+  }
+
+  .ui-measure {
+    max-inline-size: var(--measure);
   }
 
   /* Skip link: hidden until focused, then shown above everything. */

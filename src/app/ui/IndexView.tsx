@@ -71,7 +71,7 @@ export function IndexView({ label, groups, errorMessage, emptyMessage }: IndexVi
 
   return (
     <section className="ui-index" aria-labelledby="index-title">
-      <div className="ui-index-column">
+      <div className="ui-frame">
         <h1 id="index-title" className="ui-label">
           {label}
         </h1>

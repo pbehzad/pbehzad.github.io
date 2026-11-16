@@ -1,7 +1,8 @@
 /*
- * Reading pages (composition, event, text detail): one column at a readable
- * measure, placed like a section index and floating directly on the
- * background. The only bounded surface is the PDF reader's frame, because an
+ * Reading pages (composition, event, text detail): the shared frame, placed
+ * like a section index and floating directly on the background. Running
+ * text keeps the reading measure; facts and the PDF reader may use the
+ * frame's full width. The only bounded surface is the PDF reader's frame, because an
  * embedded document needs an edge; everything else is flat and semantic.
  */
 
@@ -71,6 +72,11 @@
 
   .ui-article__meta::first-letter {
     text-transform: uppercase;
+  }
+
+  /* Running text never runs the frame's full width. */
+  .ui-article :is(.ui-article__title, .ui-article__lede, .ui-article__abstract, .ui-prose) {
+    max-inline-size: var(--measure);
   }
 
   /* Vertical rhythm: one gap between parts of the article, one smaller gap
