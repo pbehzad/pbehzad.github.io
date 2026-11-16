@@ -90,6 +90,9 @@
 
   /* Layering: a small fixed scale. */
   --layer-base: 0;
+  /* The sticky header is a stacking context above page content; the open
+     menu and its control layer inside it. */
+  --layer-header: 10;
   --layer-menu: 10;
   --layer-menu-control: 20;
   --layer-skip-link: 30;

@@ -5,19 +5,15 @@
 
 :root {
   --shell-header-block-size: calc(var(--gutter-block-start) + var(--menu-size));
-  /* Inline end of every content column. The menu control is fixed, so on a
-     long page every line eventually scrolls beneath it. Below 52 rem a column
-     can reach that corner, so it gives the control a lane of its own rather
-     than letting a word disappear into the blur. At 52 rem and wider, the
-     widest column (the reading measure) already clears the control. The open
-     menu uses the same edge so its list stays aligned with page content. */
+  /* How far the header's fade reaches below the header itself. */
+  --shell-header-fade: var(--space-6);
+  /* Inline end of every content column. The header is sticky, so content
+     scrolls under the header's fade rather than past the menu control on
+     its own, and columns run to the gutter at every width. (Before the
+     header was sticky, narrow columns gave the control a 52 px lane.) The
+     open menu uses the same edge so its list stays aligned with page
+     content. */
   --content-inline-end: var(--gutter-inline-end);
-}
-
-@media (width < 52rem) {
-  :root {
-    --content-inline-end: calc(var(--gutter-inline-end) + var(--menu-size));
-  }
 }
 
 @layer components {
@@ -25,11 +21,13 @@
     position: relative;
   }
 
-  /* The header scrolls with the page; only the menu control stays fixed. */
+  /* Sticky: the brand and the menu control stay at the top while the page
+     scrolls. There is no bar. Content passes under a fade from the page
+     colour (below), which keeps the brand legible over it. */
   .ui-shell__header {
-    position: absolute;
+    position: sticky;
     inset-block-start: 0;
-    inset-inline: 0;
+    z-index: var(--layer-header);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -43,8 +41,67 @@
     pointer-events: auto;
   }
 
-  .ui-shell__main {
-    padding-block-start: var(--shell-header-block-size);
+  /* The fade: page colour at the top edge, nothing at its foot, so it has no
+     edge of its own. It is a pseudo-element rather than a background or a
+     filter on the header, so the open menu (fixed, inside the header) is
+     still positioned against the viewport. Where scroll-driven animations
+     are supported it appears only once the page has scrolled, leaving the
+     field untouched at rest; elsewhere it is always there, which reads the
+     same over the dark field. */
+  .ui-shell__header::before {
+    content: '';
+    position: absolute;
+    inset-block: 0 calc(-1 * var(--shell-header-fade));
+    inset-inline: 0;
+    z-index: -1;
+    /* Solid through the brand's line, then fading over the last part of
+       the header and the fade below it. */
+    background: linear-gradient(
+      to bottom,
+      var(--color-bg) 0%,
+      var(--color-bg) 58%,
+      rgb(8 9 8 / 0.6) 78%,
+      rgb(8 9 8 / 0) 100%
+    );
+    pointer-events: none;
+  }
+
+  /* The resting opacity is 0 because a page too short to scroll has an
+     inactive scroll timeline, and the animation then does not apply at
+     all; nothing scrolls under the header there, so nothing should show. */
+  @supports (animation-timeline: scroll()) {
+    .ui-shell__header::before {
+      opacity: 0;
+      animation: ui-header-fade linear both;
+      animation-timeline: scroll(root block);
+      animation-range: 0 var(--space-8);
+    }
+  }
+
+  @keyframes ui-header-fade {
+    from {
+      opacity: 0;
+    }
+
+    to {
+      opacity: 1;
+    }
+  }
+
+  /* Forced colours drop the gradient's colours; a plain Canvas band keeps
+     scrolled text from running through the brand. */
+  @media (forced-colors: active) {
+    .ui-shell__header::before {
+      inset-block-end: 0;
+      background: Canvas;
+      animation: none;
+    }
+  }
+
+  /* Scrolling a focus target into view (Tab, or a fragment link) stops
+     below the header and its fade, never under them. */
+  .ui-shell__main :is(a, button, summary, [tabindex]) {
+    scroll-margin-block-start: calc(var(--shell-header-block-size) + var(--shell-header-fade));
   }
 
   /* The main landmark receives focus from the skip link; it is not a control. */

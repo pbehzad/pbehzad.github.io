@@ -12,12 +12,6 @@
     padding-inline: var(--gutter-inline-start) var(--content-inline-end);
   }
 
-  /* Tabbing to a link the control covers must not park it under the
-     control: scrolling a focus target into view stops below the header. */
-  .ui-article :is(a, button, summary, [tabindex]) {
-    scroll-margin-block-start: calc(var(--shell-header-block-size) + var(--space-4));
-  }
-
   /* Back to the parent index: the same lowercase label the menu uses, so
      arriving on a detail page and leaving it read the same way. */
   .ui-article__back {
