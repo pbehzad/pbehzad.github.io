@@ -2,8 +2,9 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
-import { metalFragmentShader, metalVertexShader } from './metal.glsl';
 import { glassFragmentShader, glassVertexShader } from './glassui.glsl';
+import { ShadesTuner } from '@/app/ui/ShadesPanel';
+import { hexToRgb, METAL_FIELD, METAL_SHADES, metalFragmentShader, metalVertexShader, type Shades } from '@/app/ui/metalShader';
 
 // A realm of liquid metal, with liquid-glass windows onto it.
 //
@@ -17,7 +18,6 @@ import { glassFragmentShader, glassVertexShader } from './glassui.glsl';
 // One layout array drives both the shader's panel SDFs and the absolutely
 // positioned HTML on top, so the text can never drift off its own glass.
 
-type Theme = 'light' | 'dark';
 type Panel = { x: number; y: number; w: number; h: number; r: number };
 
 const MAX_PANELS = 7;
@@ -37,14 +37,10 @@ type Params = {
   edge: number;
 };
 
+// The field's own settings are shared with the site background; the rest
+// belong to the lab's glass.
 const DEFAULTS: Params = {
-  scale: 0.85,
-  threshold: -0.06,
-  flow: 0.35,
-  rough: 0.16,
-  env: 1.15,
-  iridescence: 0.32,
-  fog: 0.2,
+  ...METAL_FIELD,
   bevel: 34,
   thickness: 46,
   dispersion: 1.5,
@@ -67,10 +63,8 @@ const SLIDERS: { key: keyof Params; label: string; min: number; max: number; ste
   { key: 'edge', label: 'Rim light', min: 0, max: 1.4, step: 0.02 },
 ];
 
-const THEMES: Record<Theme, { tint: THREE.Color; light: number; ink: string; inkSoft: string }> = {
-  light: { tint: new THREE.Color(0.95, 0.93, 0.9), light: 1, ink: '#141414', inkSoft: 'rgba(20,20,20,0.62)' },
-  dark: { tint: new THREE.Color(0.92, 0.9, 0.86), light: 0, ink: '#f2f1ef', inkSoft: 'rgba(242,241,239,0.66)' },
-};
+const INK = '#f2f1ef';
+const INK_SOFT = 'rgba(242,241,239,0.66)';
 
 // Panel geometry in CSS pixels, top-left origin. A pure function of viewport
 // size, so the shader and the DOM cannot disagree about where the glass is.
@@ -83,16 +77,15 @@ function layoutPanels(w: number, h: number): Panel[] {
     { x: pad, y: pad, w: brandW, h: 92, r: 26 },
     { x: w - pad - navW, y: pad, w: navW, h: 60, r: 30 },
     { x: pad, y: h - pad - 196, w: heroW, h: 196, r: 32 },
-    { x: w - pad - 240, y: h - pad - 52, w: 240, h: 52, r: 26 },
+    { x: w - pad - 120, y: h - pad - 52, w: 120, h: 52, r: 26 },
   ];
 }
 
 export default function MetalLab() {
   const hostRef = useRef<HTMLDivElement>(null);
   const paramsRef = useRef<Params>({ ...DEFAULTS });
-  const themeRef = useRef<Theme>('dark');
   const [params, setParams] = useState<Params>({ ...DEFAULTS });
-  const [theme, setTheme] = useState<Theme>('dark');
+  const shadesRef = useRef<Shades>(METAL_SHADES);
   const [panelOpen, setPanelOpen] = useState(false);
   const [panels, setPanels] = useState<Panel[]>([]);
   const [fps, setFps] = useState(0);
@@ -104,9 +97,10 @@ export default function MetalLab() {
   useEffect(() => {
     paramsRef.current = params;
   }, [params]);
-  useEffect(() => {
-    themeRef.current = theme;
-  }, [theme]);
+  // The render loop reads shades from the ref every frame.
+  const applyShades = useCallback((next: Shades) => {
+    shadesRef.current = next;
+  }, []);
   useEffect(() => {
     openRef.current = panelOpen;
   }, [panelOpen]);
@@ -163,8 +157,10 @@ export default function MetalLab() {
 
     const shared = {
       uEnv: { value: DEFAULTS.env },
-      uLight: { value: 0 },
-      uTint: { value: THEMES.dark.tint.clone() },
+      uCeil: { value: new THREE.Vector3() },
+      uFloor: { value: new THREE.Vector3() },
+      uHighlight: { value: METAL_SHADES.highlight },
+      uHorizon: { value: METAL_SHADES.horizon },
     };
 
     const metalUniforms = {
@@ -177,6 +173,9 @@ export default function MetalLab() {
       uRough: { value: DEFAULTS.rough },
       uIridescence: { value: DEFAULTS.iridescence },
       uFog: { value: DEFAULTS.fog },
+      uMetal: { value: new THREE.Vector3() },
+      uHaze: { value: new THREE.Vector3() },
+      uGamma: { value: METAL_SHADES.gamma },
       ...shared,
     };
 
@@ -262,10 +261,17 @@ export default function MetalLab() {
       glassUniforms.uGlassRough.value = p.glassRough;
       glassUniforms.uEdge.value = p.edge;
 
-      const th = THEMES[themeRef.current];
+      // Plain vectors, not THREE.Color: Color would convert the picked sRGB
+      // hex to linear, and the panel promises the shader the raw value.
+      const s = shadesRef.current;
       shared.uEnv.value = p.env;
-      shared.uTint.value.lerp(th.tint, 0.08);
-      shared.uLight.value += (th.light - shared.uLight.value) * 0.08;
+      shared.uCeil.value.set(...hexToRgb(s.ceiling));
+      shared.uFloor.value.set(...hexToRgb(s.floor));
+      shared.uHighlight.value = s.highlight;
+      shared.uHorizon.value = s.horizon;
+      metalUniforms.uMetal.value.set(...hexToRgb(s.metal));
+      metalUniforms.uHaze.value.set(...hexToRgb(s.haze));
+      metalUniforms.uGamma.value = s.gamma;
 
       // Panel rects, converted to centre + half-extent in the shader's
       // bottom-up pixel space.
@@ -307,7 +313,6 @@ export default function MetalLab() {
     };
   }, []);
 
-  const th = THEMES[theme];
   const [brand, nav, hero, toggle] = panels;
 
   // Inline styles throughout: globals.css carries an unlayered
@@ -325,7 +330,7 @@ export default function MetalLab() {
     borderRadius: 999,
     padding: '9px 18px',
     fontSize: 13,
-    color: active ? th.ink : th.inkSoft,
+    color: active ? INK : INK_SOFT,
   });
 
   return (
@@ -335,8 +340,8 @@ export default function MetalLab() {
       {/* text only — every surface beneath it is drawn by the glass pass */}
       <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
         <div style={{ ...at(brand), padding: '20px 26px' }}>
-          <div style={{ fontSize: 10, letterSpacing: '0.36em', color: th.inkSoft }}>STUDIO</div>
-          <div style={{ marginTop: 8, fontSize: 24, color: th.ink }}>Parham Behzad</div>
+          <div style={{ fontSize: 10, letterSpacing: '0.36em', color: INK_SOFT }}>STUDIO</div>
+          <div style={{ marginTop: 8, fontSize: 24, color: INK }}>Parham Behzad</div>
         </div>
 
         <nav style={{ ...at(nav), display: 'flex', alignItems: 'center', justifyContent: 'space-evenly' }}>
@@ -348,10 +353,10 @@ export default function MetalLab() {
         </nav>
 
         <div style={{ ...at(hero), padding: '26px 30px' }}>
-          <p style={{ fontSize: 15, lineHeight: 1.6, color: th.ink }}>
+          <p style={{ fontSize: 15, lineHeight: 1.6, color: INK }}>
             Composition, sound, and the spaces between them.
           </p>
-          <p style={{ marginTop: 8, fontSize: 13, lineHeight: 1.6, color: th.inkSoft }}>
+          <p style={{ marginTop: 8, fontSize: 13, lineHeight: 1.6, color: INK_SOFT }}>
             Selected works, writing and performances.
           </p>
           <div style={{ marginTop: 20, display: 'flex', gap: 10 }}>
@@ -365,11 +370,6 @@ export default function MetalLab() {
         </div>
 
         <div style={{ ...at(toggle), display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2 }}>
-          {(['light', 'dark'] as Theme[]).map((t) => (
-            <button key={t} type="button" onClick={() => setTheme(t)} style={btn(theme === t)}>
-              {t}
-            </button>
-          ))}
           <button type="button" onClick={() => setPanelOpen((v) => !v)} style={btn(false)}>
             {fps}fps
           </button>
@@ -383,7 +383,7 @@ export default function MetalLab() {
         >
           {SLIDERS.map((s) => (
             <label key={s.key} style={{ display: 'block', marginBottom: 11 }}>
-              <span style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: th.inkSoft }}>
+              <span style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: INK_SOFT }}>
                 <span>{s.label}</span>
                 <span>{params[s.key].toFixed(3)}</span>
               </span>
@@ -407,6 +407,13 @@ export default function MetalLab() {
           </button>
         </div>
       )}
+
+      {/* Stops short of the hero copy, whose top edge layoutPanels puts
+          pad + 170px above the bottom; scrolls on short viewports. */}
+      <ShadesTuner
+        onChange={applyShades}
+        style={{ maxHeight: 'calc(100% - clamp(28px, 3.5vw, 56px) - 342px)' }}
+      />
     </div>
   );
 }

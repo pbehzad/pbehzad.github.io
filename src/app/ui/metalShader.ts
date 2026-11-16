@@ -1,5 +1,6 @@
-// Pass 1 — the realm. An infinite liquid-metal volume, rendered to a texture
-// that the glass pass then refracts.
+// The liquid-metal field: the background of every public page
+// (MetalBackground, plain WebGL) and pass 1 of the design lab, where it
+// renders to a texture that the lab's glass pass then refracts.
 //
 // The earlier version raymarched a cluster of metaballs floating in a
 // background, which is a figure on a ground: the frame divides into "the
@@ -12,6 +13,50 @@
 // depth. Travel is continuous and the field aperiodic, so there is no
 // vantage point from which it resolves back into an object.
 
+export type Shades = {
+  metal: string;
+  ceiling: string;
+  floor: string;
+  haze: string;
+  highlight: number;
+  horizon: number;
+  gamma: number;
+};
+
+// Tuned by hand on the moving field with the Shades panel. Each colour is
+// the raw value the shader receives before tone mapping (#ffffff is 1.0).
+// A black metal colour means no reflection head-on: the surface shows only
+// its Fresnel rims and the light bars, which is why both are doubled.
+export const METAL_SHADES: Shades = {
+  metal: '#000000',
+  ceiling: '#373941',
+  floor: '#030305',
+  haze: '#050507',
+  highlight: 2,
+  horizon: 2,
+  gamma: 0.88,
+};
+
+// Shape and motion of the field.
+export const METAL_FIELD = {
+  scale: 0.85,
+  threshold: -0.06,
+  flow: 0.35,
+  rough: 0.16,
+  env: 1.15,
+  iridescence: 0.32,
+  fog: 0.2,
+};
+
+// Plain numbers, not THREE.Color or a CSS parse: the picked hex is passed to
+// the shader as-is, with no sRGB-to-linear conversion.
+export function hexToRgb(hex: string): [number, number, number] {
+  const n = parseInt(hex.slice(1), 16);
+  return [((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255];
+}
+
+// Three.js vertex stage for the lab; it supplies `position` and `uv`.
+// MetalBackground declares its own.
 export const metalVertexShader = /* glsl */ `
 varying vec2 vUv;
 void main() {
@@ -25,33 +70,40 @@ void main() {
 // would read as cut out from a different photograph.
 export const ENV_SOURCE = /* glsl */ `
 uniform float uEnv;
-uniform float uLight;
-uniform vec3  uTint;
+uniform vec3  uCeil;       // the room above: what most of the surface reflects
+uniform vec3  uFloor;      // the room below
+uniform float uHighlight;  // strength of the light bars
+uniform float uHorizon;    // strength of the bright horizon line
 
 // A studio, deliberately not the page colour. A mirror in a pale room still
 // reflects dark corners; deriving the environment from the background leaves
 // nothing dark to reflect and the metal reads as clay.
+//
+// For dark metal, darken the room's walls, not its lights. Dimming everything
+// at once just makes murky grey; a black room with the softboxes left at
+// full power is how black chrome is photographed, and it keeps the bars that
+// make the surface read as metal at all.
 vec3 envSample(vec3 r) {
   vec3 d = normalize(r);
   float y = d.y * 0.5 + 0.5;
-  vec3 sky = mix(vec3(0.03, 0.035, 0.05), vec3(0.62, 0.65, 0.73), smoothstep(0.0, 1.0, y));
+  vec3 sky = mix(uFloor, uCeil, smoothstep(0.0, 1.0, y));
 
   // Hard-edged bars. A soft gradient highlight reads as shading; an edge the
   // surface curvature can bend reads as a reflection.
   float key = smoothstep(0.88, 0.995, dot(d, normalize(vec3(-0.45, 0.85, 0.3))));
-  sky += vec3(1.0, 0.98, 0.95) * key * (uLight > 0.5 ? 5.5 : 4.4);
+  sky += vec3(1.0, 0.98, 0.95) * key * 4.4 * uHighlight;
 
   float fill = smoothstep(0.90, 1.0, dot(d, normalize(vec3(0.8, 0.15, 0.55))));
-  sky += vec3(0.86, 0.92, 1.0) * fill * 3.0;
+  sky += vec3(0.86, 0.92, 1.0) * fill * 3.0 * uHighlight;
 
   float strip = smoothstep(0.965, 1.0, dot(d, normalize(vec3(0.15, 0.55, -0.85))));
-  sky += vec3(1.0, 0.96, 0.88) * strip * 2.4;
+  sky += vec3(1.0, 0.96, 0.88) * strip * 2.4 * uHighlight;
 
   // Somewhere genuinely dark, or every angle washes out to one value.
   float shade = smoothstep(0.45, 1.0, dot(d, normalize(vec3(-0.25, -0.92, -0.2))));
   sky *= 1.0 - shade * 0.88;
 
-  sky += vec3(0.55, 0.58, 0.66) * smoothstep(0.05, 0.0, abs(d.y)) * 1.2;
+  sky += vec3(0.55, 0.58, 0.66) * smoothstep(0.05, 0.0, abs(d.y)) * uHorizon;
   return sky;
 }
 `;
@@ -71,6 +123,10 @@ uniform float uFlow;
 uniform float uRough;
 uniform float uIridescence;
 uniform float uFog;
+
+uniform vec3  uMetal;        // reflectance head-on: the metal's own colour
+uniform vec3  uHaze;         // what distance fades into
+uniform float uGamma;        // midtone curve; higher is darker
 
 ${ENV_SOURCE}
 
@@ -185,7 +241,9 @@ void main() {
     vec3 env = mix(envSample(refl), envSample(blurred), uRough) * uEnv;
 
     float cosT = clamp(dot(n, -rd), 0.0, 1.0);
-    vec3 F = uTint + (1.0 - uTint) * pow(1.0 - cosT, 5.0);
+    // Gunmetal and black chrome are darker conductors than silver, not silver
+    // in a dimmer room, so the metal colour is a reflectance, not a tint.
+    vec3 F = uMetal + (1.0 - uMetal) * pow(1.0 - cosT, 5.0);
     col = env * F * occ;
 
     // Thin-film heat tint at the rim, where an oxide layer actually shows.
@@ -197,19 +255,21 @@ void main() {
   } else {
     // Rays that escape are looking down a long throat: read as depth, not as
     // a hole in the world.
-    col = envSample(rd) * uEnv * uTint * 0.25;
+    col = envSample(rd) * uEnv * uMetal * 0.25;
   }
 
   // Depth haze, so the volume has extent. Without it every cavern wall sits
   // at the same apparent distance and the field flattens into a pattern.
+  // In a dark room the haze should be dark too, so distance falls away to
+  // black rather than to a grey veil.
   float fog = 1.0 - exp(-t * uFog);
-  col = mix(col, vec3(0.05, 0.052, 0.062) * (uLight > 0.5 ? 3.2 : 1.0), fog);
+  col = mix(col, uHaze, fog);
 
   // Tone-mapped here, not in the glass pass: the render target is 8-bit, so
   // the specular bars would clip to flat white before the glass ever got to
   // refract them.
   col = col / (col + 0.78);
-  col = pow(col, vec3(0.86));
+  col = pow(col, vec3(uGamma));
 
   gl_FragColor = vec4(col, 1.0);
 }

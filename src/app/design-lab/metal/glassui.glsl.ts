@@ -1,4 +1,4 @@
-import { ENV_SOURCE } from './metal.glsl';
+import { ENV_SOURCE } from '@/app/ui/metalShader';
 
 // Pass 2 — the windows. Liquid glass panels refracting the metal realm.
 //
