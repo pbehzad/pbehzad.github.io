@@ -22,21 +22,18 @@
     white-space: pre-line;
   }
 
+  /* Tagline and specializations keep their stored case, like every piece of
+     content on the site. */
   .ui-page__note,
   .ui-page__terms {
     color: var(--color-muted);
     font-family: var(--font-ui-mono);
     font-size: var(--text-meta);
-    text-transform: lowercase;
   }
 
-  .ui-page__note::first-letter,
-  .ui-page__terms > li::first-letter {
-    text-transform: uppercase;
-  }
-
-  /* About sections keep the open/closed state the content model gives them.
-     The marker is the only affordance; there is no box around a section. */
+  /* About sections keep the open/closed state the content model gives them,
+     and their titles keep their stored case ("Long Bio"). The marker is the
+     only affordance; there is no box around a section. */
 
   .ui-disclosure__summary {
     display: flex;
@@ -45,7 +42,6 @@
     min-block-size: var(--hit-target);
     list-style: none;
     cursor: pointer;
-    text-transform: lowercase;
   }
 
   .ui-disclosure__summary::-webkit-details-marker {

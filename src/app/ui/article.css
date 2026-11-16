@@ -45,13 +45,13 @@
     margin-block-start: var(--space-4);
   }
 
-  /* The same size and case as the index row it was reached from, so the
-     title does not jump between the two pages. */
+  /* The same size as the index row it was reached from, so the title does
+     not jump between the two pages. Title and metadata keep their stored
+     case, as on the index. */
   .ui-article__title {
     font-size: var(--text-title);
     letter-spacing: var(--tracking-title);
     line-height: var(--leading-tight);
-    text-transform: lowercase;
     overflow-wrap: anywhere;
   }
 
@@ -60,12 +60,7 @@
     font-family: var(--font-ui-mono);
     font-size: var(--text-meta);
     line-height: var(--leading-body);
-    text-transform: lowercase;
     overflow-wrap: anywhere;
-  }
-
-  .ui-article__meta::first-letter {
-    text-transform: uppercase;
   }
 
   /* Running text never runs the frame's full width. */

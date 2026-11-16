@@ -44,13 +44,13 @@
     justify-content: center;
   }
 
-  /* Titles are stored in mixed case; the index shows them in lowercase, as
-     in the mockup. Assistive technology still reads the stored text. */
+  /* Titles and metadata show exactly as stored: their case is the
+     composer's (Team CEO, one is coming..., Pierre Boulez Saal), so the
+     site does not impose one. */
   .ui-index__title {
     font-size: var(--text-title);
     letter-spacing: var(--tracking-title);
     line-height: var(--leading-tight);
-    text-transform: lowercase;
     text-decoration: underline;
     text-decoration-color: transparent;
     text-decoration-thickness: 1px;
@@ -63,18 +63,12 @@
     text-decoration-color: var(--color-muted);
   }
 
-  /* Metadata in sentence case: "PIANO, MIDI-KEYBOARD" reads "Piano, midi-keyboard". */
   .ui-index__meta {
     display: block;
     color: var(--color-muted);
     font-family: var(--font-ui-mono);
     font-size: var(--text-meta);
     line-height: var(--leading-tight);
-    text-transform: lowercase;
-  }
-
-  .ui-index__meta::first-letter {
-    text-transform: uppercase;
   }
 
   /* Where the frame is wide, title and metadata share a line, like a
