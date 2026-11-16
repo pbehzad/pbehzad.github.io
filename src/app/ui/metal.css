@@ -4,6 +4,15 @@
  * without WebGL, in forced colours, and before the first frame.
  */
 
+/* How strongly the field shows through: the canvas over the flat page
+   colour. At full strength its brightest highlights left body text at
+   2.4:1 where they crossed it; at half strength body text stays above about
+   6.5:1 against the brightest highlight measured, and the field still reads
+   as metal. */
+:root {
+  --metal-opacity: 0.5;
+}
+
 @layer components {
   /* Fixed at z-index -1 directly under <body>: it paints above the body's
      propagated background and beneath all in-flow page content, which is
@@ -20,6 +29,7 @@
     display: block;
     inline-size: 100%;
     block-size: 100%;
+    opacity: var(--metal-opacity);
     visibility: hidden;
   }
 
@@ -27,7 +37,8 @@
     visibility: visible;
   }
 
-  @media (forced-colors: active) {
+  /* Someone who asks for more contrast gets the flat page colour. */
+  @media (forced-colors: active), (prefers-contrast: more) {
     .ui-metal__canvas {
       display: none;
     }
