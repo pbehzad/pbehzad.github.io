@@ -30,11 +30,28 @@ const EXCLUDED_PREFIXES = ['/admin', '/design-lab'];
 // GPU, or a dev-mode compile as a weak GPU, and freezing on it left the
 // field still for the rest of the visit.
 const START_PIXEL_RATIO = 1;
-const MIN_PIXEL_RATIO = 0.5;
-const TARGET_FPS = 40;
+// A third of a CSS pixel is still a soft field, and it is what an integrated
+// laptop GPU can hold once it is hot and throttled.
+const MIN_PIXEL_RATIO = 0.33;
+// The field drifts slowly, so 30 frames a second look as smooth as 60, and
+// the cap is the point. Uncapped, the field kept the GPU at 100%; on a
+// laptop whose integrated GPU shares its heat budget with the processor (an
+// Intel UHD 630 in a MacBook Pro) the chip throttled within seconds and the
+// field fell to a few frames a second. Idle time between frames lets it cool.
+const TARGET_FPS = 30;
+const FRAME_INTERVAL_MS = 1000 / TARGET_FPS;
+// Refresh timestamps jitter; without this slack a 60 Hz display would
+// sometimes wait three refreshes for a frame instead of two.
+const FRAME_SLACK_MS = 2;
+// Below this share of TARGET_FPS, the GPU is falling short.
+const SHORTFALL = 0.85;
 // Frames are measured over windows this long, after a warm-up of the same
 // length; the first frames include shader compilation and page load.
 const MEASURE_MS = 1000;
+// A gap this long between frames is a stall (a debugger, a sleeping laptop),
+// not GPU cost. Hidden tabs are handled by visibilitychange instead. Slow
+// frames, however slow, are measured: that is when the resolution must fall.
+const STALL_MS = 2000;
 
 // Why the field is or is not moving, in the browser console during
 // development only.
@@ -96,26 +113,28 @@ function MetalField() {
       show();
     };
 
+    const restartWindow = (now: number) => {
+      windowStart = now;
+      windowFrames = 0;
+    };
+
     // Lowers the resolution by the measured shortfall in one step (cost
     // scales with pixel count, the square of the ratio), then keeps checking.
     const govern = (now: number) => {
-      // A long gap means a hidden tab or a hitch, not GPU cost: restart.
-      if (now - last > 250) {
-        windowStart = now;
-        windowFrames = 0;
+      if (now - last > STALL_MS) {
+        restartWindow(now);
         return;
       }
       windowFrames++;
       const elapsed = now - windowStart;
       if (elapsed < MEASURE_MS) return;
       const fps = (windowFrames * 1000) / elapsed;
-      windowStart = now;
-      windowFrames = 0;
+      restartWindow(now);
       if (!warmedUp) {
         warmedUp = true;
         return;
       }
-      if (fps >= TARGET_FPS || pixelRatio <= MIN_PIXEL_RATIO) return;
+      if (fps >= TARGET_FPS * SHORTFALL || pixelRatio <= MIN_PIXEL_RATIO) return;
       pixelRatio = Math.max(MIN_PIXEL_RATIO, pixelRatio * Math.sqrt(fps / TARGET_FPS) * 0.95);
       resize();
       note(`${fps.toFixed(0)} fps, resolution lowered to ${pixelRatio.toFixed(2)}× CSS pixels`);
@@ -123,6 +142,9 @@ function MetalField() {
 
     const frame = (now: number) => {
       if (!renderer) return;
+      rafId = requestAnimationFrame(frame);
+      // Capped at TARGET_FPS: refreshes in between draw nothing.
+      if (now - last < FRAME_INTERVAL_MS - FRAME_SLACK_MS) return;
       // Clamped at zero: the first frame's timestamp can precede start().
       const delta = Math.min(Math.max(0, now - last) / 1000, 0.05);
       govern(now);
@@ -134,7 +156,14 @@ function MetalField() {
       pointer[1] += (aim[1] - pointer[1]) * ease;
       renderer.draw(now / 1000, pointer);
       show();
-      rafId = requestAnimationFrame(frame);
+    };
+
+    // Frames stop while the tab is hidden; that pause is not GPU cost, so
+    // measuring starts afresh when it is visible again.
+    const onVisibilityChange = () => {
+      if (document.visibilityState !== 'visible') return;
+      last = performance.now();
+      restartWindow(last);
     };
 
     const start = () => {
@@ -146,8 +175,7 @@ function MetalField() {
         return;
       }
       last = performance.now();
-      windowStart = last;
-      windowFrames = 0;
+      restartWindow(last);
       rafId = requestAnimationFrame(frame);
     };
 
@@ -198,6 +226,7 @@ function MetalField() {
     init();
     window.addEventListener('resize', onResize);
     window.addEventListener('pointermove', onPointerMove, { passive: true });
+    document.addEventListener('visibilitychange', onVisibilityChange);
     reducedMotion.addEventListener('change', start);
     canvas.addEventListener('webglcontextlost', onContextLost);
     canvas.addEventListener('webglcontextrestored', onContextRestored);
@@ -206,6 +235,7 @@ function MetalField() {
       cancelAnimationFrame(rafId);
       window.removeEventListener('resize', onResize);
       window.removeEventListener('pointermove', onPointerMove);
+      document.removeEventListener('visibilitychange', onVisibilityChange);
       reducedMotion.removeEventListener('change', start);
       canvas.removeEventListener('webglcontextlost', onContextLost);
       canvas.removeEventListener('webglcontextrestored', onContextRestored);
