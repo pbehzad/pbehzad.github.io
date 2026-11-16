@@ -47,6 +47,7 @@ These decisions supersede the matching points of the mockups and of the contract
 - **Layout:** wider, and not centred. One shared frame (`.ui-frame`, `--frame-width: 60rem`) leans left of centre by up to 8rem (`--frame-lean`); at 1440 px it runs from 139 to 1099 px. On wide screens, index rows put title and metadata on one line.
 - **Header:** sticky. Content scrolls under a fade from the page colour, which appears only once the page has scrolled. Columns no longer give the menu control a 52 px lane on narrow screens.
 - **Home:** the portrait returns, beside a preview of the next three upcoming events and an “all events” link. When none are upcoming, the three most recent are shown under “recent”. On narrow screens the events follow the portrait.
+- **Portrait frame:** a CRT. The whole square photo is shown as a picture on a cathode-ray tube: curved glass with rounded corners, 200 scanlines whose width follows brightness, a red-green-blue aperture grille, halation, slight misconvergence, edge darkening and a glass reflection (`src/app/ui/crtShader.ts`). It is drawn once in WebGL over the photo and again only on resize, so nothing animates; without JavaScript or WebGL, in forced colours, or after a lost context, the plain photo shows. No organic mask, liquid-glass rim, or ASCII trace: the R3 liquid-form work below is history, and its components, generated assets, and the `generate:home-portrait` script are removed.
 
 Not yet reconciled: the liquid-metal WebGL field behind every public page (owner direction, commit `4eee5940`) still contradicts the no-WebGL and idle-page rules in `AGENTS.md` and R7/R8 below.
 
@@ -81,8 +82,7 @@ The menu's visible droplet may be smaller than its interactive hit area. The act
 
 ### Home
 
-- Show one black-and-white portrait inside a large organic liquid form, beside an events preview. (Superseded on 2026-11-16: the portrait hangs from the shared frame rather than being centred; see “Owner direction” above.)
-- Keep the faint ASCII trace only if it can be static, low-cost, and subordinate to the portrait.
+- Show one black-and-white portrait as a picture on a CRT, beside an events preview. (Superseded on 2026-11-16: no organic liquid form and no ASCII trace, and the portrait hangs from the shared frame rather than being centred; see “Owner direction” above.)
 - Do not show “Parham Behzad,” “composer,” selected works, introduction copy, cards, or calls to action in the center.
 - Do not run a full-screen ASCII or WebGL renderer to reproduce the mockup.
 

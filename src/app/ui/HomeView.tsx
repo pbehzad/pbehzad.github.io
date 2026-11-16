@@ -14,8 +14,8 @@ type HomeViewProps = {
 };
 
 /**
- * Home: the portrait in its liquid form, and beside it a short preview of
- * events. The preview shows the next few upcoming events; when none are
+ * Home: the portrait as a picture on a CRT, and beside it a short preview
+ * of events. The preview shows the next few upcoming events; when none are
  * announced it shows the most recent ones under "recent" instead, so the
  * page never shows a schedule it does not have. With no events at all, the
  * portrait stands alone.

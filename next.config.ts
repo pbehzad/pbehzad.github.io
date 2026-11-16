@@ -13,8 +13,9 @@ const nextConfig: NextConfig = {
   images: {
     // Serve AVIF where supported, WebP otherwise (the default is WebP only).
     formats: ['image/avif', 'image/webp'],
-    // The defaults plus 1440, so a 3x phone gets the home portrait near its
-    // rendered size (about 1400 px) instead of jumping to 1920.
+    // The defaults plus 1440, so a large render on a dense screen does not
+    // jump from 1200 straight to 1920 (the home portrait's film grain makes
+    // that jump about four times the bytes).
     deviceSizes: [640, 750, 828, 1080, 1200, 1440, 1920, 2048, 3840],
     // 75 is the default; 65 is the home portrait's (see HomePortrait).
     qualities: [65, 75],

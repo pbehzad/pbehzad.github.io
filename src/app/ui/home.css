@@ -1,27 +1,24 @@
 /*
- * Home view: the portrait inside its organic form, with a short events
+ * Home view: the portrait in a plain square frame, with a short events
  * preview beside it (below it on narrow screens). The composition hangs from
  * the shared frame's start edge, so it sits left of centre like every page.
  * Everything here is static; nothing animates or redraws while idle.
  */
 
 :root {
-  /* Portrait frame width. Narrow screens: the column, up to 30rem. */
+  /* Portrait width (the photo is square). Narrow screens: the column, up
+     to 30rem. */
   --portrait-inline-size: min(
     calc(100vw - var(--gutter-inline-start) - var(--gutter-inline-end)),
     30rem
   );
-  --portrait-aspect: 1.14;
-  /* The ASCII trace spills about a third of the frame's width past its
-     right edge; the events column starts beyond where it has faded. */
-  --home-column-gap: calc(var(--portrait-inline-size) * 0.28);
 }
 
 @media (width >= 56rem) {
   :root {
-    /* Beside the events: bounded by the viewport height too, so the form
+    /* Beside the events: bounded by the viewport height too, so the photo
        never crowds the header. */
-    --portrait-inline-size: min(38vw, 36rem, 66svh * 1.14);
+    --portrait-inline-size: min(38vw, 36rem, 66svh);
   }
 }
 
@@ -36,8 +33,6 @@
     margin-block-start: calc(-1 * var(--shell-header-block-size));
     padding-block: calc(var(--shell-header-block-size) + var(--space-5)) var(--space-8);
     padding-inline: var(--gutter-inline-start) var(--content-inline-end);
-    /* The ASCII trace extends past the form; never let it scroll the page. */
-    overflow: clip;
   }
 
   /* Narrow screens: the portrait, then the events. */
@@ -52,8 +47,46 @@
   @media (width >= 56rem) {
     .ui-home__layout {
       grid-template-columns: var(--portrait-inline-size) minmax(0, 22rem);
-      column-gap: var(--home-column-gap);
+      column-gap: clamp(var(--space-7), 5vw, var(--space-9));
       align-items: center;
+    }
+  }
+
+  /* The photo, whole and uncropped, at its own square proportion, with the
+     CRT canvas laid exactly over it. */
+  .ui-home-portrait {
+    position: relative;
+    inline-size: var(--portrait-inline-size);
+    aspect-ratio: 1;
+  }
+
+  .ui-home-portrait__photo,
+  .ui-home-portrait__crt {
+    position: absolute;
+    inset: 0;
+    inline-size: 100%;
+    block-size: 100%;
+  }
+
+  /* The tube is drawn only over the photo it replaces; until it has a
+     frame (data-crt), the canvas is empty and the photo shows. A faint
+     spill of light around the glass, as a lit tube gives off. */
+  .ui-home-portrait__crt {
+    filter: drop-shadow(0 0 1.5rem rgb(200 214 235 / 0.1));
+    pointer-events: none;
+  }
+
+  .ui-home-portrait[data-crt] .ui-home-portrait__photo {
+    opacity: 0;
+  }
+
+  @media (forced-colors: active) {
+    .ui-home-portrait__crt {
+      display: none;
+    }
+
+    .ui-home-portrait[data-crt] .ui-home-portrait__photo {
+      opacity: 1;
     }
   }
 
@@ -93,92 +126,5 @@
   .ui-home__more:focus-visible {
     color: var(--color-fg);
     text-decoration-color: currentColor;
-  }
-
-  .ui-home-portrait {
-    position: relative;
-    inline-size: var(--portrait-inline-size);
-    aspect-ratio: var(--portrait-aspect);
-  }
-
-  .ui-home-portrait__photo,
-  .ui-home-portrait__glass,
-  .ui-home-portrait__light {
-    position: absolute;
-    inset: 0;
-    inline-size: 100%;
-    block-size: 100%;
-  }
-
-  /* Flat version: the photo cropped to the organic outline. The inline
-     mask image comes from portraitShape.ts. */
-  .ui-home-portrait__photo {
-    overflow: hidden;
-    background: var(--color-surface);
-    mask-size: 100% 100%;
-    mask-repeat: no-repeat;
-  }
-
-  /* Head-and-shoulders crop matching the mockup: the square photo is drawn
-     at 140% of the frame width and offset so the face sits left of centre
-     in the upper third, as in the mockup. */
-  .ui-home-portrait__photo img {
-    position: absolute;
-    inset-block-start: -15.4%;
-    inset-inline-start: -21%;
-    inline-size: 140%;
-    max-inline-size: none;
-    block-size: auto;
-  }
-
-  .ui-home-portrait__glass,
-  .ui-home-portrait__light {
-    overflow: visible;
-    pointer-events: none;
-  }
-
-  .ui-home-portrait__light-shape {
-    fill: rgb(0 0 0 / 0.01);
-  }
-
-  .ui-home-portrait__rim {
-    fill: none;
-    stroke: var(--color-rule);
-    stroke-width: 1px;
-  }
-
-  /* Faint ASCII trace of the photo behind the form: static text, visible
-     only in two soft zones to the right of and below the form. Font size,
-     line height, and offsets come from homePortraitGeometry.ts. */
-  .ui-home-portrait__trace {
-    position: absolute;
-    margin: 0;
-    color: rgb(235 233 226 / 0.4);
-    font-weight: var(--weight-regular);
-    letter-spacing: 0;
-    white-space: pre;
-    user-select: none;
-    pointer-events: none;
-    mask-image:
-      radial-gradient(22% 36% at 77% 42%, #000 35%, transparent 100%),
-      radial-gradient(16% 11% at 30% 87%, #000 25%, transparent 100%);
-  }
-
-  @media (prefers-reduced-transparency: reduce) {
-    .ui-home-portrait__light-shape {
-      display: none;
-    }
-  }
-
-  @media (forced-colors: active) {
-    .ui-home-portrait__glass,
-    .ui-home-portrait__light-shape,
-    .ui-home-portrait__trace {
-      display: none;
-    }
-
-    .ui-home-portrait__rim {
-      stroke: CanvasText;
-    }
   }
 }

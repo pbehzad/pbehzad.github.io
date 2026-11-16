@@ -30,10 +30,10 @@ If sources conflict, the latest explicit user instruction wins, followed by the 
 - The interface is super-minimal and mostly empty: near-black field, warm-white text, IBM Plex typography (Sans for titles and reading text, Mono for the brand, labels, dates, and metadata), and deliberate negative space.
 - Content hangs from one shared frame, about 60rem wide and set a little left of centre, not centred. Labels, lists, articles, and the open menu share its start edge.
 - The persistent shell contains a tiny name at top left and a single liquid menu button at top right. The header is sticky; content scrolls under a fade from the page colour, never under a visible bar. Do not restore a visible header navigation bar.
-- The home page contains the portrait inside one bounded organic liquid form and a short preview of the next few upcoming events (the most recent ones when none are announced). It contains no visible name, role, selected-work list, card, or supporting copy.
+- The home page contains the portrait as a picture on a CRT (curved glass, scanlines, phosphor grille, halation; no ASCII trace), drawn once in WebGL over the plain photo, which stays the real image and the fallback, and a short preview of the next few upcoming events (the most recent ones when none are announced). It contains no visible name, role, selected-work list, card, or supporting copy.
 - The Works index contains no glass highlight, card, panel, divider, thumbnail, or decorative ASCII. Its content floats directly on the background.
 - Other indexes inherit the Works page's restraint. Detail and reading pages use flat, semantic content surfaces.
-- Liquid glass is a signature, not a layout system. It is limited to the menu control and the home portrait treatment, with a visually acceptable flat fallback.
+- Liquid glass is a signature, not a layout system. It is limited to the menu control, with a visually acceptable flat fallback.
 - No content, navigation, focus state, or contrast may depend on an SVG filter, canvas, WebGL, or JavaScript animation.
 - Do not invent new ornament, copy, routes, or content to fill empty space. Empty space is part of the design.
 
