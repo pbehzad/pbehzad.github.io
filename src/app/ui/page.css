@@ -25,6 +25,7 @@
   .ui-page__note,
   .ui-page__terms {
     color: var(--color-muted);
+    font-family: var(--font-ui-mono);
     font-size: var(--text-meta);
     text-transform: lowercase;
   }
@@ -56,6 +57,7 @@
   .ui-disclosure__summary::before {
     content: '+';
     color: var(--color-muted);
+    font-family: var(--font-ui-mono);
     font-size: var(--text-meta);
     line-height: 1;
   }
@@ -97,6 +99,7 @@
      and it differs by the space above, not by an invented size ramp. */
   .ui-prose :is(h2, h3, h4) {
     color: var(--color-muted);
+    font-family: var(--font-ui-mono);
     font-size: var(--text-label);
     font-weight: var(--weight-regular);
     text-transform: none;
@@ -164,6 +167,7 @@
 
   .ui-channel__label {
     color: var(--color-muted);
+    font-family: var(--font-ui-mono);
     font-size: var(--text-meta);
     line-height: var(--leading-tight);
     text-transform: lowercase;

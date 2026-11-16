@@ -48,6 +48,7 @@
      in the mockup. Assistive technology still reads the stored text. */
   .ui-index__title {
     font-size: var(--text-title);
+    letter-spacing: var(--tracking-title);
     line-height: var(--leading-tight);
     text-transform: lowercase;
     text-decoration: underline;
@@ -66,6 +67,7 @@
   .ui-index__meta {
     display: block;
     color: var(--color-muted);
+    font-family: var(--font-ui-mono);
     font-size: var(--text-meta);
     line-height: var(--leading-tight);
     text-transform: lowercase;

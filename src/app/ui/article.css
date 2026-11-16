@@ -25,6 +25,7 @@
     gap: var(--space-2);
     min-block-size: var(--hit-target);
     color: var(--color-muted);
+    font-family: var(--font-ui-mono);
     font-size: var(--text-label);
     text-transform: lowercase;
     text-decoration: underline;
@@ -53,6 +54,7 @@
      title does not jump between the two pages. */
   .ui-article__title {
     font-size: var(--text-title);
+    letter-spacing: var(--tracking-title);
     line-height: var(--leading-tight);
     text-transform: lowercase;
     overflow-wrap: anywhere;
@@ -60,6 +62,7 @@
 
   .ui-article__meta {
     color: var(--color-muted);
+    font-family: var(--font-ui-mono);
     font-size: var(--text-meta);
     line-height: var(--leading-body);
     text-transform: lowercase;
@@ -107,6 +110,7 @@
     flex-direction: column;
     gap: var(--space-2);
     color: var(--color-muted);
+    font-family: var(--font-ui-mono);
     font-size: var(--text-meta);
   }
 

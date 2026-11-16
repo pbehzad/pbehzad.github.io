@@ -11,10 +11,11 @@
  * Unlayered rules beat every layered rule, including Tailwind utilities, so
  * the isolation block below rolls them back inside `.ui` with `revert-layer`.
  * Within `.ui`, Tailwind preflight, the layered primitives, and utilities
- * then apply as usual. Two of those rules use !important and cannot be rolled
- * back: the universal JetBrains Mono font-family and a linear
- * animation-timing-function. Neither conflicts with the approved design. The
- * isolation block can go once the base rules are scoped to `.admin-shell`.
+ * then apply as usual. One of those rules uses !important and cannot be
+ * rolled back: a linear animation-timing-function, which does not conflict
+ * with the design. (The forced JetBrains Mono font-family skips `.ui`
+ * entirely; see globals.css.) The isolation block can go once the base rules
+ * are scoped to `.admin-shell`.
  */
 
 :root {
@@ -27,15 +28,19 @@
   --color-focus: #ffffff;
   --color-scrim: rgb(8 9 8 / 0.985);
 
-  /* Type */
-  --font-ui: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  /* Type: IBM Plex, loaded by next/font in layout.tsx. Sans is the voice of
+     titles and reading text; Mono is the voice of the brand, labels, dates
+     and metadata. */
+  --font-ui: var(--font-plex-sans), 'IBM Plex Sans', system-ui, sans-serif;
+  --font-ui-mono: var(--font-plex-mono), 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
   --text-label: 0.8125rem;
   --text-meta: 0.8125rem;
-  --text-body: 1rem;
-  --text-title: 1.375rem;
+  --text-body: 1.0625rem;
+  --text-title: clamp(1.375rem, 1.1rem + 0.6vw, 1.75rem);
   --leading-tight: 1.2;
   --leading-body: 1.6;
   --tracking-label: 0.14em;
+  --tracking-title: -0.01em;
   --weight-regular: 400;
 
   /* Space */
@@ -55,7 +60,10 @@
   --gutter-block-start: max(var(--gutter-block), env(safe-area-inset-top));
 
   /* Size */
-  --measure: 66ch;
+  /* Reading measure, about 70 characters of Plex Sans. In ems, not ch: a
+     proportional face's "0" is wider than its average letter, so 66ch set
+     about 85 characters a line. */
+  --measure: 34em;
   /* Centred, this puts the index's start edge where the Works mockup has it
      (560 px at 1440 px); the open menu shares it. */
   --index-width: 20rem;
@@ -168,6 +176,10 @@
     line-height: var(--leading-tight);
   }
 
+  .ui :is(code, kbd, samp, pre) {
+    font-family: var(--font-ui-mono);
+  }
+
   .ui a {
     transition: color var(--duration-fast) var(--ease-out);
   }
@@ -190,16 +202,19 @@
 }
 
 @layer components {
-  /* Text roles */
+  /* Text roles. Labels and metadata speak in Mono; titles and reading text
+     in Sans. */
 
   .ui-label {
     color: var(--color-muted);
+    font-family: var(--font-ui-mono);
     font-size: var(--text-label);
     line-height: var(--leading-tight);
   }
 
   .ui-meta {
     color: var(--color-muted);
+    font-family: var(--font-ui-mono);
     font-size: var(--text-meta);
     line-height: var(--leading-body);
   }
@@ -241,6 +256,7 @@
     padding: var(--space-3) var(--space-4);
     background: var(--color-bg);
     color: var(--color-fg);
+    font-family: var(--font-ui-mono);
     font-size: var(--text-label);
     transform: translateY(calc(-100% - var(--space-4)));
   }
@@ -255,6 +271,7 @@
     display: inline-flex;
     align-items: center;
     min-block-size: var(--hit-target);
+    font-family: var(--font-ui-mono);
     font-size: var(--text-label);
     letter-spacing: var(--tracking-label);
     line-height: 1;
@@ -290,6 +307,7 @@
 
   .ui-status {
     color: var(--color-muted);
+    font-family: var(--font-ui-mono);
     font-size: var(--text-meta);
   }
 

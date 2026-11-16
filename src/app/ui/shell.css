@@ -94,6 +94,7 @@
     align-items: center;
     min-block-size: var(--hit-target);
     font-size: var(--text-title);
+    letter-spacing: var(--tracking-title);
     line-height: var(--leading-tight);
     text-decoration: underline;
     text-decoration-color: transparent;
@@ -117,6 +118,7 @@
     margin: var(--space-7) auto 0;
     padding-block: var(--space-3);
     color: var(--color-muted);
+    font-family: var(--font-ui-mono);
     font-size: var(--text-label);
   }
 
