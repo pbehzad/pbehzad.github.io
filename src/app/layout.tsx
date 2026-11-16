@@ -70,10 +70,9 @@ const FONT_VARIABLES = [plexSerif, plexSerifBold, plexSerifItalic, plexSans, ple
 export const metadata: Metadata = {
   title: "Parham Behzad",
   description: "Parham Behzad is a composer exploring emergent musical systems, ecological sound practices, and participatory performanc",
-  icons: {
-    icon: "/branding/logo-primary.svg",
-    shortcut: "/branding/logo-primary.svg",
-  },
+  // Icons come from the file conventions in this folder: icon.svg (the menu
+  // control's glass droplet), and favicon.ico and apple-icon.png rendered
+  // from it.
 };
 
 export const viewport: Viewport = {
@@ -90,10 +89,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={FONT_VARIABLES}>
-      <head>
-        <link rel="icon" type="image/svg+xml" href="/branding/logo-primary.svg" />
-        <link rel="shortcut icon" href="/branding/logo-primary.svg" />
-      </head>
       <body className="antialiased">
         <MetalBackground />
         {children}

@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- The site icon: the menu control's glass droplet. A dark glass body,
+       a rim lit from the upper left and the lower right (as the control's
+       specular light is), and a soft glint on the glass. The rim is heavy
+       enough to survive at 16 px in a browser tab, on light or dark bars.
+       favicon.ico and apple-icon.png are rendered from this drawing. -->
+  <defs>
+    <radialGradient id="glass" cx="0.42" cy="0.38" r="0.62">
+      <stop offset="0" stop-color="#232624"/>
+      <stop offset="0.62" stop-color="#0d0e0d"/>
+      <stop offset="1" stop-color="#060706"/>
+    </radialGradient>
+    <linearGradient id="rim" x1="0.12" y1="0.12" x2="0.88" y2="0.88">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="1"/>
+      <stop offset="0.32" stop-color="#ffffff" stop-opacity="0.28"/>
+      <stop offset="0.68" stop-color="#ffffff" stop-opacity="0.22"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0.9"/>
+    </linearGradient>
+    <radialGradient id="glint" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <circle cx="32" cy="32" r="29" fill="url(#glass)"/>
+  <ellipse cx="22" cy="19" rx="11" ry="5.5" transform="rotate(-38 22 19)" fill="url(#glint)"/>
+  <circle cx="32" cy="32" r="28.25" fill="none" stroke="url(#rim)" stroke-width="3.5"/>
+</svg>
