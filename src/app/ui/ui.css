@@ -130,6 +130,7 @@
 .ui button {
   border: revert-layer;
   cursor: revert-layer;
+  font-family: revert-layer;
   outline: revert-layer;
   transition: revert-layer;
 }
@@ -142,6 +143,7 @@
   background: revert-layer;
   border: revert-layer;
   color: revert-layer;
+  font-family: revert-layer;
   font-size: revert-layer;
   padding: revert-layer;
   transition: revert-layer;
