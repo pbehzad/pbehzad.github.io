@@ -39,6 +39,17 @@ Use this order when instructions differ:
 
 The earlier ASCII wireframes and “quiet index” proposal inside `basecase-UI.md` are historical analysis. They do not override the later approved mockups.
 
+### Owner direction, 2026-11-16
+
+These decisions supersede the matching points of the mockups and of the contract below; the rest of the contract stands.
+
+- **Typography:** IBM Plex. Sans for titles and reading text, Mono for the brand, labels, dates, and metadata. Loaded with `next/font/google` in `src/app/layout.tsx`. The reading measure is 34em, about 70 characters.
+- **Layout:** wider, and not centred. One shared frame (`.ui-frame`, `--frame-width: 60rem`) leans left of centre by up to 8rem (`--frame-lean`); at 1440 px it runs from 139 to 1099 px. On wide screens, index rows put title and metadata on one line.
+- **Header:** sticky. Content scrolls under a fade from the page colour, which appears only once the page has scrolled. Columns no longer give the menu control a 52 px lane on narrow screens.
+- **Home:** the portrait returns, beside a preview of the next three upcoming events and an “all events” link. When none are upcoming, the three most recent are shown under “recent”. On narrow screens the events follow the portrait.
+
+Not yet reconciled: the liquid-metal WebGL field behind every public page (owner direction, commit `4eee5940`) still contradicts the no-WebGL and idle-page rules in `AGENTS.md` and R7/R8 below.
+
 ## Preparation status
 
 - [x] Baseline desktop and mobile screenshot sheets exist.
@@ -70,8 +81,7 @@ The menu's visible droplet may be smaller than its interactive hit area. The act
 
 ### Home
 
-- Center one black-and-white portrait inside a large organic liquid form.
-- Keep the portrait centered in the viewport, not merely inside the remaining content area.
+- Show one black-and-white portrait inside a large organic liquid form, beside an events preview. (Superseded on 2026-11-16: the portrait hangs from the shared frame rather than being centred; see “Owner direction” above.)
 - Keep the faint ASCII trace only if it can be static, low-cost, and subordinate to the portrait.
 - Do not show “Parham Behzad,” “composer,” selected works, introduction copy, cards, or calls to action in the center.
 - Do not run a full-screen ASCII or WebGL renderer to reproduce the mockup.
