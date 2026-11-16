@@ -59,6 +59,8 @@
   --text-nav: 0.875rem;
   --text-title: clamp(1.25rem, 1.05rem + 0.45vw, 1.4375rem);
   --text-menu: clamp(1.875rem, 1.4rem + 1.4vw, 2.625rem);
+  /* The desktop menu is a column under its control, so it runs smaller. */
+  --text-menu-dropdown: clamp(1.5rem, 1rem + 1vw, 2rem);
   --text-display: clamp(2rem, 1.35rem + 1.7vw, 2.875rem);
   --leading-tight: 1.2;
   --leading-display: 1.08;
@@ -118,6 +120,9 @@
   /* Motion: interaction feedback only; nothing runs while idle. */
   --duration-fast: 120ms;
   --duration-base: 180ms;
+  /* The menu's links drop in one after another (shell.css). */
+  --duration-menu: 320ms;
+  --menu-stagger: 45ms;
   --ease-out: cubic-bezier(0.2, 0, 0, 1);
 
   /* Layering: a small fixed scale. */
@@ -151,6 +156,7 @@
   :root {
     --duration-fast: 0ms;
     --duration-base: 0ms;
+    --duration-menu: 0ms;
   }
 }
 

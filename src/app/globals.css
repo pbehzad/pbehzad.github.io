@@ -98,8 +98,10 @@ button:active {
   text-shadow: none;
 }
 
-/* Remove all smooth animations - Brutalist instant transitions */
-* {
+/* Remove all smooth animations - Brutalist instant transitions. Outside
+   the public shell only, at zero specificity as before; public pages
+   (`.ui`) choose their own easing in src/app/ui/. */
+:where(:not(.ui, .ui *)) {
   animation-timing-function: linear !important;
 }
 

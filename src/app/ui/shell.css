@@ -116,9 +116,10 @@
     z-index: var(--layer-menu-control);
   }
 
-  /* Open menu: a restrained near-black layer with a plain vertical list.
-     Without JavaScript it opens through :target; once enhanced, only the
-     data-open state shows it. */
+  /* Open menu. On phones: a near-black layer with a plain vertical list. On
+     desktop: no layer, a column under the control (see below). Without
+     JavaScript it opens through :target; once enhanced, only the data-open
+     state shows it. */
   .ui-site-menu__panel {
     display: none;
     position: fixed;
@@ -178,6 +179,83 @@
     text-decoration-color: var(--color-fg);
   }
 
+  /* Opening: the links drop in one after another. Closing is immediate. */
+  .ui-site-menu__panel:target:not([data-enhanced]) .ui-site-menu__link,
+  .ui-site-menu__panel[data-open] .ui-site-menu__link {
+    animation: ui-menu-link-in var(--duration-menu) var(--ease-out) both;
+  }
+
+  .ui-site-menu__list > li:nth-child(2) .ui-site-menu__link {
+    animation-delay: calc(var(--menu-stagger) * 1);
+  }
+
+  .ui-site-menu__list > li:nth-child(3) .ui-site-menu__link {
+    animation-delay: calc(var(--menu-stagger) * 2);
+  }
+
+  .ui-site-menu__list > li:nth-child(4) .ui-site-menu__link {
+    animation-delay: calc(var(--menu-stagger) * 3);
+  }
+
+  .ui-site-menu__list > li:nth-child(5) .ui-site-menu__link {
+    animation-delay: calc(var(--menu-stagger) * 4);
+  }
+
+  @keyframes ui-menu-link-in {
+    from {
+      opacity: 0;
+      transform: translateY(-0.75rem);
+    }
+
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ui-site-menu__panel:target:not([data-enhanced]) .ui-site-menu__link,
+    .ui-site-menu__panel[data-open] .ui-site-menu__link {
+      animation: none;
+    }
+  }
+
+  /* Desktop: no layer over the page. The panel still spans the viewport,
+     transparent, so a click anywhere outside the links closes the menu as
+     before, but the links stand in a column under the menu control,
+     aligned to its edge. A halo of the page colour around each word keeps
+     it legible over whatever lies beneath. */
+  @media (width >= 48rem) {
+    .ui-site-menu__panel {
+      flex-direction: column;
+      align-items: flex-end;
+      padding-block: calc(var(--shell-header-block-size) + var(--space-4)) var(--space-6);
+      padding-inline: var(--gutter-inline-start) var(--gutter-inline-end);
+      background: none;
+    }
+
+    .ui-site-menu__panel:target:not([data-enhanced]),
+    .ui-site-menu__panel[data-open] {
+      display: flex;
+    }
+
+    .ui-site-menu__list {
+      align-items: flex-end;
+      gap: var(--space-1);
+      inline-size: auto;
+      max-inline-size: none;
+      margin-inline-start: 0;
+    }
+
+    .ui-site-menu__link {
+      font-size: var(--text-menu-dropdown);
+      text-shadow:
+        0 0 0.25rem var(--color-bg),
+        0 0 1rem var(--color-bg),
+        0 0 2rem var(--color-bg);
+    }
+  }
+
   .ui-site-menu__fallback-close {
     display: block;
     inline-size: 100%;
@@ -189,6 +267,16 @@
     font-family: var(--font-ui-sans);
     font-size: var(--text-nav);
     font-weight: var(--weight-medium);
+  }
+
+  /* Desktop, without JavaScript: under the links, on the same edge. */
+  @media (width >= 48rem) {
+    .ui-site-menu__fallback-close {
+      inline-size: auto;
+      max-inline-size: none;
+      margin-block-start: var(--space-4);
+      margin-inline-start: 0;
+    }
   }
 
   /* Optional glass for the menu control: a real backdrop blur of whatever
