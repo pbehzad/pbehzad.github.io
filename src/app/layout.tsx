@@ -7,6 +7,8 @@ import "./ui/home.css";
 import "./ui/index.css";
 import "./ui/page.css";
 import "./ui/article.css";
+import "./ui/metal.css";
+import { MetalBackground } from "./ui/MetalBackground";
 
 export const metadata: Metadata = {
   title: "Parham Behzad",
@@ -43,6 +45,7 @@ export default function RootLayout({
         />
       </head>
       <body className="antialiased">
+        <MetalBackground />
         {children}
       </body>
     </html>

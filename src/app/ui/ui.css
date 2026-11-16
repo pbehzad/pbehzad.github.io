@@ -151,10 +151,12 @@
 
 @layer base {
   /* The root of every redesigned public page. */
+  /* Transparent: the field behind every page is the fixed metal layer
+     (metal.css), which also carries the flat --color-bg fallback. */
   .ui {
     min-block-size: 100vh;
     min-block-size: 100svh;
-    background: var(--color-bg);
+    background: transparent;
     color: var(--color-fg);
     font-family: var(--font-ui);
     font-size: var(--text-body);

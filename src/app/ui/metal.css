@@ -1,0 +1,35 @@
+/*
+ * Liquid-metal field behind every public page (MetalBackground). The layer's
+ * own background is the flat fallback: it is what shows without JavaScript,
+ * without WebGL, in forced colours, and before the first frame.
+ */
+
+@layer components {
+  /* Fixed at z-index -1 directly under <body>: it paints above the body's
+     propagated background and beneath all in-flow page content, which is
+     why `.ui` itself is transparent. */
+  .ui-metal {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background: var(--color-bg);
+    pointer-events: none;
+  }
+
+  .ui-metal__canvas {
+    display: block;
+    inline-size: 100%;
+    block-size: 100%;
+    visibility: hidden;
+  }
+
+  .ui-metal__canvas[data-ready] {
+    visibility: visible;
+  }
+
+  @media (forced-colors: active) {
+    .ui-metal__canvas {
+      display: none;
+    }
+  }
+}
