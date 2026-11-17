@@ -144,6 +144,12 @@
   text-transform: uppercase;
 }
 
+.admin-field-hint {
+  color: var(--admin-muted);
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+
 .admin-control {
   width: 100%;
   min-height: 2.65rem;

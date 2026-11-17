@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import AdminInput from '../../components/AdminInput';
 import AdminTextarea from '../../components/AdminTextarea';
+import { FORMATTED_TEXT_HINT } from '../../components/formattedTextHint';
 import AdminSelect from '../../components/AdminSelect';
 import AdminForm from '../../components/AdminForm';
 import AdminFileField from '../../components/AdminFileField';
@@ -151,7 +152,7 @@ export default function EditText() {
         <AdminStringList label="Tags" values={tags} onChange={setTags} placeholder="Add tag" />
         <AdminStringList label="Related composition IDs" values={relatedCompositions} onChange={setRelatedCompositions} placeholder="Add composition ID" />
         <AdminCheckbox label="Featured text" checked={featured} onChange={setFeatured} description="Show this text in featured placements on the public site." />
-        <AdminTextarea label="Description" value={description} onChange={setDescription} rows={3} />
+        <AdminTextarea label="Description" value={description} onChange={setDescription} rows={3} hint={FORMATTED_TEXT_HINT} />
         <AdminTextarea label="Abstract" value={abstract} onChange={setAbstract} rows={4} />
         <div className="admin-field">
           <label className="admin-field-label">Content</label>

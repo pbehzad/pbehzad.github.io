@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import AdminInput from '../../components/AdminInput';
 import AdminTextarea from '../../components/AdminTextarea';
+import { FORMATTED_TEXT_HINT } from '../../components/formattedTextHint';
 import AdminSelect from '../../components/AdminSelect';
 import AdminForm from '../../components/AdminForm';
 import TiptapEditor from '../../components/TiptapEditor';
@@ -157,7 +158,7 @@ export default function EditComposition() {
         <AdminInput label="Slug (URL)" value={slug} onChange={setSlug} placeholder="composition-url" />
 
         <div className="grid grid-cols-2 gap-4">
-          <AdminTextarea label="Description" value={description} onChange={setDescription} rows={3} />
+          <AdminTextarea label="Description" value={description} onChange={setDescription} rows={3} hint={FORMATTED_TEXT_HINT} />
           <AdminTextarea label="Program Notes" value={programNotes} onChange={setProgramNotes} rows={3} />
         </div>
 

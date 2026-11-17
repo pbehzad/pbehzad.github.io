@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import AdminInput from '../../components/AdminInput';
 import AdminTextarea from '../../components/AdminTextarea';
+import { FORMATTED_TEXT_HINT } from '../../components/formattedTextHint';
 import AdminSelect from '../../components/AdminSelect';
 import AdminForm from '../../components/AdminForm';
 import TiptapEditor from '../../components/TiptapEditor';
@@ -138,7 +139,7 @@ export default function EditEvent() {
         <AdminInput label="Program" value={program} onChange={setProgram} />
         <AdminInput label="Ensemble" value={ensemble} onChange={setEnsemble} />
         <AdminInput label="URL" value={url} onChange={setUrl} />
-        <AdminTextarea label="Description" value={description} onChange={setDescription} rows={4} />
+        <AdminTextarea label="Description" value={description} onChange={setDescription} rows={4} hint={FORMATTED_TEXT_HINT} />
         <AdminSelect
           label="Status"
           value={status}
