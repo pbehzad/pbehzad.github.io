@@ -52,42 +52,10 @@
     }
   }
 
-  /* The photo, whole and uncropped, at its own square proportion, with the
-     CRT canvas laid exactly over it. */
+  /* The CRT portrait (crt.css), whole and uncropped at its own square
+     proportion. */
   .ui-home-portrait {
-    position: relative;
     inline-size: var(--portrait-inline-size);
-    aspect-ratio: 1;
-  }
-
-  .ui-home-portrait__photo,
-  .ui-home-portrait__crt {
-    position: absolute;
-    inset: 0;
-    inline-size: 100%;
-    block-size: 100%;
-  }
-
-  /* The tube is drawn only over the photo it replaces; until it has a
-     frame (data-crt), the canvas is empty and the photo shows. A faint
-     spill of light around the glass, as a lit tube gives off. */
-  .ui-home-portrait__crt {
-    filter: drop-shadow(0 0 1.5rem rgb(200 214 235 / 0.1));
-    pointer-events: none;
-  }
-
-  .ui-home-portrait[data-crt] .ui-home-portrait__photo {
-    opacity: 0;
-  }
-
-  @media (forced-colors: active) {
-    .ui-home-portrait__crt {
-      display: none;
-    }
-
-    .ui-home-portrait[data-crt] .ui-home-portrait__photo {
-      opacity: 1;
-    }
   }
 
   .ui-home__events {

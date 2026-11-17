@@ -1,5 +1,4 @@
-import Image from 'next/image';
-import { HomePortraitCrt } from './HomePortraitCrt';
+import { CrtPortrait } from './CrtPortrait';
 
 const PORTRAIT_SRC = '/ParhamBehzad-display.jpg';
 /** The source photo is square, and it is shown whole, uncropped. */
@@ -18,25 +17,20 @@ type HomePortraitProps = {
 };
 
 /**
- * The home portrait: the photo as a picture on a CRT. The photo is the real
- * image (alt text, loading priority, the fallback); HomePortraitCrt draws
- * the tube over it once and hides it only when that has worked. It is the
+ * The home portrait: the square photo as a picture on a CRT. It is the
  * largest image on the page, so it loads with priority.
  */
 export function HomePortrait({ alt }: HomePortraitProps) {
   return (
-    <div className="ui-home-portrait">
-      <Image
-        className="ui-home-portrait__photo"
-        src={PORTRAIT_SRC}
-        alt={alt}
-        width={PORTRAIT_SOURCE_SIZE}
-        height={PORTRAIT_SOURCE_SIZE}
-        sizes={PORTRAIT_SIZES}
-        quality={PORTRAIT_QUALITY}
-        priority
-      />
-      <HomePortraitCrt />
-    </div>
+    <CrtPortrait
+      className="ui-home-portrait"
+      src={PORTRAIT_SRC}
+      alt={alt}
+      width={PORTRAIT_SOURCE_SIZE}
+      height={PORTRAIT_SOURCE_SIZE}
+      sizes={PORTRAIT_SIZES}
+      quality={PORTRAIT_QUALITY}
+      priority
+    />
   );
 }

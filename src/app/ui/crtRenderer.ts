@@ -21,10 +21,11 @@ function compile(gl: WebGLRenderingContext, type: number, source: string): WebGL
 
 /**
  * Plain WebGL for the CRT portrait: one full-screen triangle and the photo
- * as a texture. Returns null when WebGL or the shader is unavailable; the
- * caller then leaves the plain photo in place.
+ * as a texture, at the given gain (see CrtCanvas). Returns null when WebGL
+ * or the shader is unavailable; the caller then leaves the plain photo in
+ * place.
  */
-export function createCrtRenderer(canvas: HTMLCanvasElement): CrtRenderer | null {
+export function createCrtRenderer(canvas: HTMLCanvasElement, gain: number): CrtRenderer | null {
   const gl = canvas.getContext('webgl', {
     alpha: true,
     premultipliedAlpha: true,
@@ -68,6 +69,7 @@ export function createCrtRenderer(canvas: HTMLCanvasElement): CrtRenderer | null
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
   gl.uniform1i(gl.getUniformLocation(program, 'uImage'), 0);
+  gl.uniform1f(gl.getUniformLocation(program, 'uGain'), gain);
 
   const uSize = gl.getUniformLocation(program, 'uSize');
   const uPixelRatio = gl.getUniformLocation(program, 'uPixelRatio');

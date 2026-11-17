@@ -1,0 +1,42 @@
+/*
+ * A portrait as a picture on a CRT (CrtPortrait): the photo, whole and
+ * uncropped, with the CRT canvas laid exactly over it. The page sets the
+ * frame's width; its proportion is the photo's. Static: the tube is drawn
+ * once and redrawn only on resize.
+ */
+
+@layer components {
+  .ui-crt {
+    position: relative;
+  }
+
+  .ui-crt__photo,
+  .ui-crt__canvas {
+    position: absolute;
+    inset: 0;
+    inline-size: 100%;
+    block-size: 100%;
+  }
+
+  /* The tube is drawn only over the photo it replaces; until it has a
+     frame (data-crt), the canvas is empty and the photo shows. A faint
+     spill of light around the glass, as a lit tube gives off. */
+  .ui-crt__canvas {
+    filter: drop-shadow(0 0 1.5rem rgb(200 214 235 / 0.1));
+    pointer-events: none;
+  }
+
+  .ui-crt[data-crt] .ui-crt__photo {
+    opacity: 0;
+  }
+
+  @media (forced-colors: active) {
+    .ui-crt__canvas {
+      display: none;
+    }
+
+    .ui-crt[data-crt] .ui-crt__photo {
+      opacity: 1;
+    }
+  }
+}

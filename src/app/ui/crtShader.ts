@@ -1,6 +1,6 @@
-// The home portrait as a picture on a cathode-ray tube. Drawn once into a
-// canvas over the photo (crtRenderer.ts), and again only when its size
-// changes; nothing here animates.
+// A portrait as a picture on a cathode-ray tube (CrtPortrait). Drawn once
+// into a canvas over the photo (crtRenderer.ts), and again only when its
+// size changes; nothing here animates.
 //
 // What makes a CRT read as real, and where each lives below:
 // - the glass bulges, so the picture's edges curve and its corners round;
@@ -33,6 +33,7 @@ varying vec2 vUv;
 uniform sampler2D uImage;
 uniform vec2  uSize;        // the screen in CSS pixels
 uniform float uPixelRatio;  // device pixels per CSS pixel
+uniform float uGain;        // the tube's gain, its contrast knob (CrtCanvas)
 
 // Geometry. Lower CURVE bulges more.
 const vec2  CURVE = vec2(5.0, 4.4);
@@ -45,7 +46,6 @@ const float MASK_DARK = 0.6;
 const float MASK_LIGHT = 1.3;
 const float CONVERGENCE_PX = 0.8; // red and blue offset from green
 const float BLOOM = 0.32;
-const float GAIN = 1.6;
 const vec3  PHOSPHOR_FLOOR = vec3(0.010, 0.013, 0.011);
 
 vec3 toLinear(vec3 c) { return c * c * (c * 0.3 + 0.7); }  // close to sRGB, cheap
@@ -71,7 +71,10 @@ void main() {
   vec2 uv = cc * 0.5 + 0.5;
 
   // The tube's rounded edge, antialiased over about one device pixel.
-  vec2 q = abs(cc) - vec2(1.0 - CORNER);
+  // Measured in half the shorter side, so a tall picture's corners stay
+  // round; a square one is unchanged.
+  vec2 span = uSize / min(uSize.x, uSize.y);
+  vec2 q = abs(cc) * span - (span - CORNER);
   float edge = length(max(q, 0.0)) + min(max(q.x, q.y), 0.0) - CORNER;
   float aa = 2.0 / (min(uSize.x, uSize.y) * uPixelRatio);
   float screen = 1.0 - smoothstep(-aa, aa, edge);
@@ -117,7 +120,7 @@ void main() {
   float vignette = clamp(16.0 * uv.x * uv.y * (1.0 - uv.x) * (1.0 - uv.y), 0.0, 1.0);
   col *= pow(vignette, 0.25);
 
-  col = col * GAIN + PHOSPHOR_FLOOR;
+  col = col * uGain + PHOSPHOR_FLOOR;
 
   // A soft reflection on the glass, upper left.
   vec2 r = (c - vec2(-0.5, 0.55)) * vec2(1.0, 1.7);

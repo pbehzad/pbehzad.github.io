@@ -4,6 +4,7 @@ import "./fonts.css";
 import "./globals.css";
 import "./ui/ui.css";
 import "./ui/shell.css";
+import "./ui/crt.css";
 import "./ui/home.css";
 import "./ui/index.css";
 import "./ui/page.css";
