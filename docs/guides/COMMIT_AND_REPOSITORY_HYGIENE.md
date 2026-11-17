@@ -6,9 +6,9 @@ Applies to: all contributors and agents
 
 ## Branches and parallel work
 
-- The redesign lives on one long-running branch, `repair-UI`, alongside `main`. Do not create a branch per work package; commit boundaries, not branches, separate the packages.
-- When several agents work at once, they share that branch and the checkout, so keep file ownership narrow and commit explicit paths.
-- Branch from the agreed integration point. Do not guess a base ref when the task names one.
+- All work happens on `main`. The owner retired `repair-UI` and every other branch on 2026-11-17. Do not create a branch, per work package or otherwise; commit boundaries separate the packages.
+- Every push to `main` is a production deploy of parhambehzad.com (Vercel). There is no preview branch, so verify locally before committing, and push only when the owner asks.
+- When several agents work at once, they share `main` and the checkout, so keep file ownership narrow and commit explicit paths.
 - Avoid overlapping file ownership. Shell/token work lands before page work that consumes it.
 - Do not hand-edit another worktree or copy its `.git` metadata.
 
@@ -89,7 +89,7 @@ Add route-specific browser and screenshot checks for UI work. Add `npm run valid
 
 ```text
 Work package: R# — name
-Branch: repair-UI
+Branch: main
 Outcome: one sentence
 Changed: file list
 Checks: command — pass/fail/skipped and reason

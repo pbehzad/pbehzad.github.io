@@ -68,7 +68,7 @@ Before changing files:
 1. Inspect `git status --short` and the current diff.
 2. Choose one unchecked work package from `repair-UI.md`; do not mix unrelated packages.
 3. Identify the files you expect to own. Avoid files another active agent is editing.
-4. Work on the single `repair-UI` branch. Do not create a branch per work package.
+4. Work on `main`, the only branch. Do not create or push any other branch. Every push to `main` deploys parhambehzad.com to production, so push only when the owner asks.
 5. Record assumptions in the handoff; do not encode uncertain design choices as permanent architecture.
 
 While working:

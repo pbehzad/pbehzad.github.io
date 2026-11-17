@@ -20,7 +20,7 @@ Every agent should:
 2. Review the approved [home](docs/ui-audit/redesign-homepage-concept-v4-centered.png) and [Works](docs/ui-audit/redesign-works-concept-v3-no-highlighter.png) mockups at full size.
 3. Inspect `git status --short` and do not disturb unfamiliar work.
 4. Select one work package whose dependencies are complete.
-5. Commit to the shared `repair-UI` branch and keep the package's file ownership narrow.
+5. Commit to `main`, the only branch (every push deploys production), and keep the package's file ownership narrow.
 6. Implement the flat, semantic version before adding any optional liquid enhancement.
 7. Verify the package's exit gate and provide the handoff evidence defined below.
 
@@ -564,7 +564,7 @@ Suggested owner: integration/release agent
 ```text
 Work package: R# — name
 Status: ready for review | blocked | complete
-Branch: repair-UI
+Branch: main
 Outcome: one sentence
 Files changed: explicit list
 Checks: command — pass/fail/skipped and reason
