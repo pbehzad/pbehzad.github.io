@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import { getEventBySlug, getProfile } from '@/services/contentService';
 import { SiteShell } from '@/app/ui/SiteShell';
 import { EventArticle } from '@/app/ui/EventArticle';
+import { formattedTextToPlain } from '@/app/ui/inlineFormatting';
 
 const getEvent = cache(async (slug: string) => (await getEventBySlug(slug)).data);
 
@@ -18,7 +19,8 @@ export async function generateMetadata({
   return {
     title: `${event.title} — Parham Behzad`,
     description:
-      event.description ?? `${event.date} — ${[event.venue, event.city].filter(Boolean).join(', ')}`,
+      formattedTextToPlain(event.description) ??
+      `${event.date} — ${[event.venue, event.city].filter(Boolean).join(', ')}`,
   };
 }
 

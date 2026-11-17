@@ -290,6 +290,11 @@ All content is validated with Zod schemas on load. If you see errors in the cons
 - Keep them short but descriptive
 - Never change after publishing (breaks links)
 
+### Descriptions
+- The short `description` of a composition, event, or text takes minimal formatting: `*italic*` (or `_italic_`) for work titles and emphasis, `**bold**` (or `__bold__`) for strong emphasis.
+- Everything else stays as typed: line breaks are kept, a blank line starts a new paragraph, and lists, headings, links, and HTML are not interpreted. Write `\*` for a literal asterisk next to a word.
+- The meta description and structured data use the same text without the marks.
+
 ### Dates
 - Always use ISO 8601 format: `"2025-01-15T00:00:00Z"`
 - Update `updated_at` when you edit content

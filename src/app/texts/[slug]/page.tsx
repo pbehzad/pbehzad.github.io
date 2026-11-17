@@ -5,6 +5,7 @@ import { getProfile, getTextBySlug } from '@/services/contentService';
 import { getTextHtml } from '@/lib/text-content-manager';
 import { SiteShell } from '@/app/ui/SiteShell';
 import { TextArticle } from '@/app/ui/TextArticle';
+import { formattedTextToPlain } from '@/app/ui/inlineFormatting';
 
 const getText = cache(async (slug: string) => (await getTextBySlug(slug)).data);
 
@@ -18,7 +19,10 @@ export async function generateMetadata({
   if (!text || text.status !== 'published') return {};
   return {
     title: `${text.title} — Parham Behzad`,
-    description: text.description ?? text.abstract ?? `${text.title} (${text.year}) — ${text.type}`,
+    description:
+      formattedTextToPlain(text.description) ??
+      text.abstract ??
+      `${text.title} (${text.year}) — ${text.type}`,
   };
 }
 

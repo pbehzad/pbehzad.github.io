@@ -3,6 +3,7 @@ import type { CompositionWithContent } from '@/lib/content-manager';
 import { getPublicMediaUrl } from '@/lib/media-storage';
 import { ArticleFacts, ArticleLinks, ArticleSection, ArticleView } from './ArticleView';
 import type { ArticleLink, Fact } from './ArticleView';
+import { FormattedText } from './FormattedText';
 import { PdfReader } from './PdfReader';
 
 type CompositionArticleProps = {
@@ -67,7 +68,11 @@ export function CompositionArticle({ composition }: CompositionArticleProps) {
         </ArticleSection>
       )}
 
-      {description && <p className="ui-article__lede">{description}</p>}
+      {description && (
+        <p className="ui-article__lede">
+          <FormattedText source={description} />
+        </p>
+      )}
 
       {programNotes && (
         <ArticleSection title="program notes">

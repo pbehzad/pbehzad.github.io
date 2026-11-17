@@ -1,6 +1,7 @@
 import type { Event } from '@/data/types';
 import { ArticleFacts, ArticleLinks, ArticleSection, ArticleView } from './ArticleView';
 import type { Fact } from './ArticleView';
+import { FormattedText } from './FormattedText';
 
 type EventArticleProps = {
   event: Event;
@@ -34,7 +35,11 @@ export function EventArticle({ event }: EventArticleProps) {
     >
       {facts.length > 0 && <ArticleFacts facts={facts} />}
 
-      {description && <p className="ui-article__lede">{description}</p>}
+      {description && (
+        <p className="ui-article__lede">
+          <FormattedText source={description} />
+        </p>
+      )}
 
       {html && <div className="ui-prose" dangerouslySetInnerHTML={{ __html: html }} />}
 

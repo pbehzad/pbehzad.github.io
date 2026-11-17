@@ -5,6 +5,7 @@ import { getCompositionBySlug } from '@/lib/content-manager';
 import { getProfile } from '@/services/contentService';
 import { SiteShell } from '@/app/ui/SiteShell';
 import { CompositionArticle } from '@/app/ui/CompositionArticle';
+import { formattedTextToPlain } from '@/app/ui/inlineFormatting';
 
 const getComposition = cache(getCompositionBySlug);
 
@@ -19,7 +20,7 @@ export async function generateMetadata({
   return {
     title: `${composition.title} — Parham Behzad`,
     description:
-      composition.description ??
+      formattedTextToPlain(composition.description) ??
       `${composition.title} (${composition.year.substring(0, 4)}) — ${composition.instruments}`,
   };
 }

@@ -1,5 +1,6 @@
 import type { Text } from '@/data/types';
 import { ArticleLinks, ArticleSection, ArticleView } from './ArticleView';
+import { FormattedText } from './FormattedText';
 import { PdfReader } from './PdfReader';
 
 type TextArticleProps = {
@@ -22,7 +23,11 @@ export function TextArticle({ text, contentHtml }: TextArticleProps) {
       title={text.title}
       meta={[String(text.year), text.type, text.published_in]}
     >
-      {description && <p className="ui-article__lede">{description}</p>}
+      {description && (
+        <p className="ui-article__lede">
+          <FormattedText source={description} />
+        </p>
+      )}
 
       {abstract && (
         <ArticleSection title="abstract">
